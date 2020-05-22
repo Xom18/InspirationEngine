@@ -42,3 +42,4 @@ InspirationEngine/Release/
 *.out
 *.app
 *.zip
+*.pdb
