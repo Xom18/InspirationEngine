@@ -26,6 +26,7 @@
 *.a
 *.lib
 
+#불필요한 폴더 제외
 Debug/
 Release/
 .vs/
@@ -33,7 +34,8 @@ combase.pdb/
 oleaut32.pdb/
 shell32.pdb/
 wgdi32.pdb/
-
+InspirationEngine/Debug/
+InspirationEngine/Release/
 
 # Executables
 *.exe
