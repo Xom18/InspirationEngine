@@ -1,4 +1,4 @@
-#include <SDL\SDL.h>
+#include <SDL/SDL.h>
 #include "MacroDefine.h"
 #include "Image.h"
 #include "File.h"

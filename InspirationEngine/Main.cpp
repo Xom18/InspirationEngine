@@ -2,7 +2,7 @@
 #define SCREEN_HEIGHT 720
 #define MAP_SIZE 30
 #define TILE_SIZE 4
-#include <SDL\SDL.h>
+#include <SDL/SDL.h>
 #include <thread>
 #include <mutex>
 #include <vector>
