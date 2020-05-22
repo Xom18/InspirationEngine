@@ -26,6 +26,15 @@
 *.a
 *.lib
 
+# 폴더제외
+/Debug
+/Release
+/.vs
+/combase.pdb
+/oleaut32.pdb
+/shell32.pdb
+/wgdi32.pdb
+
 # Executables
 *.exe
 *.out
