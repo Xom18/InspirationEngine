@@ -19,10 +19,10 @@ int main(int argc, char* argv[])
 	std::thread*	InputThread;	//키보드 입력 스레드, 아직 스레드 화 하기 전
 	cDisplay		Display("Inspiration", SCREEN_WIDTH, SCREEN_HEIGHT, 2);	//창 생성
 	
-	cImage TileSet; // 타일셋이 있는 이미지
-	cTile Tile;		// 타일
+	cImage			TileSet;		// 타일셋이 있는 이미지
+	cTile			Tile;			// 타일
 
-	cInput Input;	//키보드 입력
+	cInput			Input;			//키보드 입력
 	Input.start();
 
 	//타일 이미지셋 불러와서 타일 정의

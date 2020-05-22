@@ -26,7 +26,7 @@ bool cFile::ReadFile(char* _lpFilename)
 	//파일을 읽어들인다, (파일명, 파일형식)
 	std::ifstream in(_lpFilename, std::ifstream::binary | std::ios::in);
 
-	//만약 들어올 내용이 없으면 falase 반환
+	//만약 들어올 내용이 없으면 false 반환
 	if (!in)
 		return false;
 

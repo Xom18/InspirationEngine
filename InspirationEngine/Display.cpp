@@ -23,7 +23,7 @@ cDisplay::cDisplay(char * _lpTitle, int _Width, int _Height, int _LayerCount)
 
 cDisplay::~cDisplay()
 {
-	delete[] m_pGraphicBuffer;
+	KILL(m_pGraphicBuffer);
 	for(int i = 0; i < m_LayerCount; ++i)
 		SDL_DestroyTexture(m_pLayer[i]);
 	SDL_DestroyRenderer(m_Renderer);

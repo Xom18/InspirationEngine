@@ -26,7 +26,17 @@
 *.a
 *.lib
 
+Debug/
+Release/
+.vs/
+combase.pdb/
+oleaut32.pdb/
+shell32.pdb/
+wgdi32.pdb/
+
+
 # Executables
 *.exe
 *.out
 *.app
+*.zip
