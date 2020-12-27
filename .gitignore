@@ -14,7 +14,6 @@
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
 
 # Fortran module files
 *.mod
@@ -24,22 +23,30 @@
 *.lai
 *.la
 *.a
-*.lib
-
-#불필요한 폴더 제외
-Debug/
-Release/
-.vs/
-combase.pdb/
-oleaut32.pdb/
-shell32.pdb/
-wgdi32.pdb/
-InspirationEngine/Debug/
-InspirationEngine/Release/
 
 # Executables
 *.exe
 *.out
 *.app
-*.zip
+
+# Build result
+*.idb
 *.pdb
+*.log
+*.tlog
+*.recipe
+*\v16
+*.ilk
+*.iobj
+*.ipdb
+*.sarif
+*.nativecodeanalysis.all.xml
+*.nativecodeanalysis.xml
+*.FileListAbsolute.txt
+InspirationEngine/x64/*
+InspirationEngine/Debug/*
+InspirationEngine/Release/*
+CodeAnalysisResultManifest.txt
+
+#resources
+*.png
