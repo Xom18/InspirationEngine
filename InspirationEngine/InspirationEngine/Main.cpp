@@ -9,7 +9,9 @@ int main(int argc, char* argv[])
 {
 	SDL_Event		SDL_Event;		//창 이벤트처리
 	std::thread*	InputThread;	//키보드 입력 스레드, 아직 스레드 화 하기 전
-	cDisplay		Display("Inspiration", SCREEN_WIDTH, SCREEN_HEIGHT);	//창 생성
+	cDisplay		Display;
+	
+	Display.createWindow("Inspiration", SCREEN_WIDTH, SCREEN_HEIGHT, 2);	//창 생성
 	
 	cInput			Input;			//키보드 입력
 	Input.start();
@@ -29,6 +31,9 @@ int main(int argc, char* argv[])
 		memcpy(aTile + i * 32, lpPoint, sizeof(int) * 32);
 		lpPoint += pSurface->w;
 	}
+
+	Display.setRendererLogicalSize(0, 256, 256);
+//	Display.setRendererLogicalSize(1, 512, 512);
 
 	while (!Display.closed())
 	{
@@ -75,10 +80,22 @@ int main(int argc, char* argv[])
 			iPosX += 1;
 			iPosY -= 1;
 		}
+		if(keytes[SDL_SCANCODE_ESCAPE])
+		{
+			Display.close();
+			break;
+		}
 
-		Display.draw(aTile, iPosX, iPosY, 32, 64);
+		Display.draw(aTile, 1, iPosX + 10, iPosY, 32, 64);
+		Display.draw(aTile, 0, iPosX, iPosY, 32, 64);
 
 		SDL_WaitEventTimeout(&SDL_Event, 30);
+		if(SDL_Event.window.event == SDL_WINDOWEVENT_RESIZED)
+		{
+			SDL_Window* win = SDL_GetWindowFromID(SDL_Event.window.windowID);
+			if(win == Display.getWindow())
+				Display.resize();
+		}
 		
 		Display.render();
 	}

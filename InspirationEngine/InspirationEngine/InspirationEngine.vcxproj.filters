@@ -33,6 +33,9 @@
     <ClInclude Include="InspirationEngine.h">
       <Filter>Header</Filter>
     </ClInclude>
+    <ClInclude Include="DebugTool.h">
+      <Filter>Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -48,6 +51,9 @@
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="File.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugTool.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
