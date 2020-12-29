@@ -7,14 +7,10 @@
 
 int main(int argc, char* argv[])
 {
-	SDL_Event		SDL_Event;		//창 이벤트처리
-	std::thread*	InputThread;	//키보드 입력 스레드, 아직 스레드 화 하기 전
-	cDisplay		Display;
+	InspirationEngine Engine;
 	
-	Display.createWindow("Inspiration", SCREEN_WIDTH, SCREEN_HEIGHT, 2);	//창 생성
-	
-	cInput			Input;			//키보드 입력
-	Input.start();
+	Engine.m_Display.createWindow("Inspiration", SCREEN_WIDTH, SCREEN_HEIGHT, 0, 2);	//창 생성
+	Engine.m_Input.start();
 
 	SDL_Surface* pSurface = IMG_Load("../Release/DungeonCrawl_ProjectUtumnoTileset.png");
 
@@ -32,10 +28,10 @@ int main(int argc, char* argv[])
 		lpPoint += pSurface->w;
 	}
 
-	Display.setRendererLogicalSize(0, 256, 256);
-//	Display.setRendererLogicalSize(1, 512, 512);
+	Engine.m_Display.setRendererLogicalSize(0, 256, 256);
+	Engine.m_Display.setRendererLogicalSize(1, 512, 512);
 
-	while (!Display.closed())
+	while (!Engine.m_Display.closed())
 	{
 		SDL_Rect Rect;//타일 띄울 위치
 		Rect.h = 32;
@@ -43,7 +39,7 @@ int main(int argc, char* argv[])
 		Rect.x = iPosX;
 		Rect.y = iPosY;
 
-		const Uint8* keytes = Input.getKeyInput();
+		const Uint8* keytes = Engine.m_Input.getKeyInput();
 		if(keytes[SDL_SCANCODE_KP_1])
 		{
 			iPosX -= 1;
@@ -82,22 +78,22 @@ int main(int argc, char* argv[])
 		}
 		if(keytes[SDL_SCANCODE_ESCAPE])
 		{
-			Display.close();
+			Engine.m_Display.close();
 			break;
 		}
 
-		Display.draw(aTile, 1, iPosX + 10, iPosY, 32, 64);
-		Display.draw(aTile, 0, iPosX, iPosY, 32, 64);
+		Engine.m_Display.drawBuffer(aTile, 0, 32, 64, 100, 100);
+		Engine.m_Display.drawBuffer(aTile, 1, 32, 64, 150, 150);
 
-		SDL_WaitEventTimeout(&SDL_Event, 30);
-		if(SDL_Event.window.event == SDL_WINDOWEVENT_RESIZED)
+		SDL_WaitEventTimeout(&Engine.m_Event, 30);
+		if(Engine.m_Event.window.event == SDL_WINDOWEVENT_RESIZED)
 		{
-			SDL_Window* win = SDL_GetWindowFromID(SDL_Event.window.windowID);
-			if(win == Display.getWindow())
-				Display.resize();
+			SDL_Window* win = SDL_GetWindowFromID(Engine.m_Event.window.windowID);
+			if(win == Engine.m_Display.getWindow())
+				Engine.m_Display.resizeRenderer();
 		}
 		
-		Display.render();
+		Engine.m_Display.render();
 	}
 	SDL_Quit();
 	return 0;
