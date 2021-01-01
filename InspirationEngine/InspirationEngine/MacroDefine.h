@@ -1,8 +1,9 @@
 #pragma once
 
-#define KILL(_POINTER_) if(_POINTER_)delete _POINTER_; _POINTER_ = 0//포인터 초기화
-#define aKILL(_POINTER_) if(_POINTER_)delete[] _POINTER_; _POINTER_ = 0//배열포인터 초기화
+//어디 한곳에 놓기 애매한 매크로
 
+#define KILL(ptr) {if(ptr != nullptr) delete ptr; ptr = nullptr;}		//단일 삭제
+#define pKILL(ptr) {if(ptr != nullptr) delete[] ptr; ptr = nullptr;}	//배열 삭제
 
 struct IVector2
 {

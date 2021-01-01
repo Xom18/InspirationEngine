@@ -1,10 +1,37 @@
 #pragma once
 
-class cDisplay	//화면 출력 클래스, 랜더 스레드화 필요
+class InspirationEngine;
+class cWindow	//화면 출력 클래스, 랜더 스레드화 필요
 {
 public:
-	cDisplay();
-	~cDisplay();
+
+private:
+	int							m_iRendererCount;	//랜더러 개수
+	std::vector<SDL_Renderer*>	m_vecRenderer;		//소프트웨어 랜더러
+	SDL_Window*					m_pSDLWindow;		//창
+	int							m_iWidth;			//너비
+	int							m_iHeight;			//높이
+
+	bool						m_bIsNotOperateEvent;//이벤트 처리를 독립적으로 안하는 창
+	std::thread*				m_pDrawThread;		//그리는 스레드
+
+protected:
+	InspirationEngine* m_lpEngine;//이것의 소유주
+
+public:
+	cWindow();
+
+	~cWindow();
+
+	/// <summary>
+	/// 그리기
+	/// </summary>
+	virtual void draw() = 0;
+
+	/// <summary>
+	/// X버튼을 눌렀을 때
+	/// </summary>
+	virtual void callXButton() = 0;
 
 	/// <summary>
 	/// 창 생성
@@ -15,46 +42,55 @@ public:
 	/// <param name="_iRendererCount">랜더러 개수</param>
 	/// <param name="_iWindowFlag">창 옵션</param>
 	/// <returns>성공 true / 실패 false</returns>
-	bool			createWindow(char* _lpTitle, int _Width, int _Height, int _iWindowFlag = 0, int _iRendererCount = 1);
+	bool createWindow(InspirationEngine* _lpEngine, const char* _csTitle, int _Width, int _Height, int _iX = SDL_WINDOWPOS_CENTERED, int _iY = SDL_WINDOWPOS_CENTERED, int _iWindowFlag = 0, int _iRendererCount = 1);
 
 	/// <summary>
 	/// 창이 닫혀있는지 여부
 	/// </summary>
 	/// <returns>닫혀있으면 true / 열려있으면 false</returns>
-	bool			closed();
+	bool closed();
 
 	/// <summary>
 	/// 창 닫기
 	/// </summary>
-	void			close();
+	void close();
 
 	/// <summary>
 	/// 랜더러 크기를 현재 창에 맞게 재지정 해주는 함수
 	/// </summary>
-	void			resizeRenderer();
+	void resizeRenderer();
 
 	/// <summary>
 	/// 갖고있는 변수 초기화(창 닫힘)
 	/// </summary>
-	void			reset();
+	void reset();
 
 	/// <summary>
 	/// 랜더러 포인터 받아오기
 	/// </summary>
 	/// <param name="_iRendererIndex">랜더러 인덱스</param>
 	/// <returns>랜더러 포인터 / 실패시 nullptr</returns>
-	SDL_Renderer*	getRenderer(int _iRendererIndex);
+	SDL_Renderer* getRenderer(int _iRendererIndex)
+	{
+		if((int)m_vecRenderer.size() <= _iRendererIndex)
+			return nullptr;
+
+		return m_vecRenderer[_iRendererIndex];
+	}
 
 	/// <summary>
 	/// 창 포인터 받아오기
 	/// </summary>
 	/// <returns>창 포인터</returns>
-	SDL_Window*		getWindow();
+	SDL_Window* getSDLWindow()
+	{
+		return m_pSDLWindow;
+	};
 
 	/// <summary>
-	/// 창 랜더러 호출
+	/// 드로우 끝난 창 랜더
 	/// </summary>
-	void			render();
+	void render();
 
 	/// <summary>
 	/// 랜더러의 논리적 해상도 설정
@@ -62,7 +98,7 @@ public:
 	/// <param name="_iRendererIndex">변경 할 랜더러 인덱스</param>
 	/// <param name="_iWidth">너비</param>
 	/// <param name="_iHeight">높이</param>
-	void			setRendererLogicalSize(int _iRendererIndex, int _iWidth, int _iHeight);
+	void setRendererLogicalSize(int _iRendererIndex, int _iWidth, int _iHeight);
 
 	/// <summary>
 	/// 버퍼에 있는 이미지 그리기
@@ -79,7 +115,7 @@ public:
 	/// <param name="_dAngle">회전 각도(도)</param>
 	/// <param name="_lpPivot">회전 중심</param>
 	/// <param name="_Flip">상하, 좌우 반전 SDL_FLIP_HORIZONTAL / SDL_FLIP_VERTICAL</param>
-	void			drawBuffer(int* _lpBuffer, int _iRendererIndex, int _iBufferWidth, int _iBufferHeight, int _iX, int _iY, SDL_BlendMode _BlendMode = SDL_BLENDMODE_BLEND, double _dWidthPercent = 100, double _dHeightPercent = 100, double _dAngle = 0, SDL_Point* _lpPivot = nullptr, SDL_RendererFlip _Flip = SDL_FLIP_NONE);
+	void drawBuffer(int* _lpBuffer, int _iRendererIndex, int _iBufferWidth, int _iBufferHeight, int _iX, int _iY, SDL_BlendMode _BlendMode = SDL_BLENDMODE_BLEND, double _dWidthPercent = 100, double _dHeightPercent = 100, double _dAngle = 0, SDL_Point* _lpPivot = nullptr, SDL_RendererFlip _Flip = SDL_FLIP_NONE);
 
 	/// <summary>
 	/// 텍스쳐 이미지 그리기
@@ -93,14 +129,45 @@ public:
 	/// <param name="_dAngle">회전 각도(도)</param>
 	/// <param name="_lpPivot">회전 중심</param>
 	/// <param name="_Flip">상하, 좌우 반전 SDL_FLIP_HORIZONTAL / SDL_FLIP_VERTICAL</param>
-	void			drawTexture(SDL_Texture* _lpTexture, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent = 100, double _dHeightPercent = 100, double _dAngle = 0, SDL_Point* _lpPivot = nullptr, SDL_RendererFlip _Flip = SDL_FLIP_NONE);
+	void drawTexture(SDL_Texture* _lpTexture, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent = 100, double _dHeightPercent = 100, double _dAngle = 0, SDL_Point* _lpPivot = nullptr, SDL_RendererFlip _Flip = SDL_FLIP_NONE);
 
-public:
+	/// <summary>
+	/// 창 표시
+	/// </summary>
+	void showWindow()
+	{
+		SDL_ShowWindow(m_pSDLWindow);
+	}
+
+	/// <summary>
+	/// 창 숨기기
+	/// </summary>
+	void hideWindow()
+	{
+		SDL_HideWindow(m_pSDLWindow);
+	}
+
+	/// <summary>
+	/// 드로우 스레드 호출
+	/// </summary>
+	void beginDrawThread();
+
+	void joinDrawThread()
+	{
+		if(m_pDrawThread == nullptr)
+			return;
+		m_pDrawThread->join();
+	}
+
+	void deleteThread()
+	{
+		KILL(m_pDrawThread);
+	}
 
 private:
-	int							m_iRendererCount;	//랜더러 개수
-	std::vector<SDL_Renderer*>	m_vecRenderer;		//소프트웨어 랜더러
-	SDL_Window*					m_pWindow;			//창
-	int							m_iWidth;			//너비
-	int							m_iHeight;			//높이
+
+	/// <summary>
+	/// 드로우 스레드
+	/// </summary>
+	void drawThread();
 };

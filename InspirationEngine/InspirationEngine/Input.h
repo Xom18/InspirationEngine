@@ -1,10 +1,34 @@
 #pragma once
 
-class cInput	//입력받는 클래스, 스레드화 필요
+/// <summary>
+/// 모든 입력관련 이벤트 처리하는곳
+/// </summary>
+class cInput
 {
 public:
-	void start();
-	const Uint8* getKeyInput();
+
 private:
-	const Uint8* m_lpKeyInput;
+	/// <summary>
+	/// 안눌려있으면 false
+	/// 눌려있으면 true
+	/// </summary>
+	bool m_aKeyInput[SDL_NUM_SCANCODES];
+	std::mutex m_mtxOperateEvent;
+
+public:
+	cInput(){};
+	~cInput(){};
+
+	void setKeyState(SDL_Scancode _ScanCode, Uint8 _State)
+	{
+		m_aKeyInput[_ScanCode] = _State;
+	}
+
+	bool getKeyState(SDL_Scancode _ScanCode)
+	{
+		return m_aKeyInput[_ScanCode];
+	}
+
+private:
+
 };

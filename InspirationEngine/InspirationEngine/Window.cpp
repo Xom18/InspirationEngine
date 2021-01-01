@@ -2,28 +2,29 @@
 #include <iostream>
 #include <vector>
 #include <deque>
+#include <thread>
 #include "MacroDefine.h"
-#include "Display.h"
+#include "InspirationEngine.h"
+#include "Window.h"
 
-cDisplay::cDisplay()
+cWindow::cWindow()
+{
+	reset();
+};
+cWindow::~cWindow()
 {
 	reset();
 }
 
-cDisplay::~cDisplay()
+void cWindow::close()
 {
 	reset();
 }
 
-void cDisplay::close()
-{
-	reset();
-}
-
-void cDisplay::resizeRenderer()
+void cWindow::resizeRenderer()
 {
 	//실제 사용하는 랜더러 생성(UI스크린하고 게임스크린이 해상도가 다른경우가 있기때문에 여러개일 수 있다)
-	SDL_Surface* lpSurface = SDL_GetWindowSurface(m_pWindow);
+	SDL_Surface* lpSurface = SDL_GetWindowSurface(m_pSDLWindow);
 
 	if(!lpSurface)
 		return;
@@ -61,70 +62,60 @@ void cDisplay::resizeRenderer()
 	}
 }
 
-void cDisplay::reset()
+void cWindow::reset()
 {
 	for(int i = 0; i < (int)m_vecRenderer.size(); ++i)
 		SDL_DestroyRenderer(m_vecRenderer[i]);
 	m_vecRenderer.clear();
-	SDL_DestroyWindow(m_pWindow);
-	m_pWindow = nullptr;
+	SDL_DestroyWindow(m_pSDLWindow);
+	m_pSDLWindow = nullptr;
 	m_iWidth = 0;
 	m_iHeight = 0;
 	m_iRendererCount = 0;
+	m_lpEngine = nullptr;
+	m_pDrawThread = nullptr;
 }
 
-bool cDisplay::createWindow(char * _lpTitle, int _Width, int _Height, int _iWindowFlag, int _iRendererCount)
+bool cWindow::createWindow(InspirationEngine* _lpEngine, const char* _csTitle, int _Width, int _Height, int _iX, int _iY, int _iWindowFlag, int _iRendererCount)
 {
 	//이미 창이 있다
-	if(m_pWindow)
+	if(m_pSDLWindow)
 		return false;
 
 	//창 생성, 랜더러 생성
-	m_pWindow = SDL_CreateWindow(_lpTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, _Width, _Height, _iWindowFlag);
+	m_pSDLWindow = SDL_CreateWindow(_csTitle, _iX, _iY, _Width, _Height, _iWindowFlag);
 
-	if(!m_pWindow)
+	if(!m_pSDLWindow)
 		return false;
 
 	m_iWidth = _Width;
 	m_iHeight = _Height;
 	m_iRendererCount = _iRendererCount;
 	m_vecRenderer.reserve(m_iRendererCount);
+	m_lpEngine = _lpEngine;
 	resizeRenderer();
 
 	return true;
 }
 
-void cDisplay::render()
+void cWindow::render()
 {
-	SDL_UpdateWindowSurface(m_pWindow);
+	SDL_UpdateWindowSurface(m_pSDLWindow);
 
 	//그렸으니 싹 지워준다
 	for(int i = 0; i < (int)m_vecRenderer.size(); ++i)
 		SDL_RenderClear(m_vecRenderer[i]);
 }
 
-bool cDisplay::closed()
+bool cWindow::closed()
 {
-	if (m_pWindow == NULL)
+	if (m_pSDLWindow == nullptr)
 		return true;
 	else
 		return false;
 }
 
-SDL_Renderer* cDisplay::getRenderer(int _iRendererIndex)
-{
-	if((int)m_vecRenderer.size() <= _iRendererIndex)
-		return nullptr;
-
-	return m_vecRenderer[_iRendererIndex];
-}
-
-SDL_Window* cDisplay::getWindow()
-{
-	return m_pWindow;
-}
-
-void cDisplay::setRendererLogicalSize(int _iRendererIndex, int _iWidth, int _iHeight)
+void cWindow::setRendererLogicalSize(int _iRendererIndex, int _iWidth, int _iHeight)
 {
 	if((int)m_vecRenderer.size() <= _iRendererIndex)
 		return;
@@ -132,7 +123,7 @@ void cDisplay::setRendererLogicalSize(int _iRendererIndex, int _iWidth, int _iHe
 	SDL_RenderSetLogicalSize(m_vecRenderer[_iRendererIndex], _iWidth, _iHeight);
 }
 
-void cDisplay::drawBuffer(int* _lpBuffer, int _iRendererIndex, int _iBufferWidth, int _iBufferHeight, int _iX, int _iY, SDL_BlendMode _BlendMode, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
+void cWindow::drawBuffer(int* _lpBuffer, int _iRendererIndex, int _iBufferWidth, int _iBufferHeight, int _iX, int _iY, SDL_BlendMode _BlendMode, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
 {
 	if((int)m_vecRenderer.size() <= _iRendererIndex)
 		return;
@@ -144,7 +135,7 @@ void cDisplay::drawBuffer(int* _lpBuffer, int _iRendererIndex, int _iBufferWidth
 	SDL_DestroyTexture(pTexture);
 }
 
-void cDisplay::drawTexture(SDL_Texture* _lpTexture, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
+void cWindow::drawTexture(SDL_Texture* _lpTexture, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
 {
 	if((int)m_vecRenderer.size() <= _iRendererIndex)
 		return;
@@ -174,4 +165,18 @@ void cDisplay::drawTexture(SDL_Texture* _lpTexture, int _iRendererIndex, int _iX
 		DestRect.h = (int)(iHeight * _dHeightPercent * 0.01);
 
 	SDL_RenderCopyEx(m_vecRenderer[_iRendererIndex], _lpTexture, &SrcRect, &DestRect, _dAngle, _lpPivot, _Flip);
+}
+
+void cWindow::drawThread()
+{
+	draw();
+	render();
+}
+
+void cWindow::beginDrawThread()
+{
+	if(m_pDrawThread != nullptr)
+		return;
+
+	m_pDrawThread = new std::thread([&]() {drawThread(); });
 }

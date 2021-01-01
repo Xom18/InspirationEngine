@@ -18,12 +18,6 @@
     <ClInclude Include="Core.h">
       <Filter>Header</Filter>
     </ClInclude>
-    <ClInclude Include="Display.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Input.h">
-      <Filter>Header</Filter>
-    </ClInclude>
     <ClInclude Include="MacroDefine.h">
       <Filter>Header</Filter>
     </ClInclude>
@@ -33,7 +27,13 @@
     <ClInclude Include="InspirationEngine.h">
       <Filter>Header</Filter>
     </ClInclude>
-    <ClInclude Include="DebugTool.h">
+    <ClInclude Include="Window.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugInfo.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
       <Filter>Header</Filter>
     </ClInclude>
   </ItemGroup>
@@ -44,16 +44,16 @@
     <ClCompile Include="Core.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="Display.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="Input.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="File.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="DebugTool.cpp">
+    <ClCompile Include="Window.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugInfo.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>

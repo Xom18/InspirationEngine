@@ -15,12 +15,12 @@ cFile::~cFile()
 
 void cFile::reset()
 {
-	aKILL(m_pData);
+	pKILL(m_pData);
 	m_Size = 0;
 	m_Cursor = 0;
 }
 
-bool cFile::ReadFile(char* _lpFilename)
+bool cFile::ReadFile(const char* _lpFilename)
 {
 	reset();
 	//파일을 읽어들인다, (파일명, 파일형식)
