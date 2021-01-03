@@ -15,6 +15,10 @@ private:
 	bool m_aKeyInput[SDL_NUM_SCANCODES];
 	std::mutex m_mtxOperateEvent;
 
+	Uint32 m_uiMouseStatus;
+	cIVector2 m_MousePos;
+	cIVector2 m_MouseDelta;
+
 public:
 	cInput(){};
 	~cInput(){};
@@ -27,6 +31,24 @@ public:
 	bool getKeyState(SDL_Scancode _ScanCode)
 	{
 		return m_aKeyInput[_ScanCode];
+	}
+
+	void updateMousePos(int _iX, int _iY)
+	{
+		m_MouseDelta.m_iX = _iX - m_MousePos.m_iX;
+		m_MouseDelta.m_iY = _iY - m_MousePos.m_iY;
+		m_MousePos.m_iX = _iX;
+		m_MousePos.m_iY = _iY;
+	}
+
+	cIVector2 getMousePos()
+	{
+		return m_MousePos;
+	}
+
+	cIVector2 getMouseDelta()
+	{
+		return m_MouseDelta;
 	}
 
 private:

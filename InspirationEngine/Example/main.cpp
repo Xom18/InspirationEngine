@@ -16,6 +16,8 @@
 	#endif
 #endif
 
+#pragma comment(linker, "/SUBSYSTEM:CONSOLE")
+
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 
@@ -50,11 +52,12 @@ int main(int argc, char* argv[])
 		SDL_GetWindowPosition(lpSDLWindow, &iX, &iY);
 		SDL_GetWindowSize(lpSDLWindow, &iW, &iH);
 
-		lpMainWindow->setRendererLogicalSize(0, 256, 256);
-		lpMainWindow->setRendererLogicalSize(1, 512, 512);
+		lpMainWindow->setRendererLogicalSize(0, 64, 64);
+//		lpMainWindow->setRendererLogicalSize(1, 512, 512);
 	}
 
 	//디버그용 창 생성
+	if(true)
 	{
 		cDebugWindow* lpDebugWindow = new cDebugWindow();
 		bool bSuccess = Engine.addNewWindow("Debug", lpDebugWindow);
