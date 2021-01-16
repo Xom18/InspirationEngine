@@ -5,7 +5,6 @@
 #include <thread>
 #include "MacroDefine.h"
 #include "InspirationEngine.h"
-#include "Window.h"
 
 cWindow::cWindow()
 {
@@ -29,8 +28,12 @@ void cWindow::resizeRenderer()
 	if(!lpSurface)
 		return;
 
+	//창 크기 다시 설정
+	m_iWidth = lpSurface->w;
+	m_iHeight = lpSurface->h;
+
 	//기존에 랜더러가 있으면 논리크기는 따로 빼두고 삭제
-	for(int i = 0; i < (int)m_vecRenderer.size(); ++i)
+	for(int i = 0; i < static_cast<int>(m_vecRenderer.size()); ++i)
 	{
 		if(m_vecRenderer[i].m_pRenderer != nullptr)
 			SDL_DestroyRenderer(m_vecRenderer[i].m_pRenderer);
@@ -80,7 +83,7 @@ void cWindow::render()
 	SDL_UpdateWindowSurface(m_pSDLWindow);
 
 	//그렸으니 싹 지워준다
-	for(int i = 0; i < (int)m_vecRenderer.size(); ++i)
+	for(size_t i = 0; i < m_vecRenderer.size(); ++i)
 		SDL_RenderClear(m_vecRenderer[i].m_pRenderer);
 }
 
@@ -94,7 +97,7 @@ bool cWindow::closed()
 
 void cWindow::setRendererLogicalSize(int _iRendererIndex, int _iWidth, int _iHeight)
 {
-	if((int)m_vecRenderer.size() <= _iRendererIndex)
+	if(static_cast<int>(m_vecRenderer.size()) <= _iRendererIndex)
 		return;
 
 	cRenderer* lpRenderer = &m_vecRenderer[_iRendererIndex];
@@ -108,32 +111,32 @@ void cWindow::setRendererLogicalSize(int _iRendererIndex, int _iWidth, int _iHei
 		return;
 
 	//화면 좌우가 잘리도록 되있기때문에 실제로 그려지는 위치를 기억
-	double dWindowRatio = (double)m_iWidth / m_iHeight;
-	double dRenderRatio = (double)lpRenderer->m_iLogicalWidth / lpRenderer->m_iLogicalHeight;
+	double dWindowRatio = static_cast<double>(m_iWidth) / m_iHeight;
+	double dRenderRatio = static_cast<double>(lpRenderer->m_iLogicalWidth) / lpRenderer->m_iLogicalHeight;
 
 	if(dWindowRatio > dRenderRatio)
 	{//좌우에 여백있는거
-		int iBlank = m_iWidth - (int)(m_iWidth / dWindowRatio);
-		lpRenderer->m_iX = (int)(iBlank * 0.5);
+		int iBlank = m_iWidth - static_cast<int>(m_iWidth / dWindowRatio);
+		lpRenderer->m_iX = static_cast<int>(iBlank * 0.5);
 		lpRenderer->m_iY = 0;
 		lpRenderer->m_iW = m_iWidth - iBlank;
 		lpRenderer->m_iH = m_iHeight;
-		lpRenderer->m_dScaleFactor = (double)lpRenderer->m_iLogicalHeight / m_iHeight;
+		lpRenderer->m_dScaleFactor = static_cast<double>(lpRenderer->m_iLogicalHeight) / m_iHeight;
 	}
 	else
 	{//상하에 여백있는거
-		int iBlank = (int)(m_iHeight * (dRenderRatio - dWindowRatio));
+		int iBlank = static_cast<int>(m_iHeight * (dRenderRatio - dWindowRatio));
 		lpRenderer->m_iX = 0;
-		lpRenderer->m_iY = (int)(iBlank * 0.5);
+		lpRenderer->m_iY = static_cast<int>(iBlank * 0.5);
 		lpRenderer->m_iW = m_iWidth;
 		lpRenderer->m_iH = m_iHeight - iBlank;
-		lpRenderer->m_dScaleFactor = (double)lpRenderer->m_iLogicalWidth / m_iWidth;
+		lpRenderer->m_dScaleFactor = static_cast<double>(lpRenderer->m_iLogicalWidth) / m_iWidth;
 	}
 }
 
 void cWindow::drawBuffer(int* _lpBuffer, int _iRendererIndex, int _iBufferWidth, int _iBufferHeight, int _iX, int _iY, SDL_BlendMode _BlendMode, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
 {
-	if((int)m_vecRenderer.size() <= _iRendererIndex)
+	if(static_cast<int>(m_vecRenderer.size()) <= _iRendererIndex)
 		return;
 
 	SDL_Texture* pTexture = SDL_CreateTexture(m_vecRenderer[_iRendererIndex].m_pRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, _iBufferWidth, _iBufferHeight);
@@ -145,7 +148,7 @@ void cWindow::drawBuffer(int* _lpBuffer, int _iRendererIndex, int _iBufferWidth,
 
 void cWindow::drawTexture(SDL_Texture* _lpTexture, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
 {
-	if((int)m_vecRenderer.size() <= _iRendererIndex)
+	if(static_cast<int>(m_vecRenderer.size()) <= _iRendererIndex)
 		return;
 
 	//텍스쳐 정보 받아오기
@@ -168,11 +171,29 @@ void cWindow::drawTexture(SDL_Texture* _lpTexture, int _iRendererIndex, int _iX,
 	DestRect.w = iWidth;
 	DestRect.h = iHeight;
 	if(_dWidthPercent != 100.0)
-		DestRect.w = (int)(iWidth * _dWidthPercent * 0.01);
+		DestRect.w = static_cast<int>(iWidth * _dWidthPercent * 0.01);
 	if(_dHeightPercent != 100.0)
-		DestRect.h = (int)(iHeight * _dHeightPercent * 0.01);
+		DestRect.h = static_cast<int>(iHeight * _dHeightPercent * 0.01);
 
 	SDL_RenderCopyEx(m_vecRenderer[_iRendererIndex].m_pRenderer, _lpTexture, &SrcRect, &DestRect, _dAngle, _lpPivot, _Flip);
+}
+
+void cWindow::drawSurface(SDL_Surface* _lpSurface, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
+{
+	if(static_cast<int>(m_vecRenderer.size()) <= _iRendererIndex)
+		return;
+
+	SDL_Texture* pTexture = SDL_CreateTextureFromSurface(m_vecRenderer[_iRendererIndex].m_pRenderer, _lpSurface);
+	drawTexture(pTexture, _iRendererIndex, _iX, _iY, _dWidthPercent, _dHeightPercent, _dAngle, _lpPivot, _Flip);
+	SDL_DestroyTexture(pTexture);
+}
+
+void cWindow::drawText(TTF_Font* _lpFont, const char* _lpText, SDL_Color _Color, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
+{
+	SDL_Surface* pSurface = nullptr;
+	pSurface = TTF_RenderUTF8_Solid(_lpFont, _lpText, _Color);
+	drawSurface(pSurface, _iRendererIndex, _iX, _iY, _dWidthPercent, _dHeightPercent, _dAngle, _lpPivot, _Flip);
+	SDL_FreeSurface(pSurface);
 }
 
 void cWindow::drawThread()

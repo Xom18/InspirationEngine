@@ -59,7 +59,6 @@ class cWindow	//화면 출력 클래스, 랜더 스레드화 필요
 public:
 
 private:
-
 	int							m_iRendererCount;	//랜더러 개수
 	std::vector<cRenderer>		m_vecRenderer;		//소프트웨어 랜더러
 	SDL_Window*					m_pSDLWindow;		//창
@@ -81,12 +80,12 @@ public:
 	/// <summary>
 	/// 그리기
 	/// </summary>
-	virtual void draw() = 0;
+	virtual void draw(){};
 
 	/// <summary>
 	/// X버튼을 눌렀을 때
 	/// </summary>
-	virtual void callXButton() = 0;
+	virtual void callXButton(){};
 
 	/// <summary>
 	/// 창 생성
@@ -127,7 +126,7 @@ public:
 	/// <returns>랜더러 포인터 / 실패시 nullptr</returns>
 	cRenderer* getRenderer(int _iRendererIndex)
 	{
-		if((int)m_vecRenderer.size() <= _iRendererIndex)
+		if(static_cast<int>(m_vecRenderer.size()) <= _iRendererIndex)
 			return nullptr;
 
 		return &m_vecRenderer[_iRendererIndex];
@@ -187,6 +186,36 @@ public:
 	void drawTexture(SDL_Texture* _lpTexture, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent = 100, double _dHeightPercent = 100, double _dAngle = 0, SDL_Point* _lpPivot = nullptr, SDL_RendererFlip _Flip = SDL_FLIP_NONE);
 
 	/// <summary>
+	/// 서페이스 그리기
+	/// </summary>
+	/// <param name="SDL_Surface">서페이스</param>
+	/// <param name="_iRendererIndex">랜더러 인덱스</param>
+	/// <param name="_iX">X위치</param>
+	/// <param name="_iY">Y위치</param>
+	/// <param name="_dWidthPercent">너비(퍼센트)</param>
+	/// <param name="_dHeightPercent">높이(퍼센트)</param>
+	/// <param name="_dAngle">회전 각도(도)</param>
+	/// <param name="_lpPivot">회전 중심</param>
+	/// <param name="_Flip">상하, 좌우 반전 SDL_FLIP_HORIZONTAL / SDL_FLIP_VERTICAL</param>
+	void drawSurface(SDL_Surface* _lpTexture, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent = 100, double _dHeightPercent = 100, double _dAngle = 0, SDL_Point* _lpPivot = nullptr, SDL_RendererFlip _Flip = SDL_FLIP_NONE);
+
+	/// <summary>
+	/// 텍스트 그리기
+	/// </summary>
+	/// <param name="_lpFont">폰트</param>
+	/// <param name="_lpText">텍스트</param>
+	/// <param name="_Color">텍스트 컬러</param>
+	/// <param name="_iRendererIndex">랜더러 인덱스</param>
+	/// <param name="_iX">X위치</param>
+	/// <param name="_iY">Y위치</param>
+	/// <param name="_dWidthPercent">너비(퍼센트)</param>
+	/// <param name="_dHeightPercent">높이(퍼센트)</param>
+	/// <param name="_dAngle">회전 각도(도)</param>
+	/// <param name="_lpPivot">회전 중심</param>
+	/// <param name="_Flip">상하, 좌우 반전 SDL_FLIP_HORIZONTAL / SDL_FLIP_VERTICAL</param>
+	void drawText(TTF_Font* _lpFont, const char* _lpText, SDL_Color _Color, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent = 100, double _dHeightPercent = 100, double _dAngle = 0, SDL_Point* _lpPivot = nullptr, SDL_RendererFlip _Flip = SDL_FLIP_NONE);
+
+	/// <summary>
 	/// 이 창이 하이드 상태인지
 	/// </summary>
 	/// <returns>하이드 상태면 true / 아니면 false</returns>
@@ -235,15 +264,6 @@ public:
 	}
 
 	/// <summary>
-	/// 이번에 이미 그렸는지
-	/// </summary>
-	/// <returns>이미 그렸으면 true / 아니면 false</returns>
-	bool isDrawed()
-	{
-		return m_bIsDrawed;
-	}
-
-	/// <summary>
 	/// 그린 상태 초기화
 	/// </summary>
 	void resetDrawed()
@@ -276,8 +296,8 @@ public:
 		_iScreenY = _iScreenY - lpRenderer->m_iY;
 
 		//픽셀 스케일 배수 처리
-		Pos.m_iX = (int)(_iScreenX * lpRenderer->m_dScaleFactor);
-		Pos.m_iY = (int)(_iScreenY * lpRenderer->m_dScaleFactor);
+		Pos.m_iX = static_cast<int>(_iScreenX * lpRenderer->m_dScaleFactor);
+		Pos.m_iY = static_cast<int>(_iScreenY * lpRenderer->m_dScaleFactor);
 		return Pos;
 	}
 

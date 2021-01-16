@@ -1,60 +1,91 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Resources">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="Interface">
+      <UniqueIdentifier>{de00e7bb-b452-449d-bc3d-ba29651c491e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sources">
+    <Filter Include="Resource">
+      <UniqueIdentifier>{edf3edc2-427e-438e-964e-af466804acdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{2d44e40a-a668-4a86-b55b-e06f85a2198e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MouseCursor">
+      <UniqueIdentifier>{a6b495ce-9cf7-4b27-bca9-e99902b8063f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Etc.">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Header">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="EditBox.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
     <ClInclude Include="Core.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="MacroDefine.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="File.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="InspirationEngine.h">
-      <Filter>Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Window.h">
-      <Filter>Header</Filter>
+      <Filter>Etc.</Filter>
     </ClInclude>
     <ClInclude Include="DebugInfo.h">
-      <Filter>Header</Filter>
+      <Filter>Etc.</Filter>
+    </ClInclude>
+    <ClInclude Include="InspirationEngine.h">
+      <Filter>Etc.</Filter>
+    </ClInclude>
+    <ClInclude Include="MacroDefine.h">
+      <Filter>Etc.</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>Etc.</Filter>
+    </ClInclude>
+    <ClInclude Include="File.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>Resource</Filter>
     </ClInclude>
     <ClInclude Include="Input.h">
-      <Filter>Header</Filter>
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="MouseCusor.h">
+      <Filter>MouseCursor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="Core.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Input.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="File.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Etc.</Filter>
     </ClCompile>
     <ClCompile Include="Window.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Etc.</Filter>
     </ClCompile>
     <ClCompile Include="DebugInfo.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Etc.</Filter>
+    </ClCompile>
+    <ClCompile Include="EditBox.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="Interface.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="File.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Input.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="MouseCusor.cpp">
+      <Filter>MouseCursor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

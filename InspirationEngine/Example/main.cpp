@@ -79,6 +79,16 @@ int main(int argc, char* argv[])
 	//엔진 시작
 	Engine.beginEngine();
 
+	SDL_StartTextInput();
+
+	//SDL_Rect rtInputArea;
+	//rtInputArea.x = 500;
+	//rtInputArea.y = 500;
+	//rtInputArea.w = 100;
+	//rtInputArea.h = 500;
+
+
+	//SDL_SetTextInputRect(&rtInputArea);
 	//키 입력 등은 여기서 받음
 	while (Engine.isRunning())
 	{

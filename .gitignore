@@ -50,3 +50,6 @@ CodeAnalysisResultManifest.txt
 
 #resources
 *.png
+
+#font
+*.ttf

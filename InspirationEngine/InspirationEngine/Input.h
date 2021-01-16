@@ -12,16 +12,16 @@ private:
 	/// 안눌려있으면 false
 	/// 눌려있으면 true
 	/// </summary>
-	bool m_aKeyInput[SDL_NUM_SCANCODES];
+	bool m_aKeyInput[SDL_NUM_SCANCODES] = {false,};
 	std::mutex m_mtxOperateEvent;
 
-	Uint32 m_uiMouseStatus;
+	Uint32 m_uiMouseStatus = 0;
 	cIVector2 m_MousePos;
 	cIVector2 m_MouseDelta;
 
 public:
-	cInput(){};
-	~cInput(){};
+	cInput(){}
+	~cInput(){}
 
 	void setKeyState(SDL_Scancode _ScanCode, Uint8 _State)
 	{

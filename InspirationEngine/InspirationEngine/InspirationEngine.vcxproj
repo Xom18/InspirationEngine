@@ -20,8 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core.h" />
+    <ClInclude Include="Interface.h" />
+    <ClInclude Include="MouseCusor.h" />
     <ClInclude Include="DebugInfo.h" />
+    <ClInclude Include="EditBox.h" />
+    <ClInclude Include="Font.h" />
     <ClInclude Include="Input.h" />
+    <ClInclude Include="Menu.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="InspirationEngine.h" />
     <ClInclude Include="MacroDefine.h" />
@@ -29,16 +34,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core.cpp" />
+    <ClCompile Include="Interface.cpp" />
+    <ClCompile Include="MouseCusor.cpp" />
     <ClCompile Include="DebugInfo.cpp" />
+    <ClCompile Include="EditBox.cpp" />
+    <ClCompile Include="Font.cpp" />
+    <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="File.cpp" />
-    <ClCompile Include="Main.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

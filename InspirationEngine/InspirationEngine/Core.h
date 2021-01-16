@@ -12,13 +12,16 @@ enum
 class InspirationEngine
 {
 public:
-	cInput		m_Input;		//입력, 클릭이나 창 내부 처리도 여기서 받은다음 각 창으로 보냄
-	cDebugInfo	m_DebugInfo;	//디버그 툴
-	cWindow* m_lpMainWindow = nullptr;		//메인 윈도우
-	cWindow* m_lpFocusedWindow = nullptr;	//포커스 가있는 윈도우
+	cInput			m_Input;						//입력, 클릭이나 창 내부 처리도 여기서 받은다음 각 창으로 보냄
+	cDebugInfo		m_DebugInfo;					//디버그 툴
+	cFontManager	m_Font;							//폰트 관리하는곳
+	cWindow*		m_lpMainWindow = nullptr;		//메인 윈도우
+	cWindow*		m_lpMouseOnWindow = nullptr;	//마우스가 올라가 있는 윈도우
+	cWindow*		m_lpFocusedWindow = nullptr;	//선택 되있는 윈도우
 
 private:
-	int m_iOperatePahse;						//현재 어느걸 처리중인지
+	
+	int m_iOperatePahse = 0;					//현재 어느걸 처리중인지
 	std::mutex m_mtxEvent;						//이벤트 뮤텍스
 	std::map<std::string, cWindow*>	m_mapWindow;//윈도우
 	std::map<Uint32, cWindow*>	m_mapWindowByID;//윈도우
@@ -30,8 +33,10 @@ private:
 	std::atomic<int>	m_iDrawCompleteCounter;	//그리기 완료 카운터
 	std::condition_variable m_cvDrawThreadWaiter;//각 창의 drawthread를 대기 시켜주는곳
 	std::condition_variable m_cvDrawCompleteWaiter;//각 창의 drawthread를 대기 시켜주는곳
+
 	
 public:
+	std::string strInputtingText;	//텍스트 입력 테스트
 
 	/// <summary>
 	/// 생성자
@@ -212,7 +217,7 @@ public:
 	{
 		int iValue = m_iDrawCompleteCounter.fetch_add(1);
 		iValue += 1;
-		if(iValue >= m_mapWindow.size())
+		if(iValue >= static_cast<int>(m_mapWindow.size()))
 			m_cvDrawCompleteWaiter.notify_all();
 	}
 
@@ -223,7 +228,7 @@ public:
 	bool isDrawComplete()
 	{
 		int iValue = m_iDrawCompleteCounter.load();
-		return iValue >= m_mapWindow.size();
+		return iValue >= static_cast<int>(m_mapWindow.size());
 	}
 
 	/// <summary>

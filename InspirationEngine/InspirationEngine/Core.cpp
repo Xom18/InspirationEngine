@@ -40,11 +40,27 @@ void InspirationEngine::operateEvent()
 		int iMouseY = 0;
 		SDL_GetMouseState(&iMouseX, &iMouseY);
 		m_Input.updateMousePos(iMouseX, iMouseY);
+
+		//마우스가 올라와있는 윈도우
 		SDL_Window* lpWindow = SDL_GetMouseFocus();
 		if(lpWindow)
 		{
 			Uint32 uiWindowID = SDL_GetWindowID(lpWindow);
-			m_lpFocusedWindow = getWindowByID(uiWindowID);
+			m_lpMouseOnWindow = getWindowByID(uiWindowID);
+		}
+		else
+		{
+			m_lpMouseOnWindow = nullptr;
+		}
+	}
+
+	{
+		//활성화 되 있는 윈도우
+		SDL_Window* lpWindow = SDL_GetMouseFocus();
+		if(lpWindow)
+		{
+			Uint32 uiWindowID = SDL_GetWindowID(lpWindow);
+			m_lpMouseOnWindow = getWindowByID(uiWindowID);
 		}
 		else
 		{
@@ -58,6 +74,8 @@ void InspirationEngine::operateEvent()
 	std::swap(dqEventQueue, m_dqEventQueue);
 	m_mtxEvent.unlock();
 
+	SDL_Cursor* cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
+	SDL_SetCursor(cursor);
 
 	//이벤트 처리
 	while(!dqEventQueue.empty())
@@ -70,11 +88,50 @@ void InspirationEngine::operateEvent()
 		case SDL_EventType::SDL_KEYUP:
 		{
 			m_Input.setKeyState(Event.key.keysym.scancode, Event.key.state);
+
+			if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_BACKSPACE)
+			{
+				if(strInputtingText.length())
+				{
+					const char* lpText = strInputtingText.c_str();
+					int iLength = static_cast<int>(strInputtingText.length());
+
+					if((lpText[iLength - 1] & 0b10000000) == 0)
+					{//아스키쪽인지 확인
+						strInputtingText.pop_back();
+					}
+					else
+					{//UTF-8이다
+						//몇개 지워야되는지 체크
+						int iDeleteCount = 0;
+						for(int i = iLength - 1; i >= 0; --i)
+						{
+							++iDeleteCount;
+							if((lpText[i] & 0b11000000) == 0b11000000)
+								break;
+						}
+
+						//지워야되는 만큼 삭제
+						strInputtingText.erase(static_cast<size_t>(iLength) - iDeleteCount);
+					}
+				}
+			}
 		}
 		break;
 		case SDL_EventType::SDL_WINDOWEVENT:
 		{
 			operateWindowEvent(&Event);
+		}
+		break;
+		case SDL_EventType::SDL_TEXTEDITING:
+		{//조합형 입력중
+//			strInputtingText.clear();
+//			strInputtingText += Event.text.text;
+		}
+		break;
+		case SDL_EventType::SDL_TEXTINPUT:
+		{//입력
+			strInputtingText += Event.text.text;
 		}
 		break;
 		}
