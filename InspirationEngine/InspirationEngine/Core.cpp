@@ -1,7 +1,31 @@
 #include <future>
 #include "InspirationEngine.h"
 
-void InspirationEngine::mainThread()
+//public
+cInput			cIECore::m_Input;						//입력, 클릭이나 창 내부 처리도 여기서 받은다음 각 창으로 보냄
+cDebugInfo		cIECore::m_DebugInfo;					//디버그 툴
+cFontManager	cIECore::m_Font;						//폰트 관리하는곳
+cWindow*		cIECore::m_lpMainWindow = nullptr;		//메인 윈도우
+cWindow*		cIECore::m_lpMouseOnWindow = nullptr;	//마우스가 올라가 있는 윈도우
+cWindow*		cIECore::m_lpFocusedWindow = nullptr;	//선택 되있는 윈도우
+cTextBox*		cIECore::m_lpFocusedTextBox = nullptr;	//선택 되있는 윈도우
+
+//private
+int				cIECore::m_iOperatePahse = 0;			//현재 어느걸 처리중인지
+std::mutex		cIECore::m_mtxEvent;					//이벤트 뮤텍스
+
+std::map<std::string, cWindow*>	cIECore::m_mapWindow;	//윈도우
+std::map<Uint32, cWindow*>	cIECore::m_mapWindowByID;	//윈도우
+std::thread*	cIECore::m_pMainThread = nullptr;		//메인 스레드
+int				cIECore::m_iTickRate = 16;				//메인스레드 처리간격(ms)
+bool			cIECore::m_bIsRunning = false;			//구동중 여부
+std::deque<SDL_Event> cIECore::m_dqEventQueue;			//처리 안한 이벤트 큐
+
+std::atomic<int>		cIECore::m_iDrawCompleteCounter;//그리기 완료 카운터
+std::condition_variable cIECore::m_cvDrawThreadWaiter;	//각 창의 drawthread를 대기 시켜주는곳
+std::condition_variable cIECore::m_cvDrawCompleteWaiter;//각 창의 drawthread를 대기 시켜주는곳
+
+void cIECore::mainThread()
 {
 	while(m_bIsRunning)
 	{
@@ -32,7 +56,7 @@ void InspirationEngine::mainThread()
 	return;
 }
 
-void InspirationEngine::operateEvent()
+void cIECore::operateEvent()
 {
 	//마우스 위치 갱신
 	{
@@ -74,48 +98,19 @@ void InspirationEngine::operateEvent()
 	std::swap(dqEventQueue, m_dqEventQueue);
 	m_mtxEvent.unlock();
 
-	SDL_Cursor* cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM);
-	SDL_SetCursor(cursor);
-
 	//이벤트 처리
 	while(!dqEventQueue.empty())
 	{
 		SDL_Event Event = dqEventQueue.front();
 		dqEventQueue.pop_front();
+
+		operateTextEdit(&Event);
 		switch(Event.type)
 		{
 		case SDL_EventType::SDL_KEYDOWN:
 		case SDL_EventType::SDL_KEYUP:
 		{
 			m_Input.setKeyState(Event.key.keysym.scancode, Event.key.state);
-
-			if(Event.type == SDL_KEYDOWN && Event.key.keysym.sym == SDLK_BACKSPACE)
-			{
-				if(strInputtingText.length())
-				{
-					const char* lpText = strInputtingText.c_str();
-					int iLength = static_cast<int>(strInputtingText.length());
-
-					if((lpText[iLength - 1] & 0b10000000) == 0)
-					{//아스키쪽인지 확인
-						strInputtingText.pop_back();
-					}
-					else
-					{//UTF-8이다
-						//몇개 지워야되는지 체크
-						int iDeleteCount = 0;
-						for(int i = iLength - 1; i >= 0; --i)
-						{
-							++iDeleteCount;
-							if((lpText[i] & 0b11000000) == 0b11000000)
-								break;
-						}
-
-						//지워야되는 만큼 삭제
-						strInputtingText.erase(static_cast<size_t>(iLength) - iDeleteCount);
-					}
-				}
-			}
 		}
 		break;
 		case SDL_EventType::SDL_WINDOWEVENT:
@@ -123,22 +118,11 @@ void InspirationEngine::operateEvent()
 			operateWindowEvent(&Event);
 		}
 		break;
-		case SDL_EventType::SDL_TEXTEDITING:
-		{//조합형 입력중
-//			strInputtingText.clear();
-//			strInputtingText += Event.text.text;
-		}
-		break;
-		case SDL_EventType::SDL_TEXTINPUT:
-		{//입력
-			strInputtingText += Event.text.text;
-		}
-		break;
 		}
 	}
 }
 
-void InspirationEngine::operateWindowEvent(const SDL_Event* _lpEvent)
+void cIECore::operateWindowEvent(const SDL_Event* _lpEvent)
 {
 	//이벤트에 해당하는 창 가져오고 없으면 반환
 	cWindow* lpWindow = getWindowByID(_lpEvent->window.windowID);
@@ -160,12 +144,12 @@ void InspirationEngine::operateWindowEvent(const SDL_Event* _lpEvent)
 	}
 }
 
-void InspirationEngine::update()
+void cIECore::update()
 {
 
 }
 
-void InspirationEngine::draw()
+void cIECore::draw()
 {
 	std::map<std::string, cWindow*>::iterator ite = m_mapWindow.begin();
 	//그릴게 없다
@@ -189,7 +173,7 @@ void InspirationEngine::draw()
 	});
 }
 
-bool InspirationEngine::beginEngine()
+bool cIECore::beginEngine()
 {
 	if(m_pMainThread)
 		return false;
@@ -204,4 +188,47 @@ bool InspirationEngine::beginEngine()
 		ite->second->beginDrawThread();
 
 	return true;
+}
+
+void cIECore::operateTextEdit(SDL_Event* _lpEvent)
+{
+	if(m_lpFocusedTextBox == nullptr)
+		return;
+
+	switch(_lpEvent->type)
+	{
+		case SDL_EventType::SDL_KEYDOWN:
+		{//텍스트 지우기
+			if(_lpEvent->key.keysym.sym == SDLK_BACKSPACE
+			&& m_lpFocusedTextBox->getTextLength() > 0
+			&& m_Input.isIMEUsing() != true)
+			{
+				m_lpFocusedTextBox->popBack();
+			}
+		}
+		break;
+		case SDL_EventType::SDL_TEXTEDITING:
+		{//조합형 입력중
+			if(strlen(_lpEvent->text.text) == 0)
+			{
+				if(m_Input.isIMEUsing())
+					m_lpFocusedTextBox->popBack();
+				m_Input.setIMEState(false);
+				break;
+			}
+			if(m_Input.isIMEUsing())
+				m_lpFocusedTextBox->popBack();
+			m_lpFocusedTextBox->pushBack(_lpEvent->text.text);
+			m_Input.setIMEState(true);
+		}
+		break;
+		case SDL_EventType::SDL_TEXTINPUT:
+		{//입력
+			if(m_Input.isIMEUsing())
+				m_lpFocusedTextBox->popBack();
+			m_Input.setIMEState(false);
+			m_lpFocusedTextBox->pushBack(_lpEvent->text.text);
+		}
+		break;
+	}
 }

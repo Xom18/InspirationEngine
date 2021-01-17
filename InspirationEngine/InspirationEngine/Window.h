@@ -1,58 +1,6 @@
 #pragma once
 
-class InspirationEngine;
-
-class cRenderer
-{
-public:
-	SDL_Renderer* m_pRenderer;	//랜더러
-	int m_iLogicalWidth;		//논리너비
-	int m_iLogicalHeight;		//논리높이
-	int m_iX;					//창에서 랜더러 위치
-	int m_iY;					//창에서 랜더러 위치
-	int m_iW;					//창에서 랜더러 너비
-	int m_iH;					//창에서 랜더러 높이
-	double m_dScaleFactor;		//랜더러 마우스위치 스케일 계수
-
-private:
-
-public:
-
-	cRenderer()
-	{
-		m_pRenderer = nullptr;
-		m_iLogicalWidth = 0;
-		m_iLogicalHeight = 0;
-		m_iX = 0;
-		m_iY = 0;
-		m_iW = 0;
-		m_iH = 0;
-		m_dScaleFactor = 0.0;
-	}
-
-	~cRenderer()
-	{
-		if(m_pRenderer != nullptr)
-			SDL_DestroyRenderer(m_pRenderer);
-	}
-
-	void reset()
-	{
-		if(m_pRenderer != nullptr)
-			SDL_DestroyRenderer(m_pRenderer);
-		m_pRenderer = nullptr;
-		m_iLogicalWidth = 0;
-		m_iLogicalHeight = 0;
-		m_iX = 0;
-		m_iY = 0;
-		m_iW = 0;
-		m_iH = 0;
-		m_dScaleFactor = 0.0;
-	}
-
-private:
-
-};
+class cIECore;
 
 class cWindow	//화면 출력 클래스, 랜더 스레드화 필요
 {
@@ -68,9 +16,6 @@ private:
 	std::thread*				m_pDrawThread;		//그리는 스레드
 	bool						m_bDrawThreadIsRunning;//그리는 스레드가 도는중인지
 	bool						m_bIsDrawed;		//이번에 그렸다
-
-protected:
-	InspirationEngine* m_lpEngine;//이것의 소유주
 
 public:
 	cWindow();
@@ -96,7 +41,7 @@ public:
 	/// <param name="_iRendererCount">랜더러 개수</param>
 	/// <param name="_iWindowFlag">창 옵션</param>
 	/// <returns>성공 true / 실패 false</returns>
-	bool createWindow(InspirationEngine* _lpEngine, const char* _csTitle, int _Width, int _Height, int _iX = SDL_WINDOWPOS_CENTERED, int _iY = SDL_WINDOWPOS_CENTERED, int _iWindowFlag = 0, int _iRendererCount = 1);
+	bool createWindow(const char* _csTitle, int _Width, int _Height, int _iX = SDL_WINDOWPOS_CENTERED, int _iY = SDL_WINDOWPOS_CENTERED, int _iWindowFlag = 0, int _iRendererCount = 1);
 
 	/// <summary>
 	/// 창이 닫혀있는지 여부
@@ -153,67 +98,6 @@ public:
 	/// <param name="_iWidth">너비</param>
 	/// <param name="_iHeight">높이</param>
 	void setRendererLogicalSize(int _iRendererIndex, int _iWidth, int _iHeight);
-
-	/// <summary>
-	/// 버퍼에 있는 이미지 그리기
-	/// </summary>
-	/// <param name="_lpBuffer">이미지 데이터 버퍼</param>
-	/// <param name="_iRendererIndex">랜더러 인덱스</param>
-	/// <param name="_iBufferWidth">버퍼 너비</param>
-	/// <param name="_iBufferHeight">버퍼 높이</param>
-	/// <param name="_iX">X위치</param>
-	/// <param name="_iY">Y위치</param>
-	/// <param name="_BlendMode">블랜드 모드</param>
-	/// <param name="_dWidthPercent">너비(퍼센트)</param>
-	/// <param name="_dHeightPercent">높이(퍼센트)</param>
-	/// <param name="_dAngle">회전 각도(도)</param>
-	/// <param name="_lpPivot">회전 중심</param>
-	/// <param name="_Flip">상하, 좌우 반전 SDL_FLIP_HORIZONTAL / SDL_FLIP_VERTICAL</param>
-	void drawBuffer(int* _lpBuffer, int _iRendererIndex, int _iBufferWidth, int _iBufferHeight, int _iX, int _iY, SDL_BlendMode _BlendMode = SDL_BLENDMODE_BLEND, double _dWidthPercent = 100, double _dHeightPercent = 100, double _dAngle = 0, SDL_Point* _lpPivot = nullptr, SDL_RendererFlip _Flip = SDL_FLIP_NONE);
-
-	/// <summary>
-	/// 텍스쳐 이미지 그리기
-	/// </summary>
-	/// <param name="_lpTexture">텍스쳐</param>
-	/// <param name="_iRendererIndex">랜더러 인덱스</param>
-	/// <param name="_iX">X위치</param>
-	/// <param name="_iY">Y위치</param>
-	/// <param name="_dWidthPercent">너비(퍼센트)</param>
-	/// <param name="_dHeightPercent">높이(퍼센트)</param>
-	/// <param name="_dAngle">회전 각도(도)</param>
-	/// <param name="_lpPivot">회전 중심</param>
-	/// <param name="_Flip">상하, 좌우 반전 SDL_FLIP_HORIZONTAL / SDL_FLIP_VERTICAL</param>
-	void drawTexture(SDL_Texture* _lpTexture, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent = 100, double _dHeightPercent = 100, double _dAngle = 0, SDL_Point* _lpPivot = nullptr, SDL_RendererFlip _Flip = SDL_FLIP_NONE);
-
-	/// <summary>
-	/// 서페이스 그리기
-	/// </summary>
-	/// <param name="SDL_Surface">서페이스</param>
-	/// <param name="_iRendererIndex">랜더러 인덱스</param>
-	/// <param name="_iX">X위치</param>
-	/// <param name="_iY">Y위치</param>
-	/// <param name="_dWidthPercent">너비(퍼센트)</param>
-	/// <param name="_dHeightPercent">높이(퍼센트)</param>
-	/// <param name="_dAngle">회전 각도(도)</param>
-	/// <param name="_lpPivot">회전 중심</param>
-	/// <param name="_Flip">상하, 좌우 반전 SDL_FLIP_HORIZONTAL / SDL_FLIP_VERTICAL</param>
-	void drawSurface(SDL_Surface* _lpTexture, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent = 100, double _dHeightPercent = 100, double _dAngle = 0, SDL_Point* _lpPivot = nullptr, SDL_RendererFlip _Flip = SDL_FLIP_NONE);
-
-	/// <summary>
-	/// 텍스트 그리기
-	/// </summary>
-	/// <param name="_lpFont">폰트</param>
-	/// <param name="_lpText">텍스트</param>
-	/// <param name="_Color">텍스트 컬러</param>
-	/// <param name="_iRendererIndex">랜더러 인덱스</param>
-	/// <param name="_iX">X위치</param>
-	/// <param name="_iY">Y위치</param>
-	/// <param name="_dWidthPercent">너비(퍼센트)</param>
-	/// <param name="_dHeightPercent">높이(퍼센트)</param>
-	/// <param name="_dAngle">회전 각도(도)</param>
-	/// <param name="_lpPivot">회전 중심</param>
-	/// <param name="_Flip">상하, 좌우 반전 SDL_FLIP_HORIZONTAL / SDL_FLIP_VERTICAL</param>
-	void drawText(TTF_Font* _lpFont, const char* _lpText, SDL_Color _Color, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent = 100, double _dHeightPercent = 100, double _dAngle = 0, SDL_Point* _lpPivot = nullptr, SDL_RendererFlip _Flip = SDL_FLIP_NONE);
 
 	/// <summary>
 	/// 이 창이 하이드 상태인지
@@ -278,7 +162,7 @@ public:
 	/// <param name="_iScreenX">화면상 X</param>
 	/// <param name="_iScreenY">화면상 Y</param>
 	/// <returns></returns>
-	cIVector2 getRenderPos(int _iRendererIndex, int _iScreenX, int _iScreenY)
+	cIVector2 screenPosToRenderPos(int _iRendererIndex, int _iScreenX, int _iScreenY)
 	{
 		cIVector2 Pos;
 		Pos.m_iX = _iScreenX;
@@ -298,6 +182,33 @@ public:
 		//픽셀 스케일 배수 처리
 		Pos.m_iX = static_cast<int>(_iScreenX * lpRenderer->m_dScaleFactor);
 		Pos.m_iY = static_cast<int>(_iScreenY * lpRenderer->m_dScaleFactor);
+		return Pos;
+	}
+
+	/// <summary>
+	/// 랜더상에서 X, Y위치 받아오기
+	/// </summary>
+	/// <param name="_iRendererIndex">랜더러 번호</param>
+	/// <param name="_iScreenX">랜더상 X</param>
+	/// <param name="_iScreenY">랜더상 Y</param>
+	/// <returns></returns>
+	cIVector2 renderPosToScreenPos(int _iRendererIndex, int _iScreenX, int _iScreenY)
+	{
+		cIVector2 Pos;
+		Pos.m_iX = _iScreenX;
+		Pos.m_iY = _iScreenY;
+
+		const cRenderer* lpRenderer = getRenderer(_iRendererIndex);
+		if(lpRenderer == nullptr)
+			return Pos;
+
+		if(lpRenderer->m_iLogicalWidth == 0 && lpRenderer->m_iLogicalHeight == 0)
+			return Pos;
+
+		//픽셀 스케일 배수 처리
+		Pos.m_iX = static_cast<int>(_iScreenX / lpRenderer->m_dScaleFactor) + lpRenderer->m_iX;
+		Pos.m_iY = static_cast<int>(_iScreenY / lpRenderer->m_dScaleFactor) + lpRenderer->m_iY;
+
 		return Pos;
 	}
 

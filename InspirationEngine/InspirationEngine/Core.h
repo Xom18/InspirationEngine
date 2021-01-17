@@ -9,44 +9,45 @@ enum
 	eENGINE_PAHSE_COMPLETE,		//처리완료(다음 틱 대기중)
 };
 
-class InspirationEngine
+//얘는 스태틱이다
+class cIECore
 {
 public:
-	cInput			m_Input;						//입력, 클릭이나 창 내부 처리도 여기서 받은다음 각 창으로 보냄
-	cDebugInfo		m_DebugInfo;					//디버그 툴
-	cFontManager	m_Font;							//폰트 관리하는곳
-	cWindow*		m_lpMainWindow = nullptr;		//메인 윈도우
-	cWindow*		m_lpMouseOnWindow = nullptr;	//마우스가 올라가 있는 윈도우
-	cWindow*		m_lpFocusedWindow = nullptr;	//선택 되있는 윈도우
-
+	static cInput		m_Input;			//입력, 클릭이나 창 내부 처리도 여기서 받은다음 각 창으로 보냄
+	static cDebugInfo	m_DebugInfo;		//디버그 툴
+	static cFontManager	m_Font;				//폰트 관리하는곳
+	static cWindow*		m_lpMainWindow;		//메인 윈도우
+	static cWindow*		m_lpMouseOnWindow;	//마우스가 올라가 있는 윈도우
+	static cWindow*		m_lpFocusedWindow;	//선택 되있는 윈도우
+	static cTextBox*	m_lpFocusedTextBox;	//선택 되 있는 텍스트 박스
 private:
 	
-	int m_iOperatePahse = 0;					//현재 어느걸 처리중인지
-	std::mutex m_mtxEvent;						//이벤트 뮤텍스
-	std::map<std::string, cWindow*>	m_mapWindow;//윈도우
-	std::map<Uint32, cWindow*>	m_mapWindowByID;//윈도우
-	std::thread* m_pMainThread = nullptr;		//메인 스레드
-	int m_iTickRate = 16;						//메인스레드 처리간격(ms)
-	bool m_bIsRunning = false;					//구동중 여부
-	std::deque<SDL_Event> m_dqEventQueue;		//처리 안한 이벤트 큐
+	static int m_iOperatePahse;		//현재 어느걸 처리중인지
+	static std::mutex m_mtxEvent;	//이벤트 뮤텍스
+	static std::map<std::string, cWindow*>	m_mapWindow;//윈도우
+	static std::map<Uint32, cWindow*>	m_mapWindowByID;//윈도우
+	static std::thread* m_pMainThread;			//메인 스레드
+	static int m_iTickRate;						//메인스레드 처리간격(ms)
+	static bool m_bIsRunning;					//구동중 여부
+	static std::deque<SDL_Event> m_dqEventQueue;//처리 안한 이벤트 큐
 
-	std::atomic<int>	m_iDrawCompleteCounter;	//그리기 완료 카운터
-	std::condition_variable m_cvDrawThreadWaiter;//각 창의 drawthread를 대기 시켜주는곳
-	std::condition_variable m_cvDrawCompleteWaiter;//각 창의 drawthread를 대기 시켜주는곳
+	static std::atomic<int>	m_iDrawCompleteCounter;	//그리기 완료 카운터
+	static std::condition_variable m_cvDrawThreadWaiter;//각 창의 drawthread를 대기 시켜주는곳
+	static std::condition_variable m_cvDrawCompleteWaiter;//각 창의 drawthread를 대기 시켜주는곳
 
-	
 public:
-	std::string strInputtingText;	//텍스트 입력 테스트
 
 	/// <summary>
 	/// 생성자
 	/// </summary>
-	InspirationEngine(){}
+	cIECore()
+	{
+	}
 
 	/// <summary>
 	///	소멸자
 	/// </summary>
-	~InspirationEngine()
+	~cIECore()
 	{
 		std::map<std::string, cWindow*>::iterator ite = m_mapWindow.begin();
 		for(; ite != m_mapWindow.end(); ++ite)
@@ -55,20 +56,23 @@ public:
 		m_mapWindowByID.clear();
 		m_lpMainWindow = nullptr;
 
-		m_pMainThread->join();
-		KILL(m_pMainThread);
+		if(m_pMainThread)
+		{
+			m_pMainThread->join();
+			delete m_pMainThread;
+		}
 	}
 
 	/// <summary>
 	/// 엔진 시작
 	/// </summary>
 	/// <returns></returns>
-	bool beginEngine();	
+	static bool beginEngine();
 
 	/// <summary>
 	/// 엔진 중단
 	/// </summary>
-	void stopEngine()
+	static void stopEngine()
 	{
 		m_bIsRunning = false;
 		m_cvDrawThreadWaiter.notify_all();	//각 창 스레드 중단
@@ -79,7 +83,7 @@ public:
 	/// 구동중인지
 	/// </summary>
 	/// <returns>true / false</returns>
-	bool isRunning()
+	static bool isRunning()
 	{
 		return m_bIsRunning;
 	}
@@ -88,7 +92,7 @@ public:
 	/// 처리 간격 설정
 	/// </summary>
 	/// <param name="_iTick">처리 간격(ms)</param>
-	void setTickRate(int _iTick)
+	static void setTickRate(int _iTick)
 	{
 		m_iTickRate = _iTick;
 	}
@@ -97,7 +101,7 @@ public:
 	/// 처리 간격 받아오기
 	/// </summary>
 	/// <returns>처리 간격(ms)</returns>
-	int getTickRate()
+	static int getTickRate()
 	{
 		return m_iTickRate;
 	}
@@ -108,7 +112,7 @@ public:
 	/// <param name="_csID">해당 창이 가질 ID</param>
 	/// <param name="_pWindow">동적할당 된 cWindow 변수</param>
 	/// <returns>추가 성공했으면 true / 이미 같은 ID로 할당 된 window가 존재하면 false</returns>
-	bool addNewWindow(const char* _csID, cWindow* _pWindow)
+	static bool addNewWindow(const char* _csID, cWindow* _pWindow)
 	{
 		//동일한 ID의 창이 있으면 안되기때문에 처리
 		if(getWindow(_csID) != nullptr)
@@ -125,7 +129,7 @@ public:
 	/// </summary>
 	/// <param name="_csID">받아 올 창의 ID</param>
 	/// <returns></returns>
-	cWindow* getWindow(const char* _csID)
+	static cWindow* getWindow(const char* _csID)
 	{
 		std::map<std::string, cWindow*>::iterator ite = m_mapWindow.find(_csID);
 		if(ite == m_mapWindow.end())
@@ -136,7 +140,7 @@ public:
 	/// <summary>
 	/// 메인 창 설정
 	/// </summary>
-	void setMainWindow(cWindow* _pWindow)
+	static void setMainWindow(cWindow* _pWindow)
 	{
 		m_lpMainWindow = _pWindow;
 	}
@@ -144,7 +148,7 @@ public:
 	/// 메인 창 받아오기
 	/// </summary>
 	/// <returns>ID가 Main인 창 받아옴 / 없으면 nullptr</returns>
-	cWindow* getMainWindow()
+	static cWindow* getMainWindow()
 	{
 		return m_lpMainWindow;
 	}
@@ -153,7 +157,7 @@ public:
 	/// 해당 ID의 창 삭제
 	/// </summary>
 	/// <param name="_csID">삭제 할 창의 ID</param>
-	void destroyWindow(const char* _csID)
+	static void destroyWindow(const char* _csID)
 	{
 		std::map<std::string, cWindow*>::iterator ite = m_mapWindow.find(_csID);
 		if(ite == m_mapWindow.end())
@@ -170,7 +174,7 @@ public:
 	/// 이벤트 처리 큐에 넣기
 	/// </summary>
 	/// <param name="_lpEvent">이벤트</param>
-	void eventPushBack(SDL_Event* _lpEvent)
+	static void eventPushBack(SDL_Event* _lpEvent)
 	{
 		m_mtxEvent.lock();
 		m_dqEventQueue.push_back(*_lpEvent);
@@ -182,7 +186,7 @@ public:
 	/// SDL Window Id로 찾을 수 있게 윈도우 등록
 	/// </summary>
 	/// <param name="_lpWindow">등록 할 윈도우</param>
-	void addWindowIndex(cWindow* _lpWindow)
+	static void addWindowIndex(cWindow* _lpWindow)
 	{
 		SDL_Window* lpWindow = _lpWindow->getSDLWindow();
 		Uint32 uiID = SDL_GetWindowID(lpWindow);
@@ -194,7 +198,7 @@ public:
 	/// </summary>
 	/// <param name="_iID">window ID</param>
 	/// <returns>해당하는 ID의 창을 가진 window</returns>
-	cWindow* getWindowByID(Uint32 _uiID)
+	static cWindow* getWindowByID(Uint32 _uiID)
 	{
 		std::map<Uint32, cWindow*>::iterator ite = m_mapWindowByID.find(_uiID);
 		if(ite == m_mapWindowByID.end())
@@ -205,7 +209,7 @@ public:
 	/// <summary>
 	/// 화면 그리는 스레드 대기용 변수 가져오기
 	/// </summary>
-	std::condition_variable* getDrawWaiter()		//화면 그리기 대기용
+	static std::condition_variable* getDrawWaiter()		//화면 그리기 대기용
 	{
 		return &m_cvDrawThreadWaiter;
 	}
@@ -213,7 +217,7 @@ public:
 	/// <summary>
 	/// 창 그릴 때 마다 1씩 증가시켜서 다 되면 draw가 끝났다고 알려주는 함수
 	/// </summary>
-	void increaseDrawCompleteCount()
+	static void increaseDrawCompleteCount()
 	{
 		int iValue = m_iDrawCompleteCounter.fetch_add(1);
 		iValue += 1;
@@ -225,7 +229,7 @@ public:
 	/// 그리는게 완료되었는지
 	/// </summary>
 	/// <returns></returns>
-	bool isDrawComplete()
+	static bool isDrawComplete()
 	{
 		int iValue = m_iDrawCompleteCounter.load();
 		return iValue >= static_cast<int>(m_mapWindow.size());
@@ -235,36 +239,38 @@ public:
 	/// 엔진의 현재 상태 가져오는거
 	/// </summary>
 	/// <returns>엔진의 현재 상태</returns>
-	int getEnginePhase()
+	static int getEnginePhase()
 	{
 		return m_iOperatePahse;
 	}
+
+	static void operateTextEdit(SDL_Event* _lpEvent);
 
 private:
 	/// <summary>
 	/// 주 처리 스레드
 	/// </summary>
-	void mainThread();
+	static void mainThread();
 
 	/// <summary>
 	/// 이벤트 처리 함수
 	/// </summary>
-	void operateEvent();
+	static void operateEvent();
 
 	/// <summary>
 	/// 윈도우 이벤트 처리용
 	/// </summary>
 	/// <param name="_lpEvent">이벤트</param>
-	void operateWindowEvent(const SDL_Event* _lpEvent);
+	static void operateWindowEvent(const SDL_Event* _lpEvent);
 
 	/// <summary>
 	/// 업데이트용
 	/// </summary>
-	void update();
+	static void update();
 
 	/// <summary>
 	/// 그리는용
 	/// </summary>
-	void draw();
+	static void draw();
 
 };

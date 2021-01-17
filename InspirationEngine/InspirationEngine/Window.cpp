@@ -52,11 +52,10 @@ void cWindow::reset()
 	m_iWidth = 0;
 	m_iHeight = 0;
 	m_iRendererCount = 0;
-	m_lpEngine = nullptr;
 	m_pDrawThread = nullptr;
 }
 
-bool cWindow::createWindow(InspirationEngine* _lpEngine, const char* _csTitle, int _Width, int _Height, int _iX, int _iY, int _iWindowFlag, int _iRendererCount)
+bool cWindow::createWindow(const char* _csTitle, int _Width, int _Height, int _iX, int _iY, int _iWindowFlag, int _iRendererCount)
 {
 	//이미 창이 있다
 	if(m_pSDLWindow)
@@ -72,7 +71,6 @@ bool cWindow::createWindow(InspirationEngine* _lpEngine, const char* _csTitle, i
 	m_iHeight = _Height;
 	m_iRendererCount = _iRendererCount;
 	m_vecRenderer.resize(m_iRendererCount);
-	m_lpEngine = _lpEngine;
 	resizeRenderer();
 
 	return true;
@@ -134,71 +132,9 @@ void cWindow::setRendererLogicalSize(int _iRendererIndex, int _iWidth, int _iHei
 	}
 }
 
-void cWindow::drawBuffer(int* _lpBuffer, int _iRendererIndex, int _iBufferWidth, int _iBufferHeight, int _iX, int _iY, SDL_BlendMode _BlendMode, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
-{
-	if(static_cast<int>(m_vecRenderer.size()) <= _iRendererIndex)
-		return;
-
-	SDL_Texture* pTexture = SDL_CreateTexture(m_vecRenderer[_iRendererIndex].m_pRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, _iBufferWidth, _iBufferHeight);
-	SDL_SetTextureBlendMode(pTexture, _BlendMode);
-	SDL_UpdateTexture(pTexture, NULL, _lpBuffer, _iBufferWidth * sizeof(Uint32));
-	drawTexture(pTexture, _iRendererIndex, _iX, _iY, _dWidthPercent, _dHeightPercent, _dAngle, _lpPivot, _Flip);
-	SDL_DestroyTexture(pTexture);
-}
-
-void cWindow::drawTexture(SDL_Texture* _lpTexture, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
-{
-	if(static_cast<int>(m_vecRenderer.size()) <= _iRendererIndex)
-		return;
-
-	//텍스쳐 정보 받아오기
-	int iWidth = 0;
-	int iHeight = 0;
-	if(SDL_QueryTexture(_lpTexture, NULL, NULL, &iWidth, &iHeight) == -1)
-		return;
-
-	//텍스쳐 내에서의 위치
-	SDL_Rect SrcRect;
-	SrcRect.x = 0;
-	SrcRect.y = 0;
-	SrcRect.w = iWidth;
-	SrcRect.h = iHeight;
-
-	//화면에서의 위치
-	SDL_Rect DestRect;
-	DestRect.x = _iX;
-	DestRect.y = _iY;
-	DestRect.w = iWidth;
-	DestRect.h = iHeight;
-	if(_dWidthPercent != 100.0)
-		DestRect.w = static_cast<int>(iWidth * _dWidthPercent * 0.01);
-	if(_dHeightPercent != 100.0)
-		DestRect.h = static_cast<int>(iHeight * _dHeightPercent * 0.01);
-
-	SDL_RenderCopyEx(m_vecRenderer[_iRendererIndex].m_pRenderer, _lpTexture, &SrcRect, &DestRect, _dAngle, _lpPivot, _Flip);
-}
-
-void cWindow::drawSurface(SDL_Surface* _lpSurface, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
-{
-	if(static_cast<int>(m_vecRenderer.size()) <= _iRendererIndex)
-		return;
-
-	SDL_Texture* pTexture = SDL_CreateTextureFromSurface(m_vecRenderer[_iRendererIndex].m_pRenderer, _lpSurface);
-	drawTexture(pTexture, _iRendererIndex, _iX, _iY, _dWidthPercent, _dHeightPercent, _dAngle, _lpPivot, _Flip);
-	SDL_DestroyTexture(pTexture);
-}
-
-void cWindow::drawText(TTF_Font* _lpFont, const char* _lpText, SDL_Color _Color, int _iRendererIndex, int _iX, int _iY, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
-{
-	SDL_Surface* pSurface = nullptr;
-	pSurface = TTF_RenderUTF8_Solid(_lpFont, _lpText, _Color);
-	drawSurface(pSurface, _iRendererIndex, _iX, _iY, _dWidthPercent, _dHeightPercent, _dAngle, _lpPivot, _Flip);
-	SDL_FreeSurface(pSurface);
-}
-
 void cWindow::drawThread()
 {
-	std::condition_variable* lpWaiter = m_lpEngine->getDrawWaiter();
+	std::condition_variable* lpWaiter = cIECore::getDrawWaiter();
 	while(true)
 	{
 		std::mutex mtxWaiter;
@@ -206,24 +142,24 @@ void cWindow::drawThread()
 		
 		//그릴 때 까지 대기
 		lpWaiter->wait(lkWaiter, [&] {
-			return m_bIsDrawed == false || !m_lpEngine->isRunning();
+			return m_bIsDrawed == false || !cIECore::isRunning();
 		});
 
 		//엔진이 멈췄다
-		if(!m_lpEngine->isRunning())
+		if(!cIECore::isRunning())
 			return;
 
 		//창이 숨겨져있다
 		if(isWindowHide())
 		{
-			m_lpEngine->increaseDrawCompleteCount();
+			cIECore::increaseDrawCompleteCount();
 			m_bIsDrawed = true;
 			continue;
 		}
 
 		draw();
 		render();
-		m_lpEngine->increaseDrawCompleteCount();
+		cIECore::increaseDrawCompleteCount();
 		m_bIsDrawed = true;
 	}
 }

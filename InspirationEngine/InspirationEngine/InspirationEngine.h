@@ -13,8 +13,9 @@
 #include "Font.h"			//폰트 관리
 #include "Input.h"			//입력 처리
 #include "Menu.h"			//메뉴
-#include "EditBox.h"		//메뉴-에딧박스
+#include "TextBox.h"		//메뉴-텍스트박스
 #include "MouseCusor.h"		//마우스 커서
+#include "Renderer.h"		//렌더러
 #include "Window.h"			//창
 #include "File.h"			//파일
 #include "DebugInfo.h"		//디버그 정보

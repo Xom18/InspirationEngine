@@ -23,7 +23,6 @@
 
 int main(int argc, char* argv[])
 {
-	InspirationEngine Engine;
 	int iTickRate = 16;
 
 	//디버그용 창 좌표
@@ -35,7 +34,7 @@ int main(int argc, char* argv[])
 	//주 게임 창 생성
 	{
 		cMainWindow* lpMainWindow = new cMainWindow();
-		bool bSuccess = Engine.addNewWindow("Main", lpMainWindow);
+		bool bSuccess = cIECore::addNewWindow("Main", lpMainWindow);
 
 		//실패
 		if(!bSuccess)
@@ -43,10 +42,10 @@ int main(int argc, char* argv[])
 			delete lpMainWindow;
 			return __LINE__;
 		}
-		Engine.setMainWindow(lpMainWindow);
+		cIECore::setMainWindow(lpMainWindow);
 
-		lpMainWindow->createWindow(&Engine, "Inspiration", SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 0, 2);	//창 생성
-		Engine.addWindowIndex(lpMainWindow);
+		lpMainWindow->createWindow("Inspiration", SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 0, 2);	//창 생성
+		cIECore::addWindowIndex(lpMainWindow);
 
 		SDL_Window* lpSDLWindow = lpMainWindow->getSDLWindow();
 		SDL_GetWindowPosition(lpSDLWindow, &iX, &iY);
@@ -60,7 +59,8 @@ int main(int argc, char* argv[])
 	if(true)
 	{
 		cDebugWindow* lpDebugWindow = new cDebugWindow();
-		bool bSuccess = Engine.addNewWindow("Debug", lpDebugWindow);
+
+		bool bSuccess = cIECore::addNewWindow("Debug", lpDebugWindow);
 
 		//실패
 		if(!bSuccess)
@@ -69,17 +69,27 @@ int main(int argc, char* argv[])
 			return __LINE__;
 		}
 
-		lpDebugWindow->createWindow(&Engine, "Debugger", 600, 800, iX + iW, iY, 0, 2);	//창 생성
-		Engine.addWindowIndex(lpDebugWindow);
+		lpDebugWindow->createWindow("Debugger", 600, 800, iX + iW, iY, 0, 2);	//창 생성
+		cIECore::addWindowIndex(lpDebugWindow);
+
 	}
 
 	//처리 간격 설정
-	Engine.setTickRate(iTickRate);
+	cIECore::setTickRate(iTickRate);
+
+	//폰트 엔진 초기화
+	if(TTF_Init() != 0)
+		return false;
+
+	//폰트 추가
+	cIECore::m_Font.addNewFont(0, "../data/H2PORL.ttf", 20);
+
+	//디버그 창 설정
+	cDebugWindow* lpDebugWindow = dynamic_cast<cDebugWindow*>(cIECore::getWindow("Debug"));
+	lpDebugWindow->initWindow();
 
 	//엔진 시작
-	Engine.beginEngine();
-
-	SDL_StartTextInput();
+	cIECore::beginEngine();
 
 	//SDL_Rect rtInputArea;
 	//rtInputArea.x = 500;
@@ -90,16 +100,16 @@ int main(int argc, char* argv[])
 
 	//SDL_SetTextInputRect(&rtInputArea);
 	//키 입력 등은 여기서 받음
-	while (Engine.isRunning())
+	while (cIECore::isRunning())
 	{
 		SDL_Event Event;
 		if(SDL_WaitEventTimeout(&Event, iTickRate))
 		{
-			Engine.eventPushBack(&Event);
+			cIECore::eventPushBack(&Event);
 			
 			//나머지 이벤트가 있을 수 있으니 처리
 			if(SDL_PollEvent(&Event))
-				Engine.eventPushBack(&Event);
+				cIECore::eventPushBack(&Event);
 		}
 		
 	}

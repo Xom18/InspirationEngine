@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Interface">
@@ -17,11 +17,11 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Window">
+      <UniqueIdentifier>{32586c75-a05d-4581-8106-ef531362cfad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EditBox.h">
-      <Filter>Interface</Filter>
-    </ClInclude>
     <ClInclude Include="Interface.h">
       <Filter>Interface</Filter>
     </ClInclude>
@@ -34,19 +34,13 @@
     <ClInclude Include="DebugInfo.h">
       <Filter>Etc.</Filter>
     </ClInclude>
-    <ClInclude Include="InspirationEngine.h">
+    <ClInclude Include="cIECore.h">
       <Filter>Etc.</Filter>
     </ClInclude>
     <ClInclude Include="MacroDefine.h">
       <Filter>Etc.</Filter>
     </ClInclude>
-    <ClInclude Include="Window.h">
-      <Filter>Etc.</Filter>
-    </ClInclude>
     <ClInclude Include="File.h">
-      <Filter>Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Font.h">
       <Filter>Resource</Filter>
     </ClInclude>
     <ClInclude Include="Input.h">
@@ -55,19 +49,25 @@
     <ClInclude Include="MouseCusor.h">
       <Filter>MouseCursor</Filter>
     </ClInclude>
+    <ClInclude Include="TextBox.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Window.h">
+      <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Window</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core.cpp">
       <Filter>Etc.</Filter>
     </ClCompile>
-    <ClCompile Include="Window.cpp">
-      <Filter>Etc.</Filter>
-    </ClCompile>
     <ClCompile Include="DebugInfo.cpp">
       <Filter>Etc.</Filter>
-    </ClCompile>
-    <ClCompile Include="EditBox.cpp">
-      <Filter>Interface</Filter>
     </ClCompile>
     <ClCompile Include="Interface.cpp">
       <Filter>Interface</Filter>
@@ -78,17 +78,23 @@
     <ClCompile Include="File.cpp">
       <Filter>Resource</Filter>
     </ClCompile>
-    <ClCompile Include="Font.cpp">
-      <Filter>Resource</Filter>
-    </ClCompile>
     <ClCompile Include="Input.cpp">
       <Filter>Input</Filter>
     </ClCompile>
     <ClCompile Include="MouseCusor.cpp">
       <Filter>MouseCursor</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\.editorconfig" />
+    <ClCompile Include="TextBox.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="Window.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Window</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

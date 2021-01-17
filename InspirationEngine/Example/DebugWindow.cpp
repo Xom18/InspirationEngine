@@ -4,23 +4,27 @@
 void cDebugWindow::draw()
 {
 	//텍스트 출력 테스트
-	static bool onceCode = false;
-	static TTF_Font* Fontt = nullptr;
-	if(onceCode == false)
-	{
-		if(TTF_Init() != 0)
-			return;
-
-		Fontt = TTF_OpenFont("../data/arial.ttf", 20);
-		onceCode = true;
-	}
-
 	SDL_Color color;
 	memset(&color, 0xffffffff, sizeof(int));
-	drawText(Fontt, m_lpEngine->strInputtingText.c_str(), color, 0, 0, 0);
+	cRenderer* lpRenderer = getRenderer(0);
+
+	m_DebugText.draw();
 }
 
 void cDebugWindow::callXButton()
 {
 	hideWindow();
+}
+
+void cDebugWindow::initWindow()
+{
+	//텍스트 입력 테스트용
+	SDL_StartTextInput();
+
+	//임시로 포커스 가있는 텍스트박스를 디버그용 텍스트박스에 줌
+	cIECore::m_lpFocusedTextBox = &m_DebugText;
+
+	//폰트랑 렌더러 설정
+	m_DebugText.setFont(cIECore::m_Font.getFont(0));
+	m_DebugText.setRenderer(getRenderer(0));
 }

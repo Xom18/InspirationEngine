@@ -23,7 +23,8 @@
     <ClInclude Include="Interface.h" />
     <ClInclude Include="MouseCusor.h" />
     <ClInclude Include="DebugInfo.h" />
-    <ClInclude Include="EditBox.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="TextBox.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Menu.h" />
@@ -37,15 +38,13 @@
     <ClCompile Include="Interface.cpp" />
     <ClCompile Include="MouseCusor.cpp" />
     <ClCompile Include="DebugInfo.cpp" />
-    <ClCompile Include="EditBox.cpp" />
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="TextBox.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="File.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\.editorconfig" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9D10CAC6-29F4-4F09-8DF2-BF7B37530E37}</ProjectGuid>
