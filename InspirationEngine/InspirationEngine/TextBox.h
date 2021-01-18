@@ -69,40 +69,142 @@ public:
 		return m_strText.c_str();
 	}
 
-	//맨 마지막 텍스트 지우기
-	void popBack()
+	/// <summary>
+	///	커서 위치 받아오기
+	/// </summary>
+	int getCusorPos()
 	{
-		if(m_strText.length() == 0)
+		return m_iCursorPos;
+	}
+
+	/// <summary>
+	/// 커서 위치 설정
+	/// </summary>
+	/// <param name="_iCusorPos">커서 위치(메모리 상에서)</param>
+	bool setCusorPos(int _iCusorPos)
+	{
+		m_iCursorPos = m_iCursorPos;
+	}
+
+	/// <summary>
+	/// 커서 위치 설정
+	/// </summary>
+	/// <param name="_iCusorPos">커서 위치(문자 상에서)</param>
+	/// <returns></returns>
+	void setCusorCharPos(int _iCusorPos)
+	{
+		m_iCursorPos = cStrUTF8::getMemoryPoint(&m_strText, _iCusorPos);
+	}
+
+	/// <summary>
+	/// 커서 다음으로 이동
+	/// </summary>
+	void cusorMoveNext()
+	{
+		//유효하지가 않아
+		if(m_iCursorPos == -1)
+		{
+			m_iCursorPos = 0;
+			return;
+		}
+		
+		//이미 끝이야
+		if(m_iCursorPos >= m_strText.length())
 			return;
 
-		const char* lpText = m_strText.c_str();
-		int iLength = static_cast<int>(m_strText.length());
-
-		if((lpText[iLength - 1] & 0b10000000) == 0)
-		{//아스키쪽이면 단순히 마지막 제거
-			m_strText.pop_back();
+		//아스키면 바로 다음으로
+		const char* csText = m_strText.c_str();
+		if(cStrUTF8::isCharType(csText[m_iCursorPos]) == dCHAR_TYPE_ASCII)
+		{
+			++m_iCursorPos;
+			return;
 		}
-		else
-		{//UTF-8이다
-			//몇개 지워야되는지 체크
-			int iDeleteCount = 0;
-			for(int i = iLength - 1; i >= 0; --i)
-			{
-				++iDeleteCount;
-				if((lpText[i] & 0b11000000) == 0b11000000)
-					break;
-			}
 
-			//지워야되는 만큼 삭제
-			m_strText.erase(static_cast<size_t>(iLength) - iDeleteCount);
+		//UTF-8이다
+		int iNewPos = m_iCursorPos + 1;
+		for(; iNewPos < m_strText.length(); ++iNewPos)
+		{
+			if(cStrUTF8::isCharType(csText[iNewPos]) != dCHAR_TYPE_UTF8_M)
+				break;
 		}
+		m_iCursorPos = iNewPos;
+	}
+
+	/// <summary>
+	/// 커서 이전으로 이동
+	/// </summary>
+	void cusorMovePrevious()
+	{
+		//0보다 작을 수 없다
+		if(m_iCursorPos <= 0)
+		{
+			m_iCursorPos = 0;
+			return;
+		}
+
+		//이 앞에가 아스키면 바로 다음으로
+		const char* csText = m_strText.c_str();
+		if(cStrUTF8::isCharType(csText[m_iCursorPos - 1]) == dCHAR_TYPE_ASCII)
+		{
+			--m_iCursorPos;
+			return;
+		}
+
+		//UTF-8이다
+		int iNewPos = m_iCursorPos - 1;
+		for(; iNewPos >= 0; --iNewPos)
+		{
+			if(cStrUTF8::isCharType(csText[iNewPos]) == dCHAR_TYPE_UTF8_B)
+				break;
+		}
+		m_iCursorPos = iNewPos;
+	}
+
+	/// <summary>
+	/// _iPoint로 부터 앞에있는 문자 _iCount개 삭제
+	/// </summary>
+	/// <param name="_iPoint">포인트(메모리상에서의 위치일수도 있고 문자에서의 위치일수도 있고)</param>
+	/// <param name="_iCount">지울 개수</param>
+	/// <param name="_bIsMemPoint">_iPoint가 메모리상에서의 위치인지</param>
+	void removeByBackspace(int _iCount = 1)
+	{
+		if(m_iCursorPos <= 0)
+			return;
+		int iBefore = static_cast<int>(m_strText.length());
+		cStrUTF8::removeToFront(&m_strText, m_iCursorPos, _iCount);
+		int iAfter = static_cast<int>(m_strText.length());
+
+		m_iCursorPos -= iBefore - iAfter;
 		m_bTextChanged = true;
 	}
 
-	//맨 마지막에 텍스트 추가
-	void pushBack(const char* _csText)
+	/// <summary>
+	/// _iPoint로 부터 뒤에있는 문자 _iCount개 삭제
+	/// </summary>
+	/// <param name="_iPoint">포인트(메모리상에서의 위치일수도 있고 문자에서의 위치일수도 있고)</param>
+	/// <param name="_iCount">지울 개수</param>
+	/// <param name="_bIsMemPoint">_iPoint가 메모리상에서의 위치인지</param>
+	void removeByDelete(int _iCount = 1)
 	{
-		m_strText += _csText;
+		cStrUTF8::removeToBack(&m_strText, m_iCursorPos, _iCount);
+		m_bTextChanged = true;
+	}
+
+	/// <summary>
+	/// 문자 추가
+	/// </summary>
+	/// <param name="_csText">문자 위치</param>
+	/// <param name="_iInsertPoint">문자 넣을 위치</param>
+	void insert(const char* _csText, int _iInsertPoint)
+	{
+
+	}
+
+	void insertCusorPos(const char* _csText)
+	{
+		int iCount = static_cast<int>(std::strlen(_csText));
+		m_strText.insert(m_iCursorPos, _csText);
+		m_iCursorPos += iCount;
 		m_bTextChanged = true;
 	}
 

@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core.h" />
+    <ClInclude Include="StrUTF8.h" />
     <ClInclude Include="Interface.h" />
     <ClInclude Include="MouseCusor.h" />
     <ClInclude Include="DebugInfo.h" />
@@ -35,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core.cpp" />
+    <ClCompile Include="StrUTF8.cpp" />
     <ClCompile Include="Interface.cpp" />
     <ClCompile Include="MouseCusor.cpp" />
     <ClCompile Include="DebugInfo.cpp" />

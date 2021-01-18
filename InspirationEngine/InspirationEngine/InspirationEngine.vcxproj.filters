@@ -34,9 +34,6 @@
     <ClInclude Include="DebugInfo.h">
       <Filter>Etc.</Filter>
     </ClInclude>
-    <ClInclude Include="cIECore.h">
-      <Filter>Etc.</Filter>
-    </ClInclude>
     <ClInclude Include="MacroDefine.h">
       <Filter>Etc.</Filter>
     </ClInclude>
@@ -60,6 +57,10 @@
     </ClInclude>
     <ClInclude Include="Renderer.h">
       <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="InspirationEngine.h" />
+    <ClInclude Include="StrUTF8.h">
+      <Filter>Etc.</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -95,6 +96,9 @@
     </ClCompile>
     <ClCompile Include="Renderer.cpp">
       <Filter>Window</Filter>
+    </ClCompile>
+    <ClCompile Include="StrUTF8.cpp">
+      <Filter>Etc.</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

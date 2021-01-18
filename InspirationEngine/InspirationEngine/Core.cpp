@@ -198,12 +198,23 @@ void cIECore::operateTextEdit(SDL_Event* _lpEvent)
 	switch(_lpEvent->type)
 	{
 		case SDL_EventType::SDL_KEYDOWN:
-		{//텍스트 지우기
-			if(_lpEvent->key.keysym.sym == SDLK_BACKSPACE
-			&& m_lpFocusedTextBox->getTextLength() > 0
-			&& m_Input.isIMEUsing() != true)
+		{
+			if(m_Input.isIMEUsing() != true)
 			{
-				m_lpFocusedTextBox->popBack();
+				//텍스트 지우기
+				if(_lpEvent->key.keysym.sym == SDLK_BACKSPACE
+				&& m_lpFocusedTextBox->getTextLength() > 0)
+					m_lpFocusedTextBox->removeByBackspace();
+
+				if(_lpEvent->key.keysym.sym == SDLK_DELETE
+				&& m_lpFocusedTextBox->getTextLength() > 0)
+					m_lpFocusedTextBox->removeByDelete();
+
+				//커서 좌우로 이동
+				if(_lpEvent->key.keysym.sym == SDLK_RIGHT)
+					m_lpFocusedTextBox->cusorMoveNext();
+				if(_lpEvent->key.keysym.sym == SDLK_LEFT)
+					m_lpFocusedTextBox->cusorMovePrevious();
 			}
 		}
 		break;
@@ -212,22 +223,23 @@ void cIECore::operateTextEdit(SDL_Event* _lpEvent)
 			if(strlen(_lpEvent->text.text) == 0)
 			{
 				if(m_Input.isIMEUsing())
-					m_lpFocusedTextBox->popBack();
+					m_lpFocusedTextBox->removeByBackspace();
 				m_Input.setIMEState(false);
 				break;
 			}
 			if(m_Input.isIMEUsing())
-				m_lpFocusedTextBox->popBack();
-			m_lpFocusedTextBox->pushBack(_lpEvent->text.text);
+				m_lpFocusedTextBox->removeByBackspace();
+			m_lpFocusedTextBox->insertCusorPos(_lpEvent->text.text);
 			m_Input.setIMEState(true);
 		}
 		break;
 		case SDL_EventType::SDL_TEXTINPUT:
 		{//입력
 			if(m_Input.isIMEUsing())
-				m_lpFocusedTextBox->popBack();
+				m_lpFocusedTextBox->removeByBackspace();
 			m_Input.setIMEState(false);
-			m_lpFocusedTextBox->pushBack(_lpEvent->text.text);
+
+			m_lpFocusedTextBox->insertCusorPos(_lpEvent->text.text);
 		}
 		break;
 	}

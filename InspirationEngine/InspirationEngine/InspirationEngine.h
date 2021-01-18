@@ -3,12 +3,14 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_TTF.h>
+#include <algorithm>
 #include <thread>
 #include <vector>
 #include <string>
 #include <map>
 #include <deque>
 #include <mutex>
+#include "StrUTF8.h"
 #include "MacroDefine.h"	//매크로 / Define용 헤더
 #include "Font.h"			//폰트 관리
 #include "Input.h"			//입력 처리
