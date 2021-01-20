@@ -215,6 +215,11 @@ void cIECore::operateTextEdit(SDL_Event* _lpEvent)
 					m_lpFocusedTextBox->cusorMoveNext();
 				if(_lpEvent->key.keysym.sym == SDLK_LEFT)
 					m_lpFocusedTextBox->cusorMovePrevious();
+
+				//엔터
+				if(_lpEvent->key.keysym.sym == SDLK_RETURN
+				|| _lpEvent->key.keysym.sym == SDLK_KP_ENTER)
+					m_lpFocusedTextBox->insertCusorPos("\n");
 			}
 		}
 		break;
