@@ -45,54 +45,61 @@ void cStrUTF8::pop_front(std::string* _lpString)
 	else
 	{//UTF-8이다
 		//몇개 지워야되는지 체크
-		int iDeleteCount = 1;
-		for(int i = 1; i < iLength; ++i)
+		size_t szDeleteCount = 1;
+		for(size_t i = 1; i < iLength; ++i)
 		{
 			if((lpText[i] & 0b11000000) == 0b11000000)
 				break;
-			++iDeleteCount;
+			++szDeleteCount;
 		}
 
 		//지워야되는 만큼 삭제
-		_lpString->erase(0, static_cast<size_t>(iDeleteCount));
+		_lpString->erase(0, static_cast<size_t>(szDeleteCount));
 	}
 }
 
-int cStrUTF8::getMemoryPoint(std::string* _lpString, int _iPoint)
+size_t cStrUTF8::getMemoryPoint(std::string* _lpString, size_t _szPoint)
 {
-	size_t iLength = _lpString->length();
+	size_t szLength = _lpString->length();
 	const char* lpText = _lpString->c_str();
 
-	int iCharPoint = 0;
-	for(; iCharPoint < iLength && 0 < _iPoint; ++iCharPoint)
+	size_t szCharPoint = 0;
+	for(; szCharPoint < szLength && 0 < _szPoint; ++szCharPoint)
 	{
 		//단일 아스키문자
-		if((lpText[iCharPoint] & 0b10000000) == 0)
+		if((lpText[szCharPoint] & 0b10000000) == 0)
 		{
-			--_iPoint;
+			--_szPoint;
 		}
 		//UTF-8 문자
-		else if((lpText[iCharPoint] & 0b11000000) == 0b11000000)
+		else if((lpText[szCharPoint] & 0b11000000) == 0b11000000)
 		{
-			--_iPoint;
+			--_szPoint;
 
 			//UTF-8 끝까지 달린다
-			while(iCharPoint < iLength)
+			while(szCharPoint < szLength)
 			{
-				++iCharPoint;
-				if((lpText[iCharPoint + 1] & 0b11000000) == 0b11000000
-				|| (lpText[iCharPoint + 1] & 0b10000000) == 0)
+				++szCharPoint;
+				if((lpText[szCharPoint + 1] & 0b11000000) == 0b11000000
+				|| (lpText[szCharPoint + 1] & 0b10000000) == 0)
 					break;
 			}
 		}
 	}
 
+	//길이초과했던거네
+	if(szCharPoint == szLength)
+		return std::string::npos;
 
-	return iCharPoint;
+	return szCharPoint;
 }
 
-void cStrUTF8::removeToFront(std::string* _lpString, int _iPoint, int _iCount)
+void cStrUTF8::removeToFront(std::string* _lpString, size_t _szPoint, size_t _szCount)
 {
+	//제일 앞에있어서 지울게 없다
+	if(_szPoint == 0)
+		return;
+
 	size_t iLength = _lpString->length();
 	if(iLength == 0)
 		return;
@@ -100,28 +107,27 @@ void cStrUTF8::removeToFront(std::string* _lpString, int _iPoint, int _iCount)
 	const char* lpText = _lpString->c_str();
 
 	//이 앞에문자를 삭제할꺼기때문에 -1빼고 시작
-	int i = _iPoint - 1;
-	int iDelCounter = _iCount;
-	for(; i >= 0; --i)
+	size_t i = _szPoint - 1;
+	size_t szDelCounter = _szCount;
+	for(; i > 0; --i)
 	{
 		//단일 아스키문자
 		if((lpText[i] & 0b10000000) == 0)
-			--iDelCounter;
+			--szDelCounter;
 		//UTF-8 문자
 		else if((lpText[i] & 0b11000000) == 0b11000000)
-			--iDelCounter;
+			--szDelCounter;
 
 		//처리가 끝났소
-		if(iDelCounter <= 0)
+		if(szDelCounter <= 0)
 			break;
 	}
-	i = std::max(0, i);
 
-	int iEreaseRange = _iPoint - i;
-	_lpString->erase(i, iEreaseRange);
+	size_t szEreaseRange = _szPoint - i;
+	_lpString->erase(i, szEreaseRange);
 }
 
-void cStrUTF8::removeToBack(std::string* _lpString, int _iPoint, int _iCount)
+void cStrUTF8::removeToBack(std::string* _lpString, size_t _szPoint, size_t _szCount)
 {
 	size_t iLength = _lpString->length();
 	if(iLength == 0)
@@ -129,17 +135,17 @@ void cStrUTF8::removeToBack(std::string* _lpString, int _iPoint, int _iCount)
 
 	const char* lpText = _lpString->c_str();
 
-	int i = _iPoint;
-	int iDelCounter = _iCount;
-	for(; i < iLength && iDelCounter > 0; ++i)
+	size_t i = _szPoint;
+	size_t szDelCounter = _szCount;
+	for(; i < iLength && szDelCounter > 0; ++i)
 	{
 		//단일 아스키문자
 		if((lpText[i] & 0b10000000) == 0)
-			--iDelCounter;
+			--szDelCounter;
 		//UTF-8 문자
 		else if((lpText[i] & 0b11000000) == 0b11000000)
 		{
-			--iDelCounter;
+			--szDelCounter;
 			//UTF-8 끝까지 달린다
 			while(i < iLength)
 			{
@@ -151,6 +157,6 @@ void cStrUTF8::removeToBack(std::string* _lpString, int _iPoint, int _iCount)
 		}
 	}
 
-	int iEreaseRange = i - _iPoint;
-	_lpString->erase(_iPoint, iEreaseRange);
+	size_t iEreaseRange = i - _szPoint;
+	_lpString->erase(_szPoint, iEreaseRange);
 }

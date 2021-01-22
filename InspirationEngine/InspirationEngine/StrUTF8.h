@@ -27,7 +27,7 @@ public:
 	/// <param name="_iPoint">제거 시작 위치</param>
 	/// <param name="_iCount">지울 개수</param>
 	/// <param name="_bIsMemPoint">_iPoint가 메모리상에서의 위치인지</param>
-	static void removeToFront(std::string* _lpString, int _iPoint, int _iCount = 1);
+	static void removeToFront(std::string* _lpString, size_t _szPoint, size_t _szCount = 1);
 
 	/// <summary>
 	/// _iPoint로 부터 뒤에있는 문자 _iCount개 삭제
@@ -36,14 +36,14 @@ public:
 	/// <param name="_iPoint">제거 시작 위치</param>
 	/// <param name="_iCount">지울 개수</param>
 	/// <param name="_bIsMemPoint">_iPoint가 메모리상에서의 위치인지</param>
-	static void removeToBack(std::string* _lpString, int _iPoint, int _iCount = 1);
+	static void removeToBack(std::string* _lpString, size_t _szPoint, size_t _szCount = 1);
 
 	/// <summary>
 	/// 메모리상에서의 문자 위치 받아오기
 	/// </summary>
 	/// <param name="_lpString">대상 문자열</param>
 	/// <param name="_iPoint">UTF-8에서의 문자 위치</param>
-	static int getMemoryPoint(std::string* _lpString, int _iPoint);
+	static size_t getMemoryPoint(std::string* _lpString, size_t _szPoint);
 
 	/// <summary>
 	/// 해당 문자가 ascii인지 utf-8앞인지 utf-8 중간인지 확인해줌

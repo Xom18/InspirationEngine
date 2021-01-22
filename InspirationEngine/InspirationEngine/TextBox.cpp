@@ -52,33 +52,83 @@ void cTextBox::transToTexture()
 			//너비가 설정되있는 한계를 초과
 			if(iTextWidth > m_rtRect.w)
 			{
-				bool bIsSpaceCut = m_iTextBoxStyle & dTEXT_BOX_AUTO_SPACE_NEXTLINE ? true : false;
+				bool bIsSpaceCut = true;
+				bool bIsCorrectSpace = false;
 
+				std::string strResultText;
 				//너비에 맞게 줄여나감
-				while(m_rtRect.w < iTextWidth)
+				while(strTargetText.length())
 				{
 					if(bIsSpaceCut)
 					{
-						size_t szCutLine = strTargetText.find_last_of(" ");
+						size_t szSpacePos = strTargetText.find_first_of(" ");
 
-						//아 스페이스바로 안잘리네 스페이스바로 자르는건 포기한다
-						if(szCutLine == std::string::npos)
+						//스페이스바로 안잘린다 스페이스바로 자르는건 포기한다
+						if(szSpacePos == std::string::npos)
 						{
+							//스페이스바 단위로 끊어주는건대 스페이스바를 본적이 있다
+							if((m_iTextBoxStyle & dTEXT_BOX_AUTO_SPACE_NEXTLINE) && bIsCorrectSpace)
+								break;
+
 							bIsSpaceCut = false;
 							continue;
 						}
 
-						//스페이스바 단위로 끊어서본다
-						strTargetText.erase(szCutLine);
+						//제일 뒤쪽에 스페이스바 앞쪽 문자를 이어붙여줌
+						size_t szResultLength = strResultText.length();
+						strResultText.append(strTargetText, 0, szSpacePos);
+
+						int iTempWidth = 0;
+						int iTempHeight = 0;
+						TTF_SizeUTF8(m_lpFont, strResultText.c_str(), &iTempWidth, &iTempHeight);
+
+						//스페이스바까지 잘랐는대 너비가 초과다
+						if(iTempWidth > m_rtRect.w)
+						{
+							//넣은건 취소해준다
+							strResultText.erase(szResultLength);
+
+							//스페이스바 단위로 끊어주는건대 스페이스바를 본적이 있다
+							if((m_iTextBoxStyle & dTEXT_BOX_AUTO_SPACE_NEXTLINE) && bIsCorrectSpace)
+								break;
+
+							//스페이스바를 본적이 없다. 얘는 한정된 너비 안에 스페이스바가 없는 경우다
+							//또는 스페이스바 단위로 안끊는애다
+							bIsSpaceCut = false;
+							continue;
+						}
+
+						//앞에 문자 지우기(스페이스바도 같이 지움)
+						strTargetText.erase(0, szSpacePos + 1);
+
+						//스페이스바 찾은거 체크
+						bIsCorrectSpace = true;
 					}
 					else
 					{
-						cStrUTF8::pop_back(&strTargetText);
-					}
-					TTF_SizeUTF8(m_lpFont, strTargetText.c_str(), &iTextWidth, &iTextHeight);
-				}
+						//제일 앞에문자를 제일 뒤에다 이어붙인다
+						size_t szSecondPos = cStrUTF8::getMemoryPoint(&strTargetText, 1);
+						size_t szResultLength = strResultText.length();
+						strResultText.append(strTargetText, 0, szSecondPos);
 
-				//뭐야 텍스트를 띄울 공간도 없나
+						int iTempWidth = 0;
+						int iTempHeight = 0;
+						TTF_SizeUTF8(m_lpFont, strResultText.c_str(), &iTempWidth, &iTempHeight);
+
+						//너비 재봤더니 초과했다 넣은건 취소하고 중단
+						if(iTempWidth > m_rtRect.w)
+						{
+							strResultText.erase(szResultLength);
+							break;
+						}
+
+						//앞에 문자 지우기
+						strTargetText.erase(0, szSecondPos);
+					}
+				}
+				strTargetText = strResultText;
+
+				//텍스트를 띄울 공간도 없다
 				if(strTargetText.length() == 0)
 					break;
 

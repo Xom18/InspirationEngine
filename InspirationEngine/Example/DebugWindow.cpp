@@ -29,4 +29,5 @@ void cDebugWindow::initWindow()
 	m_DebugText.setRenderer(getRenderer(0));
 	m_DebugText.setRect(0, 0, getWidth(), getHeight());
 	m_DebugText.setStyle(dTEXT_BOX_AUTO_SPACE_NEXTLINE);
+	m_DebugText.setCusorPos(0);
 }

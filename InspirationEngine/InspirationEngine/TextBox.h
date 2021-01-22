@@ -51,7 +51,7 @@ private:
 	SDL_Color m_Color;				//컬러
 	int m_iTextLeading = 0;			//행간
 	int m_iFontHeight = 0;			//폰트 높이
-	int m_iCursorPos = 0;			//커서 위치
+	size_t m_szCursorPos = std::string::npos;//커서 위치
 	int m_iSelectBegPos = 0;		//선택 시작영역
 	int m_iSelectEndPos = 0;		//선택 종료영역
 	int m_iTextBoxStyle = 0;		//텍스트 박스 스타일
@@ -118,18 +118,18 @@ public:
 	/// <summary>
 	///	커서 위치 받아오기
 	/// </summary>
-	int getCusorPos()
+	size_t getCusorPos()
 	{
-		return m_iCursorPos;
+		return m_szCursorPos;
 	}
 
 	/// <summary>
 	/// 커서 위치 설정
 	/// </summary>
 	/// <param name="_iCusorPos">커서 위치(메모리 상에서)</param>
-	bool setCusorPos(int _iCusorPos)
+	void setCusorPos(size_t _szCusorPos)
 	{
-		m_iCursorPos = m_iCursorPos;
+		m_szCursorPos = _szCusorPos;
 	}
 
 	/// <summary>
@@ -137,9 +137,9 @@ public:
 	/// </summary>
 	/// <param name="_iCusorPos">커서 위치(문자 상에서)</param>
 	/// <returns></returns>
-	void setCusorCharPos(int _iCusorPos)
+	void setCusorCharPos(size_t _szCusorPos)
 	{
-		m_iCursorPos = cStrUTF8::getMemoryPoint(&m_strText, _iCusorPos);
+		m_szCursorPos = cStrUTF8::getMemoryPoint(&m_strText, _szCusorPos);
 	}
 
 	/// <summary>
@@ -148,32 +148,32 @@ public:
 	void cusorMoveNext()
 	{
 		//유효하지가 않아
-		if(m_iCursorPos == -1)
+		if(m_szCursorPos == std::string::npos)
 		{
-			m_iCursorPos = 0;
+			m_szCursorPos = 0;
 			return;
 		}
 		
 		//이미 끝이야
-		if(m_iCursorPos >= m_strText.length())
+		if(m_szCursorPos >= m_strText.length())
 			return;
 
 		//아스키면 바로 다음으로
 		const char* csText = m_strText.c_str();
-		if(cStrUTF8::isCharType(csText[m_iCursorPos]) == dCHAR_TYPE_ASCII)
+		if(cStrUTF8::isCharType(csText[m_szCursorPos]) == dCHAR_TYPE_ASCII)
 		{
-			++m_iCursorPos;
+			++m_szCursorPos;
 			return;
 		}
 
 		//UTF-8이다
-		int iNewPos = m_iCursorPos + 1;
-		for(; iNewPos < m_strText.length(); ++iNewPos)
+		size_t szNewPos = m_szCursorPos + 1;
+		for(; szNewPos < m_strText.length(); ++szNewPos)
 		{
-			if(cStrUTF8::isCharType(csText[iNewPos]) != dCHAR_TYPE_UTF8_M)
+			if(cStrUTF8::isCharType(csText[szNewPos]) != dCHAR_TYPE_UTF8_M)
 				break;
 		}
-		m_iCursorPos = iNewPos;
+		m_szCursorPos = szNewPos;
 	}
 
 	/// <summary>
@@ -181,29 +181,33 @@ public:
 	/// </summary>
 	void cusorMovePrevious()
 	{
-		//0보다 작을 수 없다
-		if(m_iCursorPos <= 0)
+		//커서가 비활성이다
+		if(m_szCursorPos == std::string::npos)
 		{
-			m_iCursorPos = 0;
+			m_szCursorPos = 0;
 			return;
 		}
 
+		//이미 제일 앞이다
+		if(m_szCursorPos == 0)
+			return;
+
 		//이 앞에가 아스키면 바로 다음으로
 		const char* csText = m_strText.c_str();
-		if(cStrUTF8::isCharType(csText[m_iCursorPos - 1]) == dCHAR_TYPE_ASCII)
+		if(cStrUTF8::isCharType(csText[m_szCursorPos - 1]) == dCHAR_TYPE_ASCII)
 		{
-			--m_iCursorPos;
+			--m_szCursorPos;
 			return;
 		}
 
 		//UTF-8이다
-		int iNewPos = m_iCursorPos - 1;
-		for(; iNewPos >= 0; --iNewPos)
+		size_t szNewPos = m_szCursorPos - 1;
+		for(; szNewPos > 0; --szNewPos)
 		{
-			if(cStrUTF8::isCharType(csText[iNewPos]) == dCHAR_TYPE_UTF8_B)
+			if(cStrUTF8::isCharType(csText[szNewPos]) == dCHAR_TYPE_UTF8_B)
 				break;
 		}
-		m_iCursorPos = iNewPos;
+		m_szCursorPos = szNewPos;
 	}
 
 	/// <summary>
@@ -212,15 +216,16 @@ public:
 	/// <param name="_iPoint">포인트(메모리상에서의 위치일수도 있고 문자에서의 위치일수도 있고)</param>
 	/// <param name="_iCount">지울 개수</param>
 	/// <param name="_bIsMemPoint">_iPoint가 메모리상에서의 위치인지</param>
-	void removeByBackspace(int _iCount = 1)
+	void removeByBackspace(size_t _szCount = 1)
 	{
-		if(m_iCursorPos <= 0)
+		//커서가 없다
+		if(m_szCursorPos == std::string::npos)
 			return;
-		int iBefore = static_cast<int>(m_strText.length());
-		cStrUTF8::removeToFront(&m_strText, m_iCursorPos, _iCount);
-		int iAfter = static_cast<int>(m_strText.length());
+		size_t szBefore = m_strText.length();
+		cStrUTF8::removeToFront(&m_strText, m_szCursorPos, _szCount);
+		size_t szAfter = m_strText.length();
 
-		m_iCursorPos -= iBefore - iAfter;
+		m_szCursorPos -= szBefore - szAfter;
 		m_bTextChanged = true;
 	}
 
@@ -230,9 +235,9 @@ public:
 	/// <param name="_iPoint">포인트(메모리상에서의 위치일수도 있고 문자에서의 위치일수도 있고)</param>
 	/// <param name="_iCount">지울 개수</param>
 	/// <param name="_bIsMemPoint">_iPoint가 메모리상에서의 위치인지</param>
-	void removeByDelete(int _iCount = 1)
+	void removeByDelete(size_t _szCount = 1)
 	{
-		cStrUTF8::removeToBack(&m_strText, m_iCursorPos, _iCount);
+		cStrUTF8::removeToBack(&m_strText, m_szCursorPos, _szCount);
 		m_bTextChanged = true;
 	}
 
@@ -248,9 +253,11 @@ public:
 
 	void insertCusorPos(const char* _csText)
 	{
-		int iCount = static_cast<int>(std::strlen(_csText));
-		m_strText.insert(m_iCursorPos, _csText);
-		m_iCursorPos += iCount;
+		//커서가 없다
+		if(m_szCursorPos == std::string::npos)
+			return;
+		m_strText.insert(m_szCursorPos, _csText);
+		m_szCursorPos += std::strlen(_csText);
 		m_bTextChanged = true;
 	}
 
