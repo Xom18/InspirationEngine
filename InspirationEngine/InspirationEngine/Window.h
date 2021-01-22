@@ -212,6 +212,16 @@ public:
 		return Pos;
 	}
 
+	int getWidth()
+	{
+		return m_iWidth;
+	}
+
+	int getHeight()
+	{
+		return m_iHeight;
+	}
+
 private:
 
 	/// <summary>

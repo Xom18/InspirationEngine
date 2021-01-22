@@ -27,4 +27,6 @@ void cDebugWindow::initWindow()
 	//폰트랑 렌더러 설정
 	m_DebugText.setFont(cIECore::m_Font.getFont(0));
 	m_DebugText.setRenderer(getRenderer(0));
+	m_DebugText.setRect(0, 0, getWidth(), getHeight());
+	m_DebugText.setStyle(dTEXT_BOX_AUTO_SPACE_NEXTLINE);
 }

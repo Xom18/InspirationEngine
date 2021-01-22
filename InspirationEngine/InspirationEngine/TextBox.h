@@ -4,7 +4,8 @@
 #define dTEXT_BOX_STYLE_SELECTABLE		0x0002	//선택가능(드래그 포함)
 #define dTEXT_BOX_STYLE_MULTILINE		0x0004	//여러줄 가능
 #define dTEXT_BOX_STYLE_ENTER_TO_END	0x0008	//엔터 치면 종료(이경우엔 쉬프트 누르고 엔터 쳐야 개행)
-#define dTEXT_BOX_AUTO_PRETTY_NEXTLINE	0x0010	//너비꽉차면 스페이스바 맞춰서 이쁘게 줄바꿈(안되있을 때 여러줄 가능이면 그냥 마지막 문자에 내려감)
+#define dTEXT_BOX_AUTO_NEXTLINE			0x0010	//너비꽉차면 알아서 줄바꿔 출력
+#define dTEXT_BOX_AUTO_SPACE_NEXTLINE	0x0030	//너비꽉차면 스페이스바 맞춰서 이쁘게 줄바꿔 출력
 
 #define dTEXT_BOX_ALIGN_LEFT	0x01	//왼쪽
 #define dTEXT_BOX_ALIGN_CENTER	0x02	//중앙
@@ -49,11 +50,13 @@ private:
 	std::string m_strText;			//원본 텍스트
 	SDL_Color m_Color;				//컬러
 	int m_iTextLeading = 0;			//행간
+	int m_iFontHeight = 0;			//폰트 높이
 	int m_iCursorPos = 0;			//커서 위치
 	int m_iSelectBegPos = 0;		//선택 시작영역
 	int m_iSelectEndPos = 0;		//선택 종료영역
 	int m_iTextBoxStyle = 0;		//텍스트 박스 스타일
 	int m_iTextAlign = 0;			//텍스트 정렬
+	SDL_Rect m_rtRect;
 	bool m_bTextChanged = false;	//텍스트가 바뀜
 	size_t m_szDrawHash = 0;		//이전에 그렸는지 확인을 위한 해시
 
@@ -61,6 +64,7 @@ public:
 	cTextBox()
 	{
 		memset(&m_Color, 0xff, sizeof(m_Color));
+		memset(&m_rtRect, 0, sizeof(m_rtRect));
 	}
 
 	~cTextBox()
@@ -93,6 +97,8 @@ public:
 	void setFont(TTF_Font* _lpFont)
 	{
 		m_lpFont = _lpFont;
+
+		m_iFontHeight = TTF_FontHeight(m_lpFont);
 	}
 
 	void setText(const char* _csText)
@@ -246,6 +252,25 @@ public:
 		m_strText.insert(m_iCursorPos, _csText);
 		m_iCursorPos += iCount;
 		m_bTextChanged = true;
+	}
+
+	void setPos(int _iX, int _iY)
+	{
+		m_rtRect.x = _iX;
+		m_rtRect.y = _iY;
+	}
+
+	void setRect(int _iX, int _iY, int _iW = 0, int _iH = 0)
+	{
+		m_rtRect.x = _iX;
+		m_rtRect.y = _iY;
+		m_rtRect.w = _iW;
+		m_rtRect.h = _iH;
+	}
+
+	void setStyle(int _iStyle)
+	{
+		m_iTextBoxStyle = _iStyle;
 	}
 
 private:
