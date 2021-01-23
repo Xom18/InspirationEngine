@@ -37,19 +37,128 @@ void cTextBox::transToTexture()
 		return;
 
 	size_t szBegPoint = 0;
-	size_t szEndPoint = 0;
 
 	int iXOffset = 0;
 	int iYOffset = 0;
 	//텍스트를 기반으로 텍스쳐화
-	while(true)
+	while(szTextLength > szBegPoint)
 	{
-		szEndPoint = m_strText.find("\n", szBegPoint);
+		size_t szEndPoint = szTextLength;
+		//엔터를 통해 개행이 처리되었는지
+		bool bIsEnterLine = false;
+		int iNextOffset = 0;//부호 오프셋
+
+		{
+			//특수 문자 처리(개행, 스타일, 컬러)
+			size_t szEnterPoint = m_strText.find("\n", szBegPoint);
+			if(szEnterPoint != std::string::npos)
+			{
+				bIsEnterLine = true;
+				iNextOffset = 1;
+				szEndPoint = szEnterPoint;
+			}
+		}
+		
+		{
+			//스타일 코드 처리
+			size_t szCodeBegPoint = m_strText.find("<s:", szBegPoint);
+			if(szCodeBegPoint == szBegPoint)
+			{
+				size_t szCodeEndPoint = m_strText.find(">", szBegPoint);
+				//코드 시작인대 끝을 못찾겠다고 함
+				if(szCodeEndPoint == std::string::npos)
+					break;
+
+				++szCodeEndPoint;
+				std::string strStyleCode;
+				strStyleCode.append(m_strText, szCodeBegPoint, szCodeEndPoint - szCodeBegPoint);
+				int iStyle = TTF_STYLE_NORMAL;
+				if(!operateStyleCode(&strStyleCode, &iStyle))
+					break;
+				stkFont.push(m_lpFont->get(iStyle));
+
+				szBegPoint = szCodeEndPoint;
+				continue;
+			}
+
+			if(szCodeBegPoint < szEndPoint)
+			{
+				bIsEnterLine = false;
+				szEndPoint = szCodeBegPoint;
+			}
+		}
+
+		{
+			//스타일 종료 코드 처리
+			const char* c_csCloseCode = "</s>";
+			size_t szClosePoint = m_strText.find(c_csCloseCode, szBegPoint);
+			if(szClosePoint == szBegPoint)
+			{
+				if(stkFont.size() > 1)
+					stkFont.pop();
+
+				szBegPoint += std::strlen(c_csCloseCode);
+				continue;
+			}
+
+			if(szClosePoint < szEndPoint)
+			{
+				bIsEnterLine = false;
+				szEndPoint = szClosePoint;
+			}
+		}
+
+		{
+			//컬러 코드 처리
+			size_t szCodeBegPoint = m_strText.find("<c:", szBegPoint);
+			if(szCodeBegPoint == szBegPoint)
+			{
+				size_t szCodeEndPoint = m_strText.find(">", szBegPoint);
+				//코드 시작인대 끝을 못찾겠다고 함
+				if(szCodeEndPoint == std::string::npos)
+					break;
+
+				++szCodeEndPoint;
+				std::string strStyleCode;
+				strStyleCode.append(m_strText, szCodeBegPoint, szCodeEndPoint - szCodeBegPoint);
+				SDL_Color FontColor;
+				if(!operateColorCode(&strStyleCode, &FontColor))
+					break;
+				stkColor.push(FontColor);
+
+				szBegPoint = szCodeEndPoint;
+				continue;
+			}
+
+			if(szCodeBegPoint < szEndPoint)
+			{
+				bIsEnterLine = false;
+				szEndPoint = szCodeBegPoint;
+			}
+		}
+
+		{
+			//컬러 종료 코드 처리
+			const char* c_csCloseCode = "</c>";
+			size_t szClosePoint = m_strText.find(c_csCloseCode, szBegPoint);
+			if(szClosePoint == szBegPoint)
+			{
+				if(stkColor.size() > 1)
+					stkColor.pop();
+
+				szBegPoint += std::strlen(c_csCloseCode);
+				continue;
+			}
+
+			if(szClosePoint < szEndPoint)
+			{
+				bIsEnterLine = false;
+				szEndPoint = szClosePoint;
+			}
+		}
+
 		std::string strTargetText;
 		strTargetText.append(m_strText, szBegPoint, szEndPoint - szBegPoint);
-
-		int iNextOffset = 1;//부호 오프셋
-		bool bIsEnterLine = szEndPoint != std::string::npos ? true : false;//이게 엔터를 통해 개행된건지
 
 		//너비가 제한되있으면 제한된 너비만큼 처리
 		if(m_rtRect.w != 0 && m_rtRect.h != 0 && (m_iTextBoxStyle & dTEXT_BOX_AUTO_NEXTLINE))
@@ -60,7 +169,7 @@ void cTextBox::transToTexture()
 			TTF_SizeUTF8(stkFont.top(), strTargetText.c_str(), &iTextWidth, &iTextHeight);
 
 			//너비가 설정되있는 한계를 초과
-			if(iTextWidth > m_rtRect.w)
+			if(iXOffset + iTextWidth > m_rtRect.w)
 			{
 				bool bIsSpaceCut = true;
 				bool bIsCorrectSpace = false;
@@ -78,7 +187,9 @@ void cTextBox::transToTexture()
 						{
 							//스페이스바 단위로 끊어주는건대 스페이스바를 본적이 있다
 							if((m_iTextBoxStyle & dTEXT_BOX_AUTO_SPACE_NEXTLINE) && bIsCorrectSpace)
+							{
 								break;
+							}
 
 							bIsSpaceCut = false;
 							continue;
@@ -86,14 +197,14 @@ void cTextBox::transToTexture()
 
 						//제일 뒤쪽에 스페이스바 앞쪽 문자를 이어붙여줌
 						size_t szResultLength = strResultText.length();
-						strResultText.append(strTargetText, 0, szSpacePos);
+						strResultText.append(strTargetText, 0, szSpacePos + 1);
 
 						int iTempWidth = 0;
 						int iTempHeight = 0;
 						TTF_SizeUTF8(stkFont.top(), strResultText.c_str(), &iTempWidth, &iTempHeight);
 
 						//스페이스바까지 잘랐는대 너비가 초과다
-						if(iTempWidth > m_rtRect.w)
+						if(iXOffset + iTempWidth > m_rtRect.w)
 						{
 							//넣은건 취소해준다
 							strResultText.erase(szResultLength);
@@ -126,7 +237,7 @@ void cTextBox::transToTexture()
 						TTF_SizeUTF8(stkFont.top(), strResultText.c_str(), &iTempWidth, &iTempHeight);
 
 						//너비 재봤더니 초과했다 넣은건 취소하고 중단
-						if(iTempWidth > m_rtRect.w)
+						if(iXOffset + iTempWidth > m_rtRect.w)
 						{
 							strResultText.erase(szResultLength);
 							break;
@@ -161,7 +272,7 @@ void cTextBox::transToTexture()
 		SDL_FreeSurface(pSurface);
 
 		pTTexture->m_iBufferPos = static_cast<int>(szBegPoint);
-		pTTexture->m_rtRect.x = 0;
+		pTTexture->m_rtRect.x = iXOffset;
 		pTTexture->m_rtRect.y = iYOffset;
 		SDL_QueryTexture(pTTexture->m_pTexture, NULL, NULL, &pTTexture->m_rtRect.w, &pTTexture->m_rtRect.h);
 
@@ -173,8 +284,19 @@ void cTextBox::transToTexture()
 			break;
 
 		szBegPoint = szEndPoint + iNextOffset;
+
+		//줄 바꿈 처리 되었을 때 / 안되었을 때
 		if(bIsEnterLine)
+		{
 			iYOffset += m_iFontHeight;
+			iXOffset = 0;
+		}
+		else
+		{
+			iXOffset += pTTexture->m_rtRect.w;
+		}
+
+
 	}
 }
 
@@ -197,4 +319,55 @@ void cTextBox::draw()
 void cTextBox::update()
 {
 
+}
+
+bool cTextBox::operateStyleCode(const std::string* _lpStrText, int* _lpOutResult)
+{
+	size_t szCursor = _lpStrText->find_first_not_of("<s:");
+
+	//올바른 양식의 코드가 아님
+	if(szCursor == std::string::npos || _lpStrText->find_first_of("<s:") == std::string::npos)
+		return false;
+
+	if(_lpStrText->find_last_of(">") == std::string::npos)
+		return false;
+
+	int _iResult = TTF_STYLE_NORMAL;
+
+	if(_lpStrText->find("BOLD", szCursor) != std::string::npos)
+		_iResult |= TTF_STYLE_BOLD;
+	if(_lpStrText->find("ITALIC", szCursor) != std::string::npos)
+		_iResult |= TTF_STYLE_ITALIC;
+	if(_lpStrText->find("UNDERLINE", szCursor) != std::string::npos)
+		_iResult |= TTF_STYLE_UNDERLINE;
+	if(_lpStrText->find("STRIKETHROUGH", szCursor) != std::string::npos)
+		_iResult |= TTF_STYLE_STRIKETHROUGH;
+
+	*_lpOutResult = _iResult;
+
+	return true;
+}
+
+bool cTextBox::operateColorCode(const std::string* _lpStrText, SDL_Color* _lpOutResult)
+{
+	//끝나는데가 없다
+	size_t szEndPoint = _lpStrText->find_last_of(">");
+	if(_lpStrText->find_last_of(">") == std::string::npos)
+		return false;
+
+	//hex만 취급함
+	if(_lpStrText->find_first_of("<c:0x") != std::string::npos)
+	{
+		size_t szPos = _lpStrText->find_first_not_of("<c:0x");
+		std::string strTempString;
+		strTempString.append(*_lpStrText, szPos, szEndPoint - szPos);
+
+		std::stringstream StrStream;
+		Uint32 uiHexValue = 0;
+		StrStream << std::hex << strTempString;
+		StrStream >> uiHexValue;
+		memcpy(_lpOutResult, &uiHexValue, sizeof(SDL_Color));
+		return true;
+	}
+	return false;
 }

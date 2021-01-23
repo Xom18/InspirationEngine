@@ -281,6 +281,9 @@ public:
 		m_iTextBoxStyle = _iStyle;
 	}
 
+	bool operateStyleCode(const std::string* _lpStrText, int* _lpOutResult);
+	bool operateColorCode(const std::string* _lpStrText, SDL_Color* _lpOutResult);
+
 private:
 
 };

@@ -12,6 +12,7 @@
 #include <mutex>
 #include <list>
 #include <stack>
+#include <sstream>
 #include "StrUTF8.h"
 #include "MacroDefine.h"	//매크로 / Define용 헤더
 #include "Font.h"			//폰트 관리
