@@ -7,39 +7,50 @@ cFontManager::cFontManager()
 
 cFontManager::~cFontManager()
 {
-	std::map<int, TTF_Font*>::iterator ite = m_mapFont.begin();
+	std::map<int, cFont*>::iterator ite = m_mapFont.begin();
 	for(; ite != m_mapFont.end(); ++ite)
-		TTF_CloseFont(ite->second);
+		delete ite->second;
 	m_mapFont.clear();
 }
 
-bool cFontManager::addNewFont(int _iFontID, const char* _csFontDir, int _iFontSize)
+bool cFontManager::addNewFont(int _iFontID, const char* _csFontDir, int _iFontSize, bool _bMakeOnlyDefault)
 {
-	if(getFont(_iFontID) != nullptr)
-		return false;
+//#define TTF_STYLE_BOLD          0x01
+//#define TTF_STYLE_ITALIC        0x02
+//#define TTF_STYLE_UNDERLINE     0x04
+//#define TTF_STYLE_STRIKETHROUGH 0x08
+	int iMakeFontCount = 1;
+	if(_bMakeOnlyDefault)
+		iMakeFontCount = 0x10;
 
-	//폰트 생성
-	TTF_Font* pFont = TTF_OpenFont(_csFontDir, _iFontSize);
+	cFont* pFont = getFont(_iFontID);
 	if(pFont == nullptr)
-		return false;
-
-	//추가 실패
-	if(!addNewFont(_iFontID, pFont))
+		pFont = new cFont();
+	
+	//폰트 스타일별로 바리에이션 자동생성
+	for(int i = 0; i < iMakeFontCount; ++i)
 	{
-		//폰트 제거
-		TTF_CloseFont(pFont);
-		return false;
+		//스타일별 폰트 생성
+		TTF_Font* pTTF = TTF_OpenFont(_csFontDir, _iFontSize);
+		if(pTTF == nullptr)
+			continue;
+
+		TTF_SetFontStyle(pTTF, i);
+		pFont->setTTF(i, pTTF);
 	}
+	setFont(_iFontID, pFont);
 
 	return true;
 }
 
-bool cFontManager::addNewFont(int _iFontID, TTF_Font* _lpFont)
+bool cFontManager::addNewFont(int _iFontID, int _iStyle, TTF_Font* _lpFont)
 {
-	if(getFont(_iFontID) != nullptr)
-		return false;
+	cFont* pFont = getFont(_iFontID);
+	if(pFont == nullptr)
+		pFont = new cFont();
 
-	 m_mapFont.insert(std::pair<int, TTF_Font*>(_iFontID, _lpFont));
+	pFont->setTTF(_iStyle, _lpFont);
+	setFont(_iFontID, pFont);
 
 	return true;
 }

@@ -45,7 +45,7 @@ class cTextBox : public cMenu
 public:
 
 private:
-	TTF_Font* m_lpFont = nullptr;		//그리는대 사용 할 폰트
+	cFont* m_lpFont = nullptr;		//그리는대 사용 할 폰트
 	std::list<cTextTexture*> m_listTexture;//텍스트 텍스쳐들 있는 list
 	std::string m_strText;			//원본 텍스트
 	SDL_Color m_Color;				//컬러
@@ -94,11 +94,12 @@ public:
 		return static_cast<int>(m_strText.length());
 	}
 
-	void setFont(TTF_Font* _lpFont)
+	void setFont(cFont* _lpFont)
 	{
 		m_lpFont = _lpFont;
-
-		m_iFontHeight = TTF_FontHeight(m_lpFont);
+		TTF_Font* lpTTF = m_lpFont->get();
+		if(lpTTF != nullptr)
+			m_iFontHeight = TTF_FontHeight(lpTTF);
 	}
 
 	void setText(const char* _csText)

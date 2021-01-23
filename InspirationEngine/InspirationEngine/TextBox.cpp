@@ -5,6 +5,11 @@ void cTextBox::transToTexture()
 	if(!m_lpRenderer)
 		return;
 
+	if(m_lpFont == nullptr)
+		return;
+	if(m_lpFont->get() == nullptr)
+		return;
+
 	//이전에 이미 처리한적있는지 해시 비교로 확인
 	m_bTextChanged = false;
 	size_t szHash = std::hash<std::string>{}(m_strText);
@@ -17,8 +22,13 @@ void cTextBox::transToTexture()
 
 	//해시 갱신
 
-	//컬러코드 처리용 아직 사용 안함
+	//컬러코드 처리용
 	std::stack<SDL_Color> stkColor;
+	stkColor.push(m_Color);
+
+	//폰트 스타일 처리용
+	std::stack<TTF_Font*> stkFont;
+	stkFont.push(m_lpFont->get());
 
 	size_t szTextLength = m_strText.length();
 
@@ -47,7 +57,7 @@ void cTextBox::transToTexture()
 			int iTextWidth = 0;
 			int iTextHeight = 0;
 
-			TTF_SizeUTF8(m_lpFont, strTargetText.c_str(), &iTextWidth, &iTextHeight);
+			TTF_SizeUTF8(stkFont.top(), strTargetText.c_str(), &iTextWidth, &iTextHeight);
 
 			//너비가 설정되있는 한계를 초과
 			if(iTextWidth > m_rtRect.w)
@@ -80,7 +90,7 @@ void cTextBox::transToTexture()
 
 						int iTempWidth = 0;
 						int iTempHeight = 0;
-						TTF_SizeUTF8(m_lpFont, strResultText.c_str(), &iTempWidth, &iTempHeight);
+						TTF_SizeUTF8(stkFont.top(), strResultText.c_str(), &iTempWidth, &iTempHeight);
 
 						//스페이스바까지 잘랐는대 너비가 초과다
 						if(iTempWidth > m_rtRect.w)
@@ -113,7 +123,7 @@ void cTextBox::transToTexture()
 
 						int iTempWidth = 0;
 						int iTempHeight = 0;
-						TTF_SizeUTF8(m_lpFont, strResultText.c_str(), &iTempWidth, &iTempHeight);
+						TTF_SizeUTF8(stkFont.top(), strResultText.c_str(), &iTempWidth, &iTempHeight);
 
 						//너비 재봤더니 초과했다 넣은건 취소하고 중단
 						if(iTempWidth > m_rtRect.w)
@@ -144,7 +154,7 @@ void cTextBox::transToTexture()
 		
 		//텍스쳐 생성하고 위치잡고 등등
 		SDL_Surface* pSurface = nullptr;
-		pSurface = TTF_RenderUTF8_Solid(m_lpFont, strTargetText.c_str(), m_Color);
+		pSurface = TTF_RenderUTF8_Solid(stkFont.top(), strTargetText.c_str(), stkColor.top());
 
 		cTextTexture* pTTexture = new cTextTexture();
 		pTTexture->m_pTexture = SDL_CreateTextureFromSurface(m_lpRenderer->m_pRenderer, pSurface);
