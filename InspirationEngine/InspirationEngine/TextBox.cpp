@@ -66,19 +66,21 @@ void cTextBox::transToTexture()
 			{
 				size_t szCodeEndPoint = m_strText.find(">", szBegPoint);
 				//코드 시작인대 끝을 못찾겠다고 함
-				if(szCodeEndPoint == std::string::npos)
-					break;
+				if(szCodeEndPoint != std::string::npos)
+				{
+					++szCodeEndPoint;
+					std::string strStyleCode;
+					strStyleCode.append(m_strText, szCodeBegPoint, szCodeEndPoint - szCodeBegPoint);
+					int iStyle = TTF_STYLE_NORMAL;
+					if(operateStyleCode(&strStyleCode, &iStyle))
+					{
+						stkFont.push(m_lpFont->get(iStyle));
 
-				++szCodeEndPoint;
-				std::string strStyleCode;
-				strStyleCode.append(m_strText, szCodeBegPoint, szCodeEndPoint - szCodeBegPoint);
-				int iStyle = TTF_STYLE_NORMAL;
-				if(!operateStyleCode(&strStyleCode, &iStyle))
-					break;
-				stkFont.push(m_lpFont->get(iStyle));
-
-				szBegPoint = szCodeEndPoint;
-				continue;
+						szBegPoint = szCodeEndPoint;
+						continue;
+					}
+				}
+				szCodeBegPoint = std::string::npos;
 			}
 
 			if(szCodeBegPoint < szEndPoint)
@@ -115,19 +117,21 @@ void cTextBox::transToTexture()
 			{
 				size_t szCodeEndPoint = m_strText.find(">", szBegPoint);
 				//코드 시작인대 끝을 못찾겠다고 함
-				if(szCodeEndPoint == std::string::npos)
-					break;
+				if(szCodeEndPoint != std::string::npos)
+				{
+					++szCodeEndPoint;
+					std::string strStyleCode;
+					strStyleCode.append(m_strText, szCodeBegPoint, szCodeEndPoint - szCodeBegPoint);
+					SDL_Color FontColor;
+					if(operateColorCode(&strStyleCode, &FontColor))
+					{
+						stkColor.push(FontColor);
 
-				++szCodeEndPoint;
-				std::string strStyleCode;
-				strStyleCode.append(m_strText, szCodeBegPoint, szCodeEndPoint - szCodeBegPoint);
-				SDL_Color FontColor;
-				if(!operateColorCode(&strStyleCode, &FontColor))
-					break;
-				stkColor.push(FontColor);
-
-				szBegPoint = szCodeEndPoint;
-				continue;
+						szBegPoint = szCodeEndPoint;
+						continue;
+					}
+				}
+				szCodeBegPoint = std::string::npos;
 			}
 
 			if(szCodeBegPoint < szEndPoint)
@@ -366,7 +370,16 @@ bool cTextBox::operateColorCode(const std::string* _lpStrText, SDL_Color* _lpOut
 		Uint32 uiHexValue = 0;
 		StrStream << std::hex << strTempString;
 		StrStream >> uiHexValue;
-		memcpy(_lpOutResult, &uiHexValue, sizeof(SDL_Color));
+
+		//memcpy해서 넣으면abgr이여서 argb로 변환
+		_lpOutResult->b = uiHexValue & 0xff;
+		uiHexValue >>= 8;
+		_lpOutResult->g = uiHexValue & 0xff;
+		uiHexValue >>= 8;
+		_lpOutResult->r = uiHexValue & 0xff;
+		uiHexValue >>= 8;
+		_lpOutResult->a = uiHexValue & 0xff;
+
 		return true;
 	}
 	return false;
