@@ -60,6 +60,8 @@ private:
 	bool m_bTextChanged = false;	//텍스트가 바뀜
 	size_t m_szDrawHash = 0;		//이전에 그렸는지 확인을 위한 해시
 
+	size_t m_szIMEInputLength = 0;	//한글이나 IME에서 한문자로 인식되서 일본어 같은거 처리용
+
 public:
 	cTextBox()
 	{
@@ -242,6 +244,23 @@ public:
 		m_bTextChanged = true;
 	}
 
+	void removeIMEInput()
+	{
+		//지울게 없는경우
+		if(m_szIMEInputLength == 0)
+			return;
+
+		//비정상적인 경우
+		if(m_szIMEInputLength > m_szCursorPos)
+			return;
+
+		//입력되있는 IME길이만큼 지움
+		m_szCursorPos = m_szCursorPos - m_szIMEInputLength;
+		m_strText.erase(m_szCursorPos, m_szIMEInputLength);
+		m_szIMEInputLength = 0;
+		m_bTextChanged = true;
+	}
+
 	/// <summary>
 	/// 문자 추가
 	/// </summary>
@@ -283,6 +302,11 @@ public:
 
 	bool operateStyleCode(const std::string* _lpStrText, int* _lpOutResult);
 	bool operateColorCode(const std::string* _lpStrText, SDL_Color* _lpOutResult);
+
+	void setIMELength(size_t _szIMELength)
+	{
+		m_szIMEInputLength = _szIMELength;
+	}
 
 private:
 

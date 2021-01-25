@@ -199,7 +199,7 @@ void cIECore::operateTextEdit(SDL_Event* _lpEvent)
 	{
 		case SDL_EventType::SDL_KEYDOWN:
 		{
-			if(m_Input.isIMEUsing() != true)
+			if(m_Input.isIMEUsing() == false)
 			{
 				//텍스트 지우기
 				if(_lpEvent->key.keysym.sym == SDLK_BACKSPACE
@@ -228,20 +228,22 @@ void cIECore::operateTextEdit(SDL_Event* _lpEvent)
 			if(strlen(_lpEvent->text.text) == 0)
 			{
 				if(m_Input.isIMEUsing())
-					m_lpFocusedTextBox->removeByBackspace();
+					m_lpFocusedTextBox->removeIMEInput();
 				m_Input.setIMEState(false);
 				break;
 			}
 			if(m_Input.isIMEUsing())
-				m_lpFocusedTextBox->removeByBackspace();
+				m_lpFocusedTextBox->removeIMEInput();
 			m_lpFocusedTextBox->insertCusorPos(_lpEvent->text.text);
+			m_lpFocusedTextBox->setIMELength(strlen(_lpEvent->text.text));
 			m_Input.setIMEState(true);
+
 		}
 		break;
 		case SDL_EventType::SDL_TEXTINPUT:
 		{//입력
 			if(m_Input.isIMEUsing())
-				m_lpFocusedTextBox->removeByBackspace();
+				m_lpFocusedTextBox->removeIMEInput();
 			m_Input.setIMEState(false);
 
 			m_lpFocusedTextBox->insertCusorPos(_lpEvent->text.text);
