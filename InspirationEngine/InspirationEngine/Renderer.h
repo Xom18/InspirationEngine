@@ -1,8 +1,10 @@
 #pragma once
 
+class cWindow;
 class cRenderer
 {
 public:
+	cWindow* m_lpWindow;		//얘가 종속되있는 윈도우
 	SDL_Renderer* m_pRenderer;	//랜더러
 	int m_iLogicalWidth;		//논리너비
 	int m_iLogicalHeight;		//논리높이
@@ -18,6 +20,7 @@ public:
 
 	cRenderer()
 	{
+		m_lpWindow = nullptr;
 		m_pRenderer = nullptr;
 		m_iLogicalWidth = 0;
 		m_iLogicalHeight = 0;
@@ -47,6 +50,8 @@ public:
 		m_iH = 0;
 		m_dScaleFactor = 0.0;
 	}
+
+	void drawRect(SDL_Color _Color, int _iX, int _iY, int _iWidth, int _iHeight, SDL_BlendMode _BlendMode = SDL_BLENDMODE_NONE, double _dAngle = 0.0, SDL_Point* _lpPivot = nullptr);
 
 	/// <summary>
 	/// 버퍼에 있는 이미지 그리기

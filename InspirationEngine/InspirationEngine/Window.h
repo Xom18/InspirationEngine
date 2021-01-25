@@ -97,7 +97,7 @@ public:
 	/// <param name="_iRendererIndex">변경 할 랜더러 인덱스</param>
 	/// <param name="_iWidth">너비</param>
 	/// <param name="_iHeight">높이</param>
-	void setRendererLogicalSize(int _iRendererIndex, int _iWidth, int _iHeight);
+	void setRendererLogicalSize(size_t _szRendererIndex, int _iWidth, int _iHeight);
 
 	/// <summary>
 	/// 이 창이 하이드 상태인지

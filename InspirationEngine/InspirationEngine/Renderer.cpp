@@ -1,5 +1,40 @@
 #include "InspirationEngine.h"
 
+void cRenderer::drawRect(SDL_Color _Color, int _iX, int _iY, int _iWidth, int _iHeight, SDL_BlendMode _BlendMode, double _dAngle, SDL_Point* _lpPivot)
+{
+	SDL_Texture* pTexture = SDL_CreateTexture(m_pRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, 1, 1);
+	SDL_SetTextureBlendMode(pTexture, _BlendMode);
+
+	Uint32 uiColor = 0;
+	uiColor += _Color.a;
+	uiColor <<= 8;
+	uiColor += _Color.r;
+	uiColor <<= 8;
+	uiColor += _Color.g;
+	uiColor <<= 8;
+	uiColor += _Color.b;
+
+	SDL_UpdateTexture(pTexture, NULL, &uiColor, sizeof(Uint32));
+
+	//텍스쳐 내에서의 위치
+	SDL_Rect SrcRect;
+	SrcRect.x = 0;
+	SrcRect.y = 0;
+	SrcRect.w = 1;
+	SrcRect.h = 1;
+
+	//화면에서의 위치
+	SDL_Rect DestRect;
+	DestRect.x = _iX;
+	DestRect.y = _iY;
+	DestRect.w = _iWidth;
+	DestRect.h = _iHeight;
+
+	SDL_RenderCopyEx(m_pRenderer, pTexture, &SrcRect, &DestRect, _dAngle, _lpPivot, SDL_FLIP_NONE);
+
+	SDL_DestroyTexture(pTexture);
+}
+
 void cRenderer::drawBuffer(int* _lpBuffer, int _iBufferWidth, int _iBufferHeight, int _iX, int _iY, SDL_BlendMode _BlendMode, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
 {
 	SDL_Texture* pTexture = SDL_CreateTexture(m_pRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, _iBufferWidth, _iBufferHeight);
