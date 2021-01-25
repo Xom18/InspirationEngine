@@ -308,6 +308,19 @@ public:
 		m_szIMEInputLength = _szIMELength;
 	}
 
+	void setDefaultColor(Uint8 _A, Uint8 _R, Uint8 _G, Uint8 _B)
+	{
+		m_Color.a = _A;
+		m_Color.r = _R;
+		m_Color.g = _G;
+		m_Color.b = _B;
+	}
+
+	void setDefaultColor(SDL_Color _Color)
+	{
+		m_Color = _Color;
+	}
+
 private:
 
 };
