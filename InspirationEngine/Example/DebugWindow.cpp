@@ -4,8 +4,6 @@
 void cDebugWindow::draw()
 {
 	//텍스트 출력 테스트
-	SDL_Color color;
-	memset(&color, 0xffffffff, sizeof(int));
 	cRenderer* lpRenderer = getRenderer(0);
 
 	m_DebugText.draw();
