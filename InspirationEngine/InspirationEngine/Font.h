@@ -63,7 +63,7 @@ public:
 	cFontManager();
 	~cFontManager();
 
-	bool addNewFont(int _iFontID, const char* _csFontDir, int _iFontSize, bool _bMakeOnlyDefault = true);
+	bool addNewFont(int _iFontID, const char* _csFontDir, int _iFontSize, bool _bMakeOnlyDefault = false);
 	bool addNewFont(int _iFontID, int _iStyle, TTF_Font* _lpFont);
 	void setFont(int _iFontID, cFont* _lpFont)
 	{

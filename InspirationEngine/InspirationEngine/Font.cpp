@@ -20,7 +20,7 @@ bool cFontManager::addNewFont(int _iFontID, const char* _csFontDir, int _iFontSi
 //#define TTF_STYLE_UNDERLINE     0x04
 //#define TTF_STYLE_STRIKETHROUGH 0x08
 	int iMakeFontCount = 1;
-	if(_bMakeOnlyDefault)
+	if(_bMakeOnlyDefault == false)
 		iMakeFontCount = 0x10;
 
 	cFont* pFont = getFont(_iFontID);
