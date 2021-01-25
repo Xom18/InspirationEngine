@@ -33,7 +33,7 @@ bool cFile::ReadFile(const char* _lpFilename)
 	in.seekg(0, std::ifstream::end);//읽기 포인터의 위치를 파일의 맨 끝으로
 	m_Size = in.tellg();//파일 시작위치와 현재위치 사이의 길이<자료형>(파일의 총 길이) 구하기
 	in.seekg(0, std::ifstream::beg);//다시 읽기 포인터를 맨 앞으로
-	m_pData = new char[m_Size];//버퍼에 새로운 공간을 할당한다
+	m_pData = new char[static_cast<int>(m_Size)];//버퍼에 새로운 공간을 할당한다
 	in.read(m_pData, m_Size);//읽는다
 	
 	return true;

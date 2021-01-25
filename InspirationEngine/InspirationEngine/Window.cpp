@@ -33,11 +33,12 @@ void cWindow::resizeRenderer()
 	m_iHeight = lpSurface->h;
 
 	//기존에 랜더러가 있으면 논리크기는 따로 빼두고 삭제
-	for(int i = 0; i < static_cast<int>(m_vecRenderer.size()); ++i)
+	for(size_t i = 0; i < m_vecRenderer.size(); ++i)
 	{
 		if(m_vecRenderer[i].m_pRenderer != nullptr)
 			SDL_DestroyRenderer(m_vecRenderer[i].m_pRenderer);
 		m_vecRenderer[i].m_pRenderer = SDL_CreateSoftwareRenderer(lpSurface);
+		m_vecRenderer[i].m_lpWindow = this;
 		SDL_SetRenderDrawColor(m_vecRenderer[i].m_pRenderer, 0, 0, 0, 0xFF);
 
 		setRendererLogicalSize(i, m_vecRenderer[i].m_iLogicalWidth, m_vecRenderer[i].m_iLogicalHeight);
@@ -93,12 +94,12 @@ bool cWindow::closed()
 		return false;
 }
 
-void cWindow::setRendererLogicalSize(int _iRendererIndex, int _iWidth, int _iHeight)
+void cWindow::setRendererLogicalSize(size_t _szRendererIndex, int _iWidth, int _iHeight)
 {
-	if(static_cast<int>(m_vecRenderer.size()) <= _iRendererIndex)
+	if(m_vecRenderer.size() <= _szRendererIndex)
 		return;
 
-	cRenderer* lpRenderer = &m_vecRenderer[_iRendererIndex];
+	cRenderer* lpRenderer = &m_vecRenderer[_szRendererIndex];
 	lpRenderer->m_iLogicalWidth = _iWidth;
 	lpRenderer->m_iLogicalHeight = _iHeight;
 	SDL_RenderSetLogicalSize(lpRenderer->m_pRenderer, lpRenderer->m_iLogicalWidth, lpRenderer->m_iLogicalHeight);
