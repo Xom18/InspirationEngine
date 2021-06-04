@@ -267,21 +267,29 @@ void cTextBox::transToTexture()
 			}
 		}
 		
-		//텍스쳐 생성하고 위치잡고 등등
-		SDL_Surface* pSurface = nullptr;
-		pSurface = TTF_RenderUTF8_Solid(stkFont.top(), strTargetText.c_str(), stkColor.top());
+		int iWidthOffset = 0;
 
-		cTextTexture* pTTexture = new cTextTexture();
-		pTTexture->m_pTexture = SDL_CreateTextureFromSurface(m_lpRenderer->m_pRenderer, pSurface);
-		SDL_FreeSurface(pSurface);
+		//텍스트가 없으면 오프셋만 더하고 텍스쳐 생성 안함
+		if (strTargetText.length())
+		{
+			//텍스쳐 생성하고 위치잡고 등등
+			SDL_Surface* pSurface = nullptr;
+			pSurface = TTF_RenderUTF8_Solid(stkFont.top(), strTargetText.c_str(), stkColor.top());
 
-		pTTexture->m_iBufferPos = static_cast<int>(szBegPoint);
-		pTTexture->m_rtRect.x = iXOffset;
-		pTTexture->m_rtRect.y = iYOffset;
-		SDL_QueryTexture(pTTexture->m_pTexture, NULL, NULL, &pTTexture->m_rtRect.w, &pTTexture->m_rtRect.h);
+			cTextTexture* pTTexture = new cTextTexture();
+			pTTexture->m_pTexture = SDL_CreateTextureFromSurface(m_lpRenderer->m_pRenderer, pSurface);
+			SDL_FreeSurface(pSurface);
 
-		//텍스쳐 리스트에 추가
-		m_listTexture.push_back(pTTexture);
+			pTTexture->m_iBufferPos = static_cast<int>(szBegPoint);
+			pTTexture->m_rtRect.x = iXOffset;
+			pTTexture->m_rtRect.y = iYOffset;
+			SDL_QueryTexture(pTTexture->m_pTexture, NULL, NULL, &pTTexture->m_rtRect.w, &pTTexture->m_rtRect.h);
+
+			//텍스쳐 리스트에 추가
+			m_listTexture.push_back(pTTexture);
+
+			iWidthOffset = pTTexture->m_rtRect.w;
+		}
 
 		if(szTextLength <= szEndPoint + iNextOffset
 		|| szEndPoint == std::string::npos)
@@ -297,10 +305,8 @@ void cTextBox::transToTexture()
 		}
 		else
 		{
-			iXOffset += pTTexture->m_rtRect.w;
+			iXOffset += iWidthOffset;
 		}
-
-
 	}
 }
 
