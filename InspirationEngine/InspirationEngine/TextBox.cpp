@@ -51,10 +51,11 @@ void cTextBox::transToTexture()
 		{
 			//특수 문자 처리(개행, 스타일, 컬러)
 			size_t szEnterPoint = m_strText.find("\n", szBegPoint);
-			if(szEnterPoint != std::string::npos)
+			if(szEnterPoint != std::string::npos
+				&& szEnterPoint < szEndPoint)
 			{
 				bIsEnterLine = true;
-				iNextOffset = 1;
+				++iNextOffset;
 				szEndPoint = szEnterPoint;
 			}
 		}
@@ -184,6 +185,11 @@ void cTextBox::transToTexture()
 				{
 					if(bIsSpaceCut)
 					{
+						//TODO : 로직부터가 잘못됐다
+						//첫번째 스페이스바가 아니라 자를수 있는 마지노선 스페이스바를 찾아야 한다
+						//나중에 해야지
+
+
 						size_t szSpacePos = strTargetText.find_first_of(" ");
 
 						//스페이스바로 안잘린다 스페이스바로 자르는건 포기한다
@@ -201,7 +207,7 @@ void cTextBox::transToTexture()
 
 						//제일 뒤쪽에 스페이스바 앞쪽 문자를 이어붙여줌
 						size_t szResultLength = strResultText.length();
-						strResultText.append(strTargetText, 0, szSpacePos + 1);
+						strResultText.append(strTargetText, 0, szSpacePos);
 
 						int iTempWidth = 0;
 						int iTempHeight = 0;
@@ -228,6 +234,7 @@ void cTextBox::transToTexture()
 
 						//스페이스바 찾은거 체크
 						bIsCorrectSpace = true;
+						++iNextOffset;
 					}
 					else
 					{
