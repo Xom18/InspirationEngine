@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
 	//엔진 시작
 	cIECore::beginEngine();
 
-	//키 입력 등은 여기서 받음
+	//이벤트 처리루프
 	while (cIECore::isRunning())
 	{
 		SDL_Event Event;
@@ -111,6 +111,9 @@ int main(int argc, char* argv[])
 		}
 		
 	}
-	SDL_Quit();
+
+	//엔진 종료
+	cIECore::endEngine();
+
 	return 0;
 }

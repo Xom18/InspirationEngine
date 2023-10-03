@@ -50,6 +50,7 @@ void cWindow::reset()
 	if (m_pDrawThread != nullptr)
 	{
 		m_pDrawThread->join();
+		delete m_pDrawThread;
 		m_pDrawThread = nullptr;
 	}
 

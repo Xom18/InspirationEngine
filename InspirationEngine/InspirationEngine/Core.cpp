@@ -184,13 +184,29 @@ bool cIECore::beginEngine()
 
 	m_bIsRunning = true;
 
-	m_pMainThread = new std::thread([&]() {mainThread(); });
+	m_pMainThread = new std::thread([&]() { mainThread(); });
 
 	std::map<std::string, cWindow*>::iterator ite = m_mapWindow.begin();
 	//스레드를 각자 파서 각자 그리도록
 	for(; ite != m_mapWindow.end(); ++ite)
 		ite->second->beginDrawThread();
 
+	return true;
+}
+
+bool cIECore::endEngine()
+{
+	if (m_pMainThread != nullptr)
+	{
+		m_pMainThread->join();
+		delete m_pMainThread;
+		m_pMainThread = nullptr;
+	}
+
+	for (auto& [_, window] : m_mapWindow)//각 창 삭제
+		window->close();
+
+	SDL_Quit();
 	return true;
 }
 

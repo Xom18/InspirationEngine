@@ -70,6 +70,11 @@ public:
 	static bool beginEngine();
 
 	/// <summary>
+	/// 엔진 종료
+	/// </summary>
+	static bool endEngine();
+
+	/// <summary>
 	/// 엔진 중단
 	/// </summary>
 	static void stopEngine()
@@ -77,14 +82,6 @@ public:
 		m_bIsRunning = false;
 		m_cvDrawThreadWaiter.notify_all();	//각 창 스레드 중단
 		m_cvDrawCompleteWaiter.notify_all();//그리는거 기다리는거 중단
-
-		if (m_pMainThread != nullptr)
-		{
-			m_pMainThread->join();
-			for (auto& [_, window] : m_mapWindow)//각 창 삭제
-				window->close();
-			m_pMainThread = nullptr;
-		}
 	}
 
 	/// <summary>
