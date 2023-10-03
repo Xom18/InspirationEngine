@@ -1,6 +1,6 @@
 #include <future>
 #include "InspirationEngine.h"
-
+#include <iostream>
 //public
 cInput			cIECore::m_Input;						//입력, 클릭이나 창 내부 처리도 여기서 받은다음 각 창으로 보냄
 cDebugInfo		cIECore::m_DebugInfo;					//디버그 툴
@@ -27,9 +27,14 @@ std::condition_variable cIECore::m_cvDrawCompleteWaiter;//각 창의 drawthread�
 
 void cIECore::mainThread()
 {
+	auto tickCicle = std::chrono::milliseconds(m_iTickRate);
+	std::chrono::system_clock::time_point StartTime = std::chrono::system_clock::now();	//시작시간
+	std::chrono::system_clock::time_point NextTime = StartTime + tickCicle;				//다음틱
+	
 	while(m_bIsRunning)
 	{
-		std::chrono::system_clock::time_point StartTime = std::chrono::system_clock::now();
+		auto TargetNextTime = NextTime;	//목표 틱
+		NextTime += tickCicle;			//다음 목표틱
 
 		m_iOperatePahse = eENGINE_PAHSE_OPERATE_EVENT;
 		operateEvent();
@@ -41,16 +46,15 @@ void cIECore::mainThread()
 		draw();
 
 		m_iOperatePahse = eENGINE_PAHSE_COMPLETE;
-		//남은 시간만큼 재운다
-		std::chrono::duration<double> EndTime = std::chrono::system_clock::now() - StartTime;
-		std::chrono::milliseconds msEndTime = std::chrono::duration_cast<std::chrono::milliseconds>(EndTime);
 
-		//처리가 너무 오래걸렸다
-		if(m_iTickRate < msEndTime.count())
+		if (TargetNextTime < std::chrono::system_clock::now())
+		{
+			//처리가 너무 오래걸렸다
 			continue;
+		}
 
-		std::chrono::milliseconds msSleepTime(m_iTickRate - msEndTime.count());
-		std::this_thread::sleep_for(msSleepTime);
+		//남은 시간만큼 재운다
+		std::this_thread::sleep_for(TargetNextTime - std::chrono::system_clock::now());
 	}
 
 	return;

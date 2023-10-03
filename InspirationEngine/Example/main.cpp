@@ -31,6 +31,9 @@ int main(int argc, char* argv[])
 	int iW = 0;
 	int iH = 0;
 
+	//IME출력설정
+	SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
+
 	//주 게임 창 생성
 	{
 		cMainWindow* lpMainWindow = new cMainWindow();
@@ -45,6 +48,7 @@ int main(int argc, char* argv[])
 		cIECore::setMainWindow(lpMainWindow);
 
 		lpMainWindow->createWindow("Inspiration", SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 0, 2);	//창 생성
+
 		cIECore::addWindowIndex(lpMainWindow);
 
 		SDL_Window* lpSDLWindow = lpMainWindow->getSDLWindow();
@@ -52,8 +56,10 @@ int main(int argc, char* argv[])
 		SDL_GetWindowSize(lpSDLWindow, &iW, &iH);
 
 		lpMainWindow->setRendererLogicalSize(0, 64, 64);
-//		lpMainWindow->setRendererLogicalSize(1, 512, 512);
+		lpMainWindow->setRendererLogicalSize(1, 512, 512);
+
 	}
+
 
 	//디버그용 창 생성
 	if(true)
@@ -91,14 +97,6 @@ int main(int argc, char* argv[])
 	//엔진 시작
 	cIECore::beginEngine();
 
-	//SDL_Rect rtInputArea;
-	//rtInputArea.x = 500;
-	//rtInputArea.y = 500;
-	//rtInputArea.w = 100;
-	//rtInputArea.h = 500;
-
-
-	//SDL_SetTextInputRect(&rtInputArea);
 	//키 입력 등은 여기서 받음
 	while (cIECore::isRunning())
 	{

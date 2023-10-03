@@ -324,6 +324,13 @@ void cTextBox::draw()
 		cTextTexture* pTTexture = *ite;
 		m_lpRenderer->drawTexture(pTTexture->m_pTexture, m_rtRect.x + pTTexture->m_rtRect.x, m_rtRect.y + pTTexture->m_rtRect.y);
 	}
+
+//	SDL_Color Color;
+//	Color.a = 0xaf;
+//	Color.r = 0xff;
+//	Color.g = 0xff;
+//	Color.b = 0xff;
+//	m_lpRenderer->drawRect(Color, 0, 0, 500, 500, SDL_BLENDMODE_BLEND);
 }
 
 void cTextBox::update()
