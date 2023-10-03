@@ -46,6 +46,7 @@
 InspirationEngine/x64/*
 InspirationEngine/Debug/*
 InspirationEngine/Release/*
+*/enc_temp_folder/*
 CodeAnalysisResultManifest.txt
 *.enc
 
