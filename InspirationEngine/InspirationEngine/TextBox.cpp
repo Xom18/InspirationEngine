@@ -46,20 +46,8 @@ void cTextBox::transToTexture()
 		size_t szEndPoint = szTextLength;
 		//엔터를 통해 개행이 처리되었는지
 		bool bIsEnterLine = false;
-		int iNextOffset = 0;//부호 오프셋
+		size_t iNextOffset = 0;//부호 오프셋
 
-		{
-			//특수 문자 처리(개행, 스타일, 컬러)
-			size_t szEnterPoint = m_strText.find("\n", szBegPoint);
-			if(szEnterPoint != std::string::npos
-				&& szEnterPoint < szEndPoint)
-			{
-				bIsEnterLine = true;
-				++iNextOffset;
-				szEndPoint = szEnterPoint;
-			}
-		}
-		
 		{
 			//스타일 코드 처리
 			size_t szCodeBegPoint = m_strText.find("<s:", szBegPoint);
@@ -85,10 +73,7 @@ void cTextBox::transToTexture()
 			}
 
 			if(szCodeBegPoint < szEndPoint)
-			{
-				bIsEnterLine = false;
 				szEndPoint = szCodeBegPoint;
-			}
 		}
 
 		{
@@ -105,10 +90,7 @@ void cTextBox::transToTexture()
 			}
 
 			if(szClosePoint < szEndPoint)
-			{
-				bIsEnterLine = false;
 				szEndPoint = szClosePoint;
-			}
 		}
 
 		{
@@ -136,10 +118,7 @@ void cTextBox::transToTexture()
 			}
 
 			if(szCodeBegPoint < szEndPoint)
-			{
-				bIsEnterLine = false;
 				szEndPoint = szCodeBegPoint;
-			}
 		}
 
 		{
@@ -156,9 +135,18 @@ void cTextBox::transToTexture()
 			}
 
 			if(szClosePoint < szEndPoint)
-			{
-				bIsEnterLine = false;
 				szEndPoint = szClosePoint;
+		}
+
+		{
+			//특수 문자 처리(개행, 스타일, 컬러)
+			size_t szEnterPoint = m_strText.find("\n", szBegPoint);
+			if (szEnterPoint != std::string::npos
+				&& szEnterPoint < szEndPoint)
+			{
+				bIsEnterLine = true;
+				++iNextOffset;
+				szEndPoint = szEnterPoint;
 			}
 		}
 
@@ -185,11 +173,6 @@ void cTextBox::transToTexture()
 				{
 					if(bIsSpaceCut)
 					{
-						//TODO : 얘는 여기있으면 안될듯
-						//공백 안넣고 제낀거 알아서 넣도록 수정을 해야됨
-						if (bIsCorrectSpace)
-							strResultText.append(" ");
-
 						size_t szSpaceBeginPos = strTargetText.find_first_of(" ");
 						//스페이스바로 안잘린다 스페이스바로 자르는건 포기한다
 						if(szSpaceBeginPos == std::string::npos)
@@ -203,7 +186,7 @@ void cTextBox::transToTexture()
 									&& removeSpaceEnd != std::string::npos)
 								{
 									strResultText.erase(removeSpaceBegin + 1, removeSpaceEnd);
-									iNextOffset = removeSpaceEnd - removeSpaceBegin;
+									iNextOffset += removeSpaceEnd - removeSpaceBegin;
 								}
 
 								break;
@@ -217,19 +200,40 @@ void cTextBox::transToTexture()
 						//제일 뒤쪽에 스페이스바 앞쪽 문자를 이어붙여줌
 						size_t szResultLength = strResultText.length();
 						if (szSpaceEndPos == std::string::npos)
-							strResultText.append(strTargetText, 0, szSpaceBeginPos);
+							strResultText.append(strTargetText, 0, szSpaceBeginPos + 1);
 						else
-							strResultText.append(strTargetText, 0, szSpaceEndPos - 1);
+							strResultText.append(strTargetText, 0, szSpaceEndPos);
 
 						int iTempWidth = 0;
 						int iTempHeight = 0;
 						TTF_SizeUTF8(stkFont.top(), strResultText.c_str(), &iTempWidth, &iTempHeight);
-						//TODO : 뒤쪽 무의미한 공백 지우고나서 측정했을때
-						//넓이가 충족되서 가능하다면 그 공백들을 지우고 넣는부분 추가 필요
 
+						//무의미한 공백 지우게되었을떄 넣을수 있는경우인지 체크
+						if (m_iTextBoxStyle & dTEXT_BOX_AUTO_SPACE_NEXTLINE)
+						{
+							if (m_rtRect.w < iXOffset + iTempWidth)
+							{
+								size_t spaceBeginPoint = strResultText.find_last_not_of(' ');
+								if (spaceBeginPoint != std::string::npos)
+								{
+									std::string tempString;
+									tempString.append(strResultText, 0, spaceBeginPoint + 1);
+
+									int spaceRemoveWidth = 0;
+									int spaceRemoveHeight = 0;
+									TTF_SizeUTF8(stkFont.top(), tempString.c_str(), &spaceRemoveWidth, &spaceRemoveHeight);
+									if (iXOffset + spaceRemoveWidth <= m_rtRect.w)
+									{
+										iNextOffset += strResultText.length() - spaceBeginPoint - 1;
+										strResultText = tempString;
+										break;
+									}
+								}
+							}
+						}
 
 						//스페이스바까지 잘랐는대 너비가 초과다
-						if(iXOffset + iTempWidth > m_rtRect.w)
+						if(m_rtRect.w < iXOffset + iTempWidth)
 						{
 							//넣은건 취소해준다
 							strResultText.erase(szResultLength);
