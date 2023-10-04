@@ -15,12 +15,12 @@ void cTextBox::transToTexture()
 	size_t szHash = std::hash<std::string>{}(m_strText);
 	if(m_szDrawHash == szHash)
 		return;
+
+	//해시 갱신
 	m_szDrawHash = szHash;
 
 	//텍스쳐 해제
 	resetTexture();
-
-	//해시 갱신
 
 	//컬러코드 처리용
 	std::stack<SDL_Color> stkColor;
