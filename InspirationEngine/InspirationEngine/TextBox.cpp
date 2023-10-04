@@ -185,33 +185,48 @@ void cTextBox::transToTexture()
 				{
 					if(bIsSpaceCut)
 					{
-						//TODO : 로직부터가 잘못됐다
-						//첫번째 스페이스바가 아니라 자를수 있는 마지노선 스페이스바를 찾아야 한다
-						//나중에 해야지
+						//TODO : 얘는 여기있으면 안될듯
+						//공백 안넣고 제낀거 알아서 넣도록 수정을 해야됨
+						if (bIsCorrectSpace)
+							strResultText.append(" ");
 
-
-						size_t szSpacePos = strTargetText.find_first_of(" ");
-
+						size_t szSpaceBeginPos = strTargetText.find_first_of(" ");
 						//스페이스바로 안잘린다 스페이스바로 자르는건 포기한다
-						if(szSpacePos == std::string::npos)
+						if(szSpaceBeginPos == std::string::npos)
 						{
 							//스페이스바 단위로 끊어주는건대 스페이스바를 본적이 있다
 							if((m_iTextBoxStyle & dTEXT_BOX_AUTO_SPACE_NEXTLINE) && bIsCorrectSpace)
 							{
+								size_t removeSpaceBegin = strResultText.find_last_not_of(' ');
+								size_t removeSpaceEnd = strResultText.find_last_of(' ');
+								if (removeSpaceBegin != std::string::npos
+									&& removeSpaceEnd != std::string::npos)
+								{
+									strResultText.erase(removeSpaceBegin + 1, removeSpaceEnd);
+									iNextOffset = removeSpaceEnd - removeSpaceBegin;
+								}
+
 								break;
 							}
 
 							bIsSpaceCut = false;
 							continue;
 						}
+						size_t szSpaceEndPos = strTargetText.find_first_not_of(" ", szSpaceBeginPos + 1);
 
 						//제일 뒤쪽에 스페이스바 앞쪽 문자를 이어붙여줌
 						size_t szResultLength = strResultText.length();
-						strResultText.append(strTargetText, 0, szSpacePos);
+						if (szSpaceEndPos == std::string::npos)
+							strResultText.append(strTargetText, 0, szSpaceBeginPos);
+						else
+							strResultText.append(strTargetText, 0, szSpaceEndPos - 1);
 
 						int iTempWidth = 0;
 						int iTempHeight = 0;
 						TTF_SizeUTF8(stkFont.top(), strResultText.c_str(), &iTempWidth, &iTempHeight);
+						//TODO : 뒤쪽 무의미한 공백 지우고나서 측정했을때
+						//넓이가 충족되서 가능하다면 그 공백들을 지우고 넣는부분 추가 필요
+
 
 						//스페이스바까지 잘랐는대 너비가 초과다
 						if(iXOffset + iTempWidth > m_rtRect.w)
@@ -230,11 +245,12 @@ void cTextBox::transToTexture()
 						}
 
 						//앞에 문자 지우기(스페이스바도 같이 지움)
-						strTargetText.erase(0, szSpacePos + 1);
-
+						if (szSpaceEndPos == std::string::npos)
+							strTargetText.erase(0, szSpaceBeginPos + 1);
+						else
+							strTargetText.erase(0, szSpaceEndPos);
 						//스페이스바 찾은거 체크
 						bIsCorrectSpace = true;
-						++iNextOffset;
 					}
 					else
 					{
