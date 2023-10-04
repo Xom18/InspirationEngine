@@ -16,7 +16,9 @@
 	#endif
 #endif
 
-#pragma comment(linker, "/SUBSYSTEM:CONSOLE")
+#ifdef _DEBUG
+	#pragma comment(linker, "/SUBSYSTEM:CONSOLE")
+#endif
 
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
