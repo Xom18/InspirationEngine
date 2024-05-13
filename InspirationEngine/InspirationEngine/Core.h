@@ -35,6 +35,12 @@ private:
 	static std::condition_variable m_cvDrawThreadWaiter;//각 창의 drawthread를 대기 시켜주는곳
 	static std::condition_variable m_cvDrawCompleteWaiter;//각 창의 drawthread를 대기 시켜주는곳
 
+	static bool m_bUseIME;
+
+	static std::mutex m_mtxTextEdit;			// IME 사용 처리를 위한 뮤텍스
+	static bool m_bTextEdit;					// IME 사용중인지
+	static SDL_Rect m_rtTextEditPosition;		// IME 사용중일때 IME의 위치
+
 public:
 
 	/// <summary>
@@ -187,6 +193,15 @@ public:
 		m_mtxEvent.unlock();
 	}
 
+	static std::optional<SDL_Rect> getTextEditPosition();
+
+	static void updateTextEditPosition(SDL_Rect& _rect)
+	{
+		m_mtxTextEdit.lock();
+		m_rtTextEditPosition = _rect;
+		m_mtxTextEdit.unlock();
+	}
+
 	/// <summary>
 	/// SDL Window Id로 찾을 수 있게 윈도우 등록
 	/// </summary>
@@ -248,7 +263,7 @@ public:
 		return m_iOperatePahse;
 	}
 
-	static void operateTextEdit(SDL_Event* _lpEvent);
+	static bool operateTextEdit(SDL_Event* _lpEvent);
 
 private:
 	/// <summary>

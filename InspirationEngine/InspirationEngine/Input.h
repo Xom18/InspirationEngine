@@ -12,7 +12,7 @@ private:
 	/// 안눌려있으면 false
 	/// 눌려있으면 true
 	/// </summary>
-	bool m_aKeyInput[SDL_NUM_SCANCODES] = {false,};
+	bool m_aKeyInput[SDL_NUM_SCANCODES] = { false, };
 	bool m_bIsTextEditting = false;	//텍스트 입력중
 	std::mutex m_mtxOperateEvent;
 
@@ -20,11 +20,9 @@ private:
 	cIVector2 m_MousePos;
 	cIVector2 m_MouseDelta;
 
-	bool m_bUseIME = false;
-
 public:
-	cInput(){}
-	~cInput(){}
+	cInput() {}
+	~cInput() {}
 
 	void setKeyState(SDL_Scancode _ScanCode, Uint8 _State)
 	{
@@ -52,16 +50,6 @@ public:
 	cIVector2 getMouseDelta()
 	{
 		return m_MouseDelta;
-	}
-
-	void setIMEState(bool _bIsUse)
-	{
-		m_bUseIME = _bIsUse;
-	}
-
-	bool isIMEUsing()
-	{
-		return m_bUseIME;
 	}
 
 private:

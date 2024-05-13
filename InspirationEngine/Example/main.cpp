@@ -25,7 +25,10 @@
 
 int main(int argc, char* argv[])
 {
-	int iTickRate = 16;
+	std::locale::global(std::locale("ko_KR.UTF-8"));
+
+
+	int iTickRate = 1000 / 60;;
 
 	//디버그용 창 좌표
 	int iX = 0;
@@ -33,7 +36,7 @@ int main(int argc, char* argv[])
 	int iW = 0;
 	int iH = 0;
 
-	//IME출력설정
+	//IME출력설정, 기본 텍스트 인풋모드인거 off
 	SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 
 	//주 게임 창 생성
@@ -99,6 +102,9 @@ int main(int argc, char* argv[])
 	//엔진 시작
 	cIECore::beginEngine();
 
+	//SDL_StopTextInput();
+	//SDL_StartTextInput();
+	bool useIME = false;
 	//이벤트 처리루프
 	while (cIECore::isRunning())
 	{
@@ -108,10 +114,32 @@ int main(int argc, char* argv[])
 			cIECore::eventPushBack(&Event);
 			
 			//나머지 이벤트가 있을 수 있으니 처리
-			if(SDL_PollEvent(&Event))
+			if (SDL_PollEvent(&Event))
 				cIECore::eventPushBack(&Event);
 		}
 		
+		//메인스레드에서 호출해야 IME 창 위치 설정하는게 먹음
+		//스톱 시키고 바로 스타트 시키는건 안할거다 일단 테스트 코드로 남겨둔부분
+		auto rect = cIECore::getTextEditPosition();
+		if (rect.has_value())
+		{
+			SDL_SetTextInputRect(&rect.value());
+			if (!useIME)
+			{
+				useIME = true;
+				SDL_StopTextInput();
+				SDL_StartTextInput();
+			}
+		}
+		else
+		{
+			if (useIME)
+			{
+				useIME = false;
+				SDL_StopTextInput();
+				SDL_StartTextInput();
+			}
+		}
 	}
 
 	//엔진 종료

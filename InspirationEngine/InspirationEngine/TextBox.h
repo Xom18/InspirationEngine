@@ -18,7 +18,7 @@ class cTextTexture
 {
 public:
 	SDL_Texture* m_pTexture = nullptr;	//텍스트 텍스쳐
-	int m_iBufferPos;			//이 텍스쳐의 텍스트가 버퍼의 어디부터인지
+	int m_iBufferPos = 0;			//이 텍스쳐의 텍스트가 버퍼의 어디부터인지
 	SDL_Rect m_rtRect;			//텍스쳐 Rect
 
 	cTextTexture()
@@ -40,6 +40,7 @@ public:
 	}
 };
 
+//포커스 와있나 등 처리 필요할듯
 class cTextBox : public cMenu
 {
 public:
@@ -61,6 +62,8 @@ private:
 	size_t m_szDrawHash = 0;		//이전에 그렸는지 확인을 위한 해시
 
 	size_t m_szIMEInputLength = 0;	//한글이나 IME에서 한문자로 인식되서 일본어 같은거 처리용
+
+	SDL_Point m_CursorScreenPos;	//화면상 커서 위치
 
 public:
 	cTextBox()
@@ -133,6 +136,22 @@ public:
 	void setCusorPos(size_t _szCusorPos)
 	{
 		m_szCursorPos = _szCusorPos;
+	}
+
+	void setCursurScreenPos(int x, int y)
+	{
+		m_CursorScreenPos.x = x;
+		m_CursorScreenPos.y = y;
+	}
+
+	SDL_Point getCursurScreenPos()
+	{
+		return m_CursorScreenPos;
+	}
+
+	int getFontHeight()
+	{
+		return m_iFontHeight;
 	}
 
 	/// <summary>
@@ -293,6 +312,11 @@ public:
 		m_rtRect.y = _iY;
 		m_rtRect.w = _iW;
 		m_rtRect.h = _iH;
+	}
+
+	void getRect(SDL_Rect& rect)
+	{
+		rect = m_rtRect;
 	}
 
 	void setStyle(int _iStyle)

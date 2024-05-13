@@ -23,23 +23,5 @@ void cDebugWindow::initWindow()
 	m_DebugText.setRect(0, 0, getWidth(), getHeight());
 	m_DebugText.setStyle(dTEXT_BOX_AUTO_SPACE_NEXTLINE);
 	m_DebugText.setCusorPos(0);
-
-	int32_t iX = 0;
-	int32_t iY = 0;
-	SDL_Window* lpSDLWindow = getSDLWindow();
-	SDL_GetWindowPosition(lpSDLWindow, &iX, &iY);
-
-	//텍스트 출력 테스트
-	cRenderer* lpRenderer = getRenderer(0);
-	SDL_Rect rtInputArea;
-	rtInputArea.x = iX;
-	rtInputArea.y = iY;
-	rtInputArea.w = 200;
-	rtInputArea.h = 500;
-	SDL_SetTextInputRect(&rtInputArea);
-
-	//텍스트 입력 테스트용
-	//SDL_StartTextInput();
-	std::string errormsg = SDL_GetError();
-	printf("%s", errormsg.c_str());
+	m_DebugText.setCursurScreenPos(0, 0);
 }
