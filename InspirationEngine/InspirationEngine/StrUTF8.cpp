@@ -1,162 +1,129 @@
 #include <string>
-#include <algorithm>
+#include <vector>
 #include "StrUTF8.h"
+#include "utf8proc.h"
 
-void cStrUTF8::pop_back(std::string* _lpString)
+bool cStrUTF8::IsValidStartByte(unsigned char c)
 {
-	if(_lpString->length() == 0)
-		return;
-
-	const char* lpText = _lpString->c_str();
-	int iLength = static_cast<int>(_lpString->length());
-
-	if((lpText[iLength - 1] & 0b10000000) == 0)
-	{//아스키쪽이면 단순히 마지막 제거
-		_lpString->pop_back();
-	}
-	else
-	{//UTF-8이다
-		//몇개 지워야되는지 체크
-		int iDeleteCount = 0;
-		for(int i = iLength - 1; i >= 0; --i)
-		{
-			++iDeleteCount;
-			if((lpText[i] & 0b11000000) == 0b11000000)
-				break;
-		}
-
-		//지워야되는 만큼 삭제
-		_lpString->erase(static_cast<size_t>(iLength) - iDeleteCount);
-	}
+	if ((c & 0x80) == 0) return true;
+	if ((c & 0xE0) == 0xC0) return c >= 0xC2;
+	if ((c & 0xF0) == 0xE0) return true;
+	if ((c & 0xF8) == 0xF0) return true;
+	return false;
 }
 
-void cStrUTF8::pop_front(std::string* _lpString)
+size_t cStrUTF8::GetUTF8ByteLength(unsigned char c)
 {
-	size_t iLength = _lpString->length();
-	if(iLength == 0)
-		return;
-
-	const char* lpText = _lpString->c_str();
-
-	if((lpText[0] & 0b10000000) == 0)
-	{//아스키쪽이면 시작꺼 바로 제거
-		_lpString->erase(0, 1);
-	}
-	else
-	{//UTF-8이다
-		//몇개 지워야되는지 체크
-		size_t szDeleteCount = 1;
-		for(size_t i = 1; i < iLength; ++i)
-		{
-			if((lpText[i] & 0b11000000) == 0b11000000)
-				break;
-			++szDeleteCount;
-		}
-
-		//지워야되는 만큼 삭제
-		_lpString->erase(0, static_cast<size_t>(szDeleteCount));
-	}
+	if ((c & 0x80) == 0) return 1;
+	if ((c & 0xE0) == 0xC0) return 2;
+	if ((c & 0xF0) == 0xE0) return 3;
+	if ((c & 0xF8) == 0xF0) return 4;
+	return 1;
 }
 
-size_t cStrUTF8::getMemoryPoint(std::string* _lpString, size_t _szPoint)
+void cStrUTF8::pop_back(std::string& inputStr)
 {
-	size_t szLength = _lpString->length();
-	const char* lpText = _lpString->c_str();
+	if (inputStr.empty())
+		return;
 
-	size_t szCharPoint = 0;
-	for(; szCharPoint < szLength && 0 < _szPoint; ++szCharPoint)
-	{
-		//단일 아스키문자
-		if((lpText[szCharPoint] & 0b10000000) == 0)
-		{
-			--_szPoint;
-		}
-		//UTF-8 문자
-		else if((lpText[szCharPoint] & 0b11000000) == 0b11000000)
-		{
-			--_szPoint;
+	const auto* u = (const utf8proc_uint8_t*)inputStr.data();
+	utf8proc_ssize_t len = (utf8proc_ssize_t)inputStr.size();
 
-			//UTF-8 끝까지 달린다
-			while(szCharPoint < szLength)
-			{
-				++szCharPoint;
-				if((lpText[szCharPoint + 1] & 0b11000000) == 0b11000000
-				|| (lpText[szCharPoint + 1] & 0b10000000) == 0)
-					break;
-			}
-		}
+	// 앞에서 스캔해 마지막 코드포인트 시작 위치를 찾는다
+	utf8proc_ssize_t lastStart = 0, i = 0;
+	while (i < len) {
+		utf8proc_int32_t cp;
+		utf8proc_ssize_t n = utf8proc_iterate(u + i, len - i, &cp);
+		if (n <= 0) n = 1;
+		lastStart = i;
+		i += n;
+	}
+	inputStr.erase((size_t)lastStart);
+}
+
+void cStrUTF8::pop_front(std::string& inputStr)
+{
+	if (inputStr.empty())
+		return;
+
+	utf8proc_int32_t cp;
+	utf8proc_ssize_t n = utf8proc_iterate(
+		(const utf8proc_uint8_t*)inputStr.data(),
+		(utf8proc_ssize_t)inputStr.size(), &cp);
+	inputStr.erase(0, (size_t)(n > 0 ? n : 1));
+}
+
+size_t cStrUTF8::getMemoryPoint(std::string& inputStr, size_t _szPoint)
+{
+	if (_szPoint == 0)
+		return 0;
+
+	const auto* u = (const utf8proc_uint8_t*)inputStr.data();
+	utf8proc_ssize_t len = (utf8proc_ssize_t)inputStr.size();
+	utf8proc_ssize_t i = 0;
+	size_t chars = 0;
+
+	while (i < len && chars < _szPoint) {
+		utf8proc_int32_t cp;
+		utf8proc_ssize_t n = utf8proc_iterate(u + i, len - i, &cp);
+		i += (n > 0) ? n : 1;
+		++chars;
 	}
 
-	//길이초과했던거네
-	if(szCharPoint == szLength)
+	if (chars < _szPoint)
 		return std::string::npos;
 
-	return szCharPoint;
+	return (size_t)i;
 }
 
-void cStrUTF8::removeToFront(std::string* _lpString, size_t _szPoint, size_t _szCount)
+void cStrUTF8::removeToFront(std::string& inputStr, size_t _szPoint, size_t _szCount)
 {
-	//제일 앞에있어서 지울게 없다
-	if(_szPoint == 0)
+	if (_szPoint == 0 || inputStr.empty())
 		return;
 
-	size_t iLength = _lpString->length();
-	if(iLength == 0)
-		return;
+	if (_szPoint > inputStr.size())
+		_szPoint = inputStr.size();
 
-	const char* lpText = _lpString->c_str();
+	const auto* u = (const utf8proc_uint8_t*)inputStr.data();
+	utf8proc_ssize_t limit = (utf8proc_ssize_t)_szPoint;
 
-	//이 앞에문자를 삭제할꺼기때문에 -1빼고 시작
-	size_t i = _szPoint - 1;
-	size_t szDelCounter = _szCount;
-	for(; i > 0; --i)
-	{
-		//단일 아스키문자
-		if((lpText[i] & 0b10000000) == 0)
-			--szDelCounter;
-		//UTF-8 문자
-		else if((lpText[i] & 0b11000000) == 0b11000000)
-			--szDelCounter;
-
-		//처리가 끝났소
-		if(szDelCounter <= 0)
-			break;
+	// _szPoint 이전 코드포인트 시작 위치 목록 수집
+	std::vector<utf8proc_ssize_t> starts;
+	utf8proc_ssize_t i = 0;
+	while (i < limit) {
+		starts.push_back(i);
+		utf8proc_int32_t cp;
+		utf8proc_ssize_t n = utf8proc_iterate(u + i, limit - i, &cp);
+		i += (n > 0) ? n : 1;
 	}
 
-	size_t szEreaseRange = _szPoint - i;
-	_lpString->erase(i, szEreaseRange);
+	if (starts.empty())
+		return;
+
+	size_t eraseFrom = (starts.size() <= _szCount)
+		? (size_t)starts[0]
+		: (size_t)starts[starts.size() - _szCount];
+
+	inputStr.erase(eraseFrom, _szPoint - eraseFrom);
 }
 
-void cStrUTF8::removeToBack(std::string* _lpString, size_t _szPoint, size_t _szCount)
+void cStrUTF8::removeToBack(std::string& inputStr, size_t _szPoint, size_t _szCount)
 {
-	size_t iLength = _lpString->length();
-	if(iLength == 0)
+	size_t iLength = inputStr.length();
+	if (iLength == 0 || _szPoint >= iLength)
 		return;
 
-	const char* lpText = _lpString->c_str();
+	const auto* u = (const utf8proc_uint8_t*)inputStr.data();
+	utf8proc_ssize_t len = (utf8proc_ssize_t)iLength;
+	utf8proc_ssize_t i = (utf8proc_ssize_t)_szPoint;
+	size_t removed = 0;
 
-	size_t i = _szPoint;
-	size_t szDelCounter = _szCount;
-	for(; i < iLength && szDelCounter > 0; ++i)
-	{
-		//단일 아스키문자
-		if((lpText[i] & 0b10000000) == 0)
-			--szDelCounter;
-		//UTF-8 문자
-		else if((lpText[i] & 0b11000000) == 0b11000000)
-		{
-			--szDelCounter;
-			//UTF-8 끝까지 달린다
-			while(i < iLength)
-			{
-				++i;
-				if((lpText[i + 1] & 0b11000000) == 0b11000000
-				|| (lpText[i + 1] & 0b10000000) == 0)
-					break;
-			}
-		}
+	while (i < len && removed < _szCount) {
+		utf8proc_int32_t cp;
+		utf8proc_ssize_t n = utf8proc_iterate(u + i, len - i, &cp);
+		i += (n > 0) ? n : 1;
+		++removed;
 	}
 
-	size_t iEreaseRange = i - _szPoint;
-	_lpString->erase(_szPoint, iEreaseRange);
+	inputStr.erase(_szPoint, (size_t)i - _szPoint);
 }

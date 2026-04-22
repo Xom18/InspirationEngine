@@ -35,6 +35,6 @@ bool cFile::ReadFile(const char* _lpFilename)
 	in.seekg(0, std::ifstream::beg);//다시 읽기 포인터를 맨 앞으로
 	m_pData = new char[static_cast<int>(m_Size)];//버퍼에 새로운 공간을 할당한다
 	in.read(m_pData, m_Size);//읽는다
-	
+
 	return true;
 }

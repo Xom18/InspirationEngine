@@ -49,7 +49,7 @@ void cRenderer::drawTexture(SDL_Texture* _lpTexture, int _iX, int _iY, double _d
 	//텍스쳐 정보 받아오기
 	int iWidth = 0;
 	int iHeight = 0;
-	if(SDL_QueryTexture(_lpTexture, NULL, NULL, &iWidth, &iHeight) == -1)
+	if (SDL_QueryTexture(_lpTexture, NULL, NULL, &iWidth, &iHeight) == -1)
 		return;
 
 	//텍스쳐 내에서의 위치
@@ -65,9 +65,9 @@ void cRenderer::drawTexture(SDL_Texture* _lpTexture, int _iX, int _iY, double _d
 	DestRect.y = _iY;
 	DestRect.w = iWidth;
 	DestRect.h = iHeight;
-	if(_dWidthPercent != 100.0)
+	if (_dWidthPercent != 100.0)
 		DestRect.w = static_cast<int>(iWidth * _dWidthPercent * 0.01);
-	if(_dHeightPercent != 100.0)
+	if (_dHeightPercent != 100.0)
 		DestRect.h = static_cast<int>(iHeight * _dHeightPercent * 0.01);
 
 	SDL_RenderCopyEx(m_pRenderer, _lpTexture, &SrcRect, &DestRect, _dAngle, _lpPivot, _Flip);
@@ -80,10 +80,33 @@ void cRenderer::drawSurface(SDL_Surface* _lpSurface, int _iX, int _iY, double _d
 	SDL_DestroyTexture(pTexture);
 }
 
+#ifdef IE_LEGACY_TTF
 void cRenderer::drawText(TTF_Font* _lpFont, const char* _lpText, SDL_Color _Color, int _iX, int _iY, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
 {
-	SDL_Surface* pSurface = nullptr;
-	pSurface = TTF_RenderUTF8_Solid(_lpFont, _lpText, _Color);
+	SDL_Surface* pSurface = TTF_RenderUTF8_Solid(_lpFont, _lpText, _Color);
 	drawSurface(pSurface, _iX, _iY, _dWidthPercent, _dHeightPercent, _dAngle, _lpPivot, _Flip);
 	SDL_FreeSurface(pSurface);
 }
+#else
+void cRenderer::drawText(cFont* _lpFont, const char* _lpText, SDL_Color _Color, int _iX, int _iY, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
+{
+	if (!_lpFont) return;
+	cFontFace* pFace = _lpFont->get();
+	if (!pFace || !pFace->ftFace) return;
+
+	auto glyphs = cTextRenderer::shape(pFace->hbFont, _lpText, (int)std::strlen(_lpText));
+	auto ms     = cTextRenderer::measure(pFace->ftFace, glyphs);
+
+	if (ms.width <= 0 || ms.height <= 0) return;
+
+	SDL_Texture* pTex = cTextRenderer::renderToTexture(
+		m_pRenderer, pFace->ftFace, glyphs, _Color,
+		ms.width, ms.height, ms.ascent);
+
+	if (pTex)
+	{
+		drawTexture(pTex, _iX, _iY, _dWidthPercent, _dHeightPercent, _dAngle, _lpPivot, _Flip);
+		SDL_DestroyTexture(pTex);
+	}
+}
+#endif

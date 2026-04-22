@@ -32,7 +32,7 @@ public:
 	{
 		m_lpRenderer = _lpRenderer;
 	}
-	virtual void draw(){}
-	virtual void update(){}
+	virtual void draw() {}
+	virtual void update() {}
 
 };

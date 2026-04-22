@@ -16,12 +16,12 @@ public:
 	static cInput		m_Input;			//입력, 클릭이나 창 내부 처리도 여기서 받은다음 각 창으로 보냄
 	static cDebugInfo	m_DebugInfo;		//디버그 툴
 	static cFontManager	m_Font;				//폰트 관리하는곳
-	static cWindow*		m_lpMainWindow;		//메인 윈도우
-	static cWindow*		m_lpMouseOnWindow;	//마우스가 올라가 있는 윈도우
-	static cWindow*		m_lpFocusedWindow;	//선택 되있는 윈도우
-	static cTextBox*	m_lpFocusedTextBox;	//선택 되 있는 텍스트 박스
+	static cWindow* m_lpMainWindow;		//메인 윈도우
+	static cWindow* m_lpMouseOnWindow;	//마우스가 올라가 있는 윈도우
+	static cWindow* m_lpFocusedWindow;	//선택 되있는 윈도우
+	static cTextBox* m_lpFocusedTextBox;	//선택 되 있는 텍스트 박스
 private:
-	
+
 	static int m_iOperatePahse;		//현재 어느걸 처리중인지
 	static std::mutex m_mtxEvent;	//이벤트 뮤텍스
 	static std::map<std::string, cWindow*>	m_mapWindow;//윈도우
@@ -56,13 +56,13 @@ public:
 	~cIECore()
 	{
 		std::map<std::string, cWindow*>::iterator ite = m_mapWindow.begin();
-		for(; ite != m_mapWindow.end(); ++ite)
+		for (; ite != m_mapWindow.end(); ++ite)
 			delete ite->second;
 		m_mapWindow.clear();
 		m_mapWindowByID.clear();
 		m_lpMainWindow = nullptr;
 
-		if(m_pMainThread)
+		if (m_pMainThread)
 		{
 			m_pMainThread->join();
 			delete m_pMainThread;
@@ -126,10 +126,10 @@ public:
 	static bool addNewWindow(const char* _csID, cWindow* _pWindow)
 	{
 		//동일한 ID의 창이 있으면 안되기때문에 처리
-		if(getWindow(_csID) != nullptr)
+		if (getWindow(_csID) != nullptr)
 			return false;
 
-		if(m_mapWindow.empty())
+		if (m_mapWindow.empty())
 			m_lpMainWindow = _pWindow;
 		m_mapWindow.insert(std::pair<std::string, cWindow*>(_csID, _pWindow));
 		return true;
@@ -143,7 +143,7 @@ public:
 	static cWindow* getWindow(const char* _csID)
 	{
 		std::map<std::string, cWindow*>::iterator ite = m_mapWindow.find(_csID);
-		if(ite == m_mapWindow.end())
+		if (ite == m_mapWindow.end())
 			return nullptr;
 		return ite->second;
 	}
@@ -171,10 +171,10 @@ public:
 	static void destroyWindow(const char* _csID)
 	{
 		std::map<std::string, cWindow*>::iterator ite = m_mapWindow.find(_csID);
-		if(ite == m_mapWindow.end())
+		if (ite == m_mapWindow.end())
 			return;
 
-		if(ite->second == m_lpMainWindow)
+		if (ite->second == m_lpMainWindow)
 			m_lpMainWindow = nullptr;
 
 		delete ite->second;
@@ -221,7 +221,7 @@ public:
 	static cWindow* getWindowByID(Uint32 _uiID)
 	{
 		std::map<Uint32, cWindow*>::iterator ite = m_mapWindowByID.find(_uiID);
-		if(ite == m_mapWindowByID.end())
+		if (ite == m_mapWindowByID.end())
 			return nullptr;
 		return ite->second;
 	}
@@ -233,7 +233,7 @@ public:
 	{
 		return &m_cvDrawThreadWaiter;
 	}
-	
+
 	/// <summary>
 	/// 창 그릴 때 마다 1씩 증가시켜서 다 되면 draw가 끝났다고 알려주는 함수
 	/// </summary>

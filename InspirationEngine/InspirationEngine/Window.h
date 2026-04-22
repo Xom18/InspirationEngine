@@ -9,11 +9,11 @@ public:
 private:
 	int							m_iRendererCount;	//랜더러 개수
 	std::vector<cRenderer>		m_vecRenderer;		//소프트웨어 랜더러
-	SDL_Window*					m_pSDLWindow;		//창
+	SDL_Window* m_pSDLWindow;		//창
 	int							m_iWidth;			//너비
 	int							m_iHeight;			//높이
 
-	std::thread*				m_pDrawThread;		//그리는 스레드
+	std::thread* m_pDrawThread;		//그리는 스레드
 	bool						m_bDrawThreadIsRunning;//그리는 스레드가 도는중인지
 	bool						m_bIsDrawed;		//이번에 그렸다
 
@@ -25,12 +25,12 @@ public:
 	/// <summary>
 	/// 그리기
 	/// </summary>
-	virtual void draw(){};
+	virtual void draw() {};
 
 	/// <summary>
 	/// X버튼을 눌렀을 때
 	/// </summary>
-	virtual void callXButton(){};
+	virtual void callXButton() {};
 
 	/// <summary>
 	/// 창 생성
@@ -71,7 +71,7 @@ public:
 	/// <returns>랜더러 포인터 / 실패시 nullptr</returns>
 	cRenderer* getRenderer(int _iRendererIndex)
 	{
-		if(static_cast<int>(m_vecRenderer.size()) <= _iRendererIndex)
+		if (static_cast<int>(m_vecRenderer.size()) <= _iRendererIndex)
 			return nullptr;
 
 		return &m_vecRenderer[_iRendererIndex];
@@ -134,7 +134,7 @@ public:
 	/// </summary>
 	void joinDrawThread()
 	{
-		if(m_pDrawThread == nullptr)
+		if (m_pDrawThread == nullptr)
 			return;
 		m_pDrawThread->join();
 	}
@@ -169,10 +169,10 @@ public:
 		Pos.m_iY = _iScreenY;
 
 		const cRenderer* lpRenderer = getRenderer(_iRendererIndex);
-		if(lpRenderer == nullptr)
+		if (lpRenderer == nullptr)
 			return Pos;
 
-		if(lpRenderer->m_iLogicalWidth == 0 && lpRenderer->m_iLogicalHeight == 0)
+		if (lpRenderer->m_iLogicalWidth == 0 && lpRenderer->m_iLogicalHeight == 0)
 			return Pos;
 
 		//상하 또는 좌우 여백이 있는거 처리
@@ -199,10 +199,10 @@ public:
 		Pos.m_iY = _iScreenY;
 
 		const cRenderer* lpRenderer = getRenderer(_iRendererIndex);
-		if(lpRenderer == nullptr)
+		if (lpRenderer == nullptr)
 			return Pos;
 
-		if(lpRenderer->m_iLogicalWidth == 0 && lpRenderer->m_iLogicalHeight == 0)
+		if (lpRenderer->m_iLogicalWidth == 0 && lpRenderer->m_iLogicalHeight == 0)
 			return Pos;
 
 		//픽셀 스케일 배수 처리

@@ -17,7 +17,7 @@ void cMainWindow::draw()
 		Surface = IMG_Load("../data/DungeonCrawl_ProjectUtumnoTileset.png");
 		isOn = true;
 	}
-	
+
 	pRenderer->drawSurface(Surface, 0, 0);
 }
 

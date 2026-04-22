@@ -14,9 +14,11 @@
 #include <stack>
 #include <sstream>
 #include <optional>
+#include "utf8proc.h"
 #include "StrUTF8.h"
 #include "MacroDefine.h"	//매크로 / Define용 헤더
 #include "Font.h"			//폰트 관리
+#include "TextRenderer.h"	//FreeType+HarfBuzz 렌더링 유틸리티
 #include "Input.h"			//입력 처리
 #include "Menu.h"			//메뉴
 #include "TextBox.h"		//메뉴-텍스트박스

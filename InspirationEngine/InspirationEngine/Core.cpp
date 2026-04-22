@@ -92,7 +92,7 @@ void cIECore::operateEvent()
 			//테스트용 코드
 			m_mtxTextEdit.lock();
 			m_bTextEdit = true;
-			if(m_lpFocusedTextBox != nullptr)
+			if (m_lpFocusedTextBox != nullptr)
 			{
 				m_rtTextEditPosition.x = m_lpFocusedTextBox->getCursurScreenPos().x;
 				m_rtTextEditPosition.y = m_lpFocusedTextBox->getCursurScreenPos().y;
@@ -298,7 +298,7 @@ bool cIECore::operateTextEdit(SDL_Event* _lpEvent)
 	break;
 	default:
 		return false;
-	break;
+		break;
 	}
 
 	return true;

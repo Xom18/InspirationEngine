@@ -28,14 +28,14 @@ public:
 
 	~cTextTexture()
 	{
-		if(m_pTexture)
+		if (m_pTexture)
 			SDL_DestroyTexture(m_pTexture);
 	}
 
 	void reset()
 	{
 		memset(&m_rtRect, 0, sizeof(m_rtRect));
-		if(m_pTexture)
+		if (m_pTexture)
 			SDL_DestroyTexture(m_pTexture);
 	}
 };
@@ -65,6 +65,8 @@ private:
 
 	SDL_Point m_CursorScreenPos;	//화면상 커서 위치
 
+	std::vector<size_t> m_vecGraphemeBounds;	//그래핌 클러스터 바이트 경계 목록 (lazy 재빌드)
+
 public:
 	cTextBox()
 	{
@@ -86,7 +88,7 @@ public:
 	void resetTexture()
 	{
 		std::list<cTextTexture*>::iterator ite = m_listTexture.begin();
-		for(; ite != m_listTexture.end(); ++ite)
+		for (; ite != m_listTexture.end(); ++ite)
 		{
 			cTextTexture* pTTexture = *ite;
 			delete pTTexture;
@@ -102,15 +104,20 @@ public:
 	void setFont(cFont* _lpFont)
 	{
 		m_lpFont = _lpFont;
+#ifdef IE_LEGACY_TTF
 		TTF_Font* lpTTF = m_lpFont->get();
-		if(lpTTF != nullptr)
+		if (lpTTF != nullptr)
 			m_iFontHeight = TTF_FontHeight(lpTTF);
+#else
+		m_iFontHeight = m_lpFont->getHeight();
+#endif
 	}
 
 	void setText(const char* _csText)
 	{
 		m_strText = _csText;
 		m_bTextChanged = true;
+		m_vecGraphemeBounds.clear();
 	}
 
 	//텍스트 텍스쳐화
@@ -161,7 +168,7 @@ public:
 	/// <returns></returns>
 	void setCusorCharPos(size_t _szCusorPos)
 	{
-		m_szCursorPos = cStrUTF8::getMemoryPoint(&m_strText, _szCusorPos);
+		m_szCursorPos = cStrUTF8::getMemoryPoint(m_strText, _szCusorPos);
 	}
 
 	/// <summary>
@@ -169,33 +176,20 @@ public:
 	/// </summary>
 	void cusorMoveNext()
 	{
-		//유효하지가 않아
-		if(m_szCursorPos == std::string::npos)
+		if (m_szCursorPos == std::string::npos)
 		{
 			m_szCursorPos = 0;
 			return;
 		}
-		
-		//이미 끝이야
-		if(m_szCursorPos >= m_strText.length())
+		if (m_szCursorPos >= m_strText.length())
 			return;
 
-		//아스키면 바로 다음으로
-		const char* csText = m_strText.c_str();
-		if(cStrUTF8::isCharType(csText[m_szCursorPos]) == dCHAR_TYPE_ASCII)
-		{
-			++m_szCursorPos;
-			return;
-		}
+		if (m_vecGraphemeBounds.empty())
+			rebuildGraphemeBounds();
 
-		//UTF-8이다
-		size_t szNewPos = m_szCursorPos + 1;
-		for(; szNewPos < m_strText.length(); ++szNewPos)
-		{
-			if(cStrUTF8::isCharType(csText[szNewPos]) != dCHAR_TYPE_UTF8_M)
-				break;
-		}
-		m_szCursorPos = szNewPos;
+		auto it = std::upper_bound(m_vecGraphemeBounds.begin(), m_vecGraphemeBounds.end(), m_szCursorPos);
+		if (it != m_vecGraphemeBounds.end())
+			m_szCursorPos = *it;
 	}
 
 	/// <summary>
@@ -203,33 +197,23 @@ public:
 	/// </summary>
 	void cusorMovePrevious()
 	{
-		//커서가 비활성이다
-		if(m_szCursorPos == std::string::npos)
+		if (m_szCursorPos == std::string::npos)
 		{
 			m_szCursorPos = 0;
 			return;
 		}
-
-		//이미 제일 앞이다
-		if(m_szCursorPos == 0)
+		if (m_szCursorPos == 0)
 			return;
 
-		//이 앞에가 아스키면 바로 다음으로
-		const char* csText = m_strText.c_str();
-		if(cStrUTF8::isCharType(csText[m_szCursorPos - 1]) == dCHAR_TYPE_ASCII)
-		{
-			--m_szCursorPos;
-			return;
-		}
+		if (m_vecGraphemeBounds.empty())
+			rebuildGraphemeBounds();
 
-		//UTF-8이다
-		size_t szNewPos = m_szCursorPos - 1;
-		for(; szNewPos > 0; --szNewPos)
+		auto it = std::lower_bound(m_vecGraphemeBounds.begin(), m_vecGraphemeBounds.end(), m_szCursorPos);
+		if (it != m_vecGraphemeBounds.begin())
 		{
-			if(cStrUTF8::isCharType(csText[szNewPos]) == dCHAR_TYPE_UTF8_B)
-				break;
+			--it;
+			m_szCursorPos = *it;
 		}
-		m_szCursorPos = szNewPos;
 	}
 
 	/// <summary>
@@ -241,14 +225,15 @@ public:
 	void removeByBackspace(size_t _szCount = 1)
 	{
 		//커서가 없다
-		if(m_szCursorPos == std::string::npos)
+		if (m_szCursorPos == std::string::npos)
 			return;
 		size_t szBefore = m_strText.length();
-		cStrUTF8::removeToFront(&m_strText, m_szCursorPos, _szCount);
+		cStrUTF8::removeToFront(m_strText, m_szCursorPos, _szCount);
 		size_t szAfter = m_strText.length();
 
 		m_szCursorPos -= szBefore - szAfter;
 		m_bTextChanged = true;
+		m_vecGraphemeBounds.clear();
 	}
 
 	/// <summary>
@@ -259,18 +244,19 @@ public:
 	/// <param name="_bIsMemPoint">_iPoint가 메모리상에서의 위치인지</param>
 	void removeByDelete(size_t _szCount = 1)
 	{
-		cStrUTF8::removeToBack(&m_strText, m_szCursorPos, _szCount);
+		cStrUTF8::removeToBack(m_strText, m_szCursorPos, _szCount);
 		m_bTextChanged = true;
+		m_vecGraphemeBounds.clear();
 	}
 
 	void removeIMEInput()
 	{
 		//지울게 없는경우
-		if(m_szIMEInputLength == 0)
+		if (m_szIMEInputLength == 0)
 			return;
 
 		//비정상적인 경우
-		if(m_szIMEInputLength > m_szCursorPos)
+		if (m_szIMEInputLength > m_szCursorPos)
 			return;
 
 		//입력되있는 IME길이만큼 지움
@@ -278,6 +264,7 @@ public:
 		m_strText.erase(m_szCursorPos, m_szIMEInputLength);
 		m_szIMEInputLength = 0;
 		m_bTextChanged = true;
+		m_vecGraphemeBounds.clear();
 	}
 
 	/// <summary>
@@ -293,11 +280,12 @@ public:
 	void insertCusorPos(const char* _csText)
 	{
 		//커서가 없다
-		if(m_szCursorPos == std::string::npos)
+		if (m_szCursorPos == std::string::npos)
 			return;
 		m_strText.insert(m_szCursorPos, _csText);
 		m_szCursorPos += std::strlen(_csText);
 		m_bTextChanged = true;
+		m_vecGraphemeBounds.clear();
 	}
 
 	void setPos(int _iX, int _iY)
@@ -346,5 +334,33 @@ public:
 	}
 
 private:
+	void rebuildGraphemeBounds()
+	{
+		m_vecGraphemeBounds.clear();
+		const auto* u = (const utf8proc_uint8_t*)m_strText.data();
+		utf8proc_ssize_t len = (utf8proc_ssize_t)m_strText.size();
+
+		m_vecGraphemeBounds.push_back(0);
+		if (len == 0)
+			return;
+
+		utf8proc_int32_t cp1, cp2;
+		utf8proc_int32_t state = 0;
+		utf8proc_ssize_t i = 0;
+
+		utf8proc_ssize_t n = utf8proc_iterate(u, len, &cp1);
+		if (n <= 0) { m_vecGraphemeBounds.push_back((size_t)len); return; }
+		i = n;
+
+		while (i < len) {
+			utf8proc_ssize_t m = utf8proc_iterate(u + i, len - i, &cp2);
+			if (m <= 0) m = 1;
+			if (utf8proc_grapheme_break_stateful(cp1, cp2, &state))
+				m_vecGraphemeBounds.push_back((size_t)i);
+			cp1 = cp2;
+			i += m;
+		}
+		m_vecGraphemeBounds.push_back((size_t)len);
+	}
 
 };

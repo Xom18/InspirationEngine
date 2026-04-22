@@ -2,22 +2,24 @@
 #include "MainWindow.h"
 #include "DebugWindow.h"
 
+void TestStrUTF8();
+
 #ifdef _WIN64
-	#ifdef _DEBUG
-		#pragma comment(lib, "../x64/Debug/InspirationEngine.lib")
-	#else
-		#pragma comment(lib, "../x64/Release/InspirationEngine.lib")
-	#endif
+#ifdef _DEBUG
+#pragma comment(lib, "../x64/Debug/InspirationEngine.lib")
 #else
-	#ifdef _DEBUG
-		#pragma comment(lib, "../Debug/InspirationEngine.lib")
-	#else
-		#pragma comment(lib, "../Release/InspirationEngine.lib")
-	#endif
+#pragma comment(lib, "../x64/Release/InspirationEngine.lib")
+#endif
+#else
+#ifdef _DEBUG
+#pragma comment(lib, "../Debug/InspirationEngine.lib")
+#else
+#pragma comment(lib, "../Release/InspirationEngine.lib")
+#endif
 #endif
 
 #ifdef _DEBUG
-	#pragma comment(linker, "/SUBSYSTEM:CONSOLE")
+#pragma comment(linker, "/SUBSYSTEM:CONSOLE")
 #endif
 
 #define SCREEN_WIDTH 1280
@@ -25,8 +27,10 @@
 
 int main(int argc, char* argv[])
 {
+	//콘솔창 인코딩 UTF-8
 	std::locale::global(std::locale("ko_KR.UTF-8"));
 
+	TestStrUTF8();
 
 	int iTickRate = 1000 / 60;;
 
@@ -45,7 +49,7 @@ int main(int argc, char* argv[])
 		bool bSuccess = cIECore::addNewWindow("Main", lpMainWindow);
 
 		//실패
-		if(!bSuccess)
+		if (!bSuccess)
 		{
 			delete lpMainWindow;
 			return __LINE__;
@@ -67,14 +71,14 @@ int main(int argc, char* argv[])
 
 
 	//디버그용 창 생성
-	if(true)
+	if (true)
 	{
 		cDebugWindow* lpDebugWindow = new cDebugWindow();
 
 		bool bSuccess = cIECore::addNewWindow("Debug", lpDebugWindow);
 
 		//실패
-		if(!bSuccess)
+		if (!bSuccess)
 		{
 			delete lpDebugWindow;
 			return __LINE__;
@@ -89,8 +93,8 @@ int main(int argc, char* argv[])
 	cIECore::setTickRate(iTickRate);
 
 	//폰트 엔진 초기화
-	if(TTF_Init() != 0)
-		return false;
+	if (TTF_Init() != 0)
+		return 1;
 
 	//폰트 추가
 	cIECore::m_Font.addNewFont(0, "../data/H2PORL.ttf", 20);
@@ -102,24 +106,22 @@ int main(int argc, char* argv[])
 	//엔진 시작
 	cIECore::beginEngine();
 
-	//SDL_StopTextInput();
-	//SDL_StartTextInput();
 	bool useIME = false;
 	//이벤트 처리루프
 	while (cIECore::isRunning())
 	{
 		SDL_Event Event;
-		if(SDL_WaitEventTimeout(&Event, iTickRate))
+		if (SDL_WaitEventTimeout(&Event, iTickRate))
 		{
 			cIECore::eventPushBack(&Event);
-			
+
 			//나머지 이벤트가 있을 수 있으니 처리
 			if (SDL_PollEvent(&Event))
 				cIECore::eventPushBack(&Event);
 		}
-		
+
 		//메인스레드에서 호출해야 IME 창 위치 설정하는게 먹음
-		//스톱 시키고 바로 스타트 시키는건 안할거다 일단 테스트 코드로 남겨둔부분
+		//스톱 시키고 바로 스타트 시키는걸 해야 IME 입력박스 위치를 갱신가능
 		auto rect = cIECore::getTextEditPosition();
 		if (rect.has_value())
 		{
