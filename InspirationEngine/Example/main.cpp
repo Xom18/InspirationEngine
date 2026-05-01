@@ -4,18 +4,10 @@
 
 void TestStrUTF8();
 
-#ifdef _WIN64
 #ifdef _DEBUG
 #pragma comment(lib, "../x64/Debug/InspirationEngine.lib")
 #else
 #pragma comment(lib, "../x64/Release/InspirationEngine.lib")
-#endif
-#else
-#ifdef _DEBUG
-#pragma comment(lib, "../Debug/InspirationEngine.lib")
-#else
-#pragma comment(lib, "../Release/InspirationEngine.lib")
-#endif
 #endif
 
 #ifdef _DEBUG
@@ -91,10 +83,6 @@ int main(int argc, char* argv[])
 
 	//처리 간격 설정
 	cIECore::setTickRate(iTickRate);
-
-	//폰트 엔진 초기화
-	if (TTF_Init() != 0)
-		return 1;
 
 	//폰트 추가
 	cIECore::m_Font.addNewFont(0, "../data/H2PORL.ttf", 20);

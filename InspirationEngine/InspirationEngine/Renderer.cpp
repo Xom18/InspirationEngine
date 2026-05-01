@@ -80,14 +80,6 @@ void cRenderer::drawSurface(SDL_Surface* _lpSurface, int _iX, int _iY, double _d
 	SDL_DestroyTexture(pTexture);
 }
 
-#ifdef IE_LEGACY_TTF
-void cRenderer::drawText(TTF_Font* _lpFont, const char* _lpText, SDL_Color _Color, int _iX, int _iY, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
-{
-	SDL_Surface* pSurface = TTF_RenderUTF8_Solid(_lpFont, _lpText, _Color);
-	drawSurface(pSurface, _iX, _iY, _dWidthPercent, _dHeightPercent, _dAngle, _lpPivot, _Flip);
-	SDL_FreeSurface(pSurface);
-}
-#else
 void cRenderer::drawText(cFont* _lpFont, const char* _lpText, SDL_Color _Color, int _iX, int _iY, double _dWidthPercent, double _dHeightPercent, double _dAngle, SDL_Point* _lpPivot, SDL_RendererFlip _Flip)
 {
 	if (!_lpFont) return;
@@ -109,4 +101,3 @@ void cRenderer::drawText(cFont* _lpFont, const char* _lpText, SDL_Color _Color, 
 		SDL_DestroyTexture(pTex);
 	}
 }
-#endif

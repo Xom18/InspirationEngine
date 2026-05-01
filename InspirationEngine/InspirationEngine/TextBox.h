@@ -104,13 +104,7 @@ public:
 	void setFont(cFont* _lpFont)
 	{
 		m_lpFont = _lpFont;
-#ifdef IE_LEGACY_TTF
-		TTF_Font* lpTTF = m_lpFont->get();
-		if (lpTTF != nullptr)
-			m_iFontHeight = TTF_FontHeight(lpTTF);
-#else
 		m_iFontHeight = m_lpFont->getHeight();
-#endif
 	}
 
 	void setText(const char* _csText)

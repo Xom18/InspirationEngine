@@ -2,7 +2,6 @@
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
-#include <SDL/SDL_TTF.h>
 #include <algorithm>
 #include <thread>
 #include <vector>

@@ -112,11 +112,7 @@ public:
 	/// <param name="_dAngle">회전 각도(도)</param>
 	/// <param name="_lpPivot">회전 중심</param>
 	/// <param name="_Flip">상하, 좌우 반전 SDL_FLIP_HORIZONTAL / SDL_FLIP_VERTICAL</param>
-#ifdef IE_LEGACY_TTF
-	void drawText(TTF_Font* _lpFont, const char* _lpText, SDL_Color _Color, int _iX, int _iY, double _dWidthPercent = 100, double _dHeightPercent = 100, double _dAngle = 0, SDL_Point* _lpPivot = nullptr, SDL_RendererFlip _Flip = SDL_FLIP_NONE);
-#else
 	void drawText(cFont* _lpFont, const char* _lpText, SDL_Color _Color, int _iX, int _iY, double _dWidthPercent = 100, double _dHeightPercent = 100, double _dAngle = 0, SDL_Point* _lpPivot = nullptr, SDL_RendererFlip _Flip = SDL_FLIP_NONE);
-#endif
 
 private:
 
