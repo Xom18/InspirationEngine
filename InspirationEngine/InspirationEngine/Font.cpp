@@ -20,10 +20,6 @@ bool cFontManager::addNewFont(int _iFontID, const char* _csFontDir, int _iFontSi
 
 		FT_Set_Pixel_Sizes(face, 0, (FT_UInt)_iFontSize);
 
-		// Bold 합성 (bit 0x01)
-		if (i & IE_FONT_STYLE_BOLD)
-			FT_GlyphSlot_Embolden(face->glyph);
-
 		// Italic 합성 (bit 0x02)
 		if (i & IE_FONT_STYLE_ITALIC)
 		{
@@ -33,6 +29,7 @@ bool cFontManager::addNewFont(int _iFontID, const char* _csFontDir, int _iFontSi
 
 		cFontFace* pFace = new cFontFace();
 		pFace->ftFace = face;
+		pFace->bBold  = (i & IE_FONT_STYLE_BOLD) != 0;
 
 		// hb_ft_font_create 미사용 — blob 경로로 face/font 생성
 		hb_blob_t* hbBlob = hb_blob_create_from_file(_csFontDir);

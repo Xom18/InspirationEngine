@@ -14,6 +14,7 @@ struct cFontFace
 {
 	FT_Face    ftFace = nullptr;
 	hb_font_t* hbFont = nullptr;
+	bool       bBold  = false;
 
 	~cFontFace()
 	{

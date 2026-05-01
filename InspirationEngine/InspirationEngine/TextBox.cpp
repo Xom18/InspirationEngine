@@ -1,4 +1,4 @@
-﻿#include "InspirationEngine.h"
+#include "InspirationEngine.h"
 
 void cTextBox::transToTexture()
 {
@@ -19,7 +19,7 @@ void cTextBox::transToTexture()
 	m_szDrawHash = szHash;
 	resetTexture();
 
-std::stack<SDL_Color> stkColor;
+	std::stack<SDL_Color> stkColor;
 	stkColor.push(m_Color);
 
 	// 스타일 스택: int (IE_FONT_STYLE_*)
@@ -253,7 +253,8 @@ std::stack<SDL_Color> stkColor;
 				stkColor.top(),
 				ms.width  > 0 ? ms.width  : 1,
 				ms.height > 0 ? ms.height : 1,
-				iAscent);
+				iAscent,
+				pCurFace->bBold);
 
 			if (pTex)
 			{

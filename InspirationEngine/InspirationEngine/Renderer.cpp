@@ -93,7 +93,7 @@ void cRenderer::drawText(cFont* _lpFont, const char* _lpText, SDL_Color _Color, 
 
 	SDL_Texture* pTex = cTextRenderer::renderToTexture(
 		m_pRenderer, pFace->ftFace, glyphs, _Color,
-		ms.width, ms.height, ms.ascent);
+		ms.width, ms.height, ms.ascent, pFace->bBold);
 
 	if (pTex)
 	{

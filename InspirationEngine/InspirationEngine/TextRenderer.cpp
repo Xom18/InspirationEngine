@@ -61,7 +61,8 @@ SDL_Texture* cTextRenderer::renderToTexture(
 	SDL_Color                        color,
 	int                              w,
 	int                              h,
-	int                              ascent)
+	int                              ascent,
+	bool                             bBold)
 {
 	if (w <= 0 || h <= 0)
 		return nullptr;
@@ -73,6 +74,7 @@ SDL_Texture* cTextRenderer::renderToTexture(
 	for (const auto& g : glyphs)
 	{
 		if (FT_Load_Glyph(face, g.glyphIndex, FT_LOAD_DEFAULT) != 0) { penX += g.xAdvance >> 6; continue; }
+		if (bBold) FT_GlyphSlot_Embolden(face->glyph);
 		if (FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL) != 0) { penX += g.xAdvance >> 6; continue; }
 
 		FT_Bitmap& bmp = face->glyph->bitmap;

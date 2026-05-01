@@ -50,7 +50,8 @@ public:
 		SDL_Color                          color,
 		int                                w,
 		int                                h,
-		int                                ascent);
+		int                                ascent,
+		bool                               bBold = false);
 };
 
 #endif // !IE_LEGACY_TTF
