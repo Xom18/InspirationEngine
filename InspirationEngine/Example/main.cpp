@@ -19,9 +19,6 @@ void TestStrUTF8();
 
 int main(int argc, char* argv[])
 {
-	//콘솔창 인코딩 UTF-8
-	std::locale::global(std::locale("ko_KR.UTF-8"));
-
 	TestStrUTF8();
 
 	int iTickRate = 1000 / 60;;
