@@ -2,3 +2,6 @@ root = true
 
 [*]
 charset = utf-8
+
+[*.{cpp,h,hpp,c,cc}]
+charset = utf-8
