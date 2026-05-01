@@ -1,104 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Interface">
-      <UniqueIdentifier>{de00e7bb-b452-449d-bc3d-ba29651c491e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resource">
-      <UniqueIdentifier>{edf3edc2-427e-438e-964e-af466804acdd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Input">
-      <UniqueIdentifier>{2d44e40a-a668-4a86-b55b-e06f85a2198e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MouseCursor">
-      <UniqueIdentifier>{a6b495ce-9cf7-4b27-bca9-e99902b8063f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Etc.">
+    <Filter Include="Core">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Window">
       <UniqueIdentifier>{32586c75-a05d-4581-8106-ef531362cfad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{2d44e40a-a668-4a86-b55b-e06f85a2198e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{de00e7bb-b452-449d-bc3d-ba29651c491e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Text">
+      <UniqueIdentifier>{a1b2c3d4-e5f6-7890-abcd-ef1234567890}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{edf3edc2-427e-438e-964e-af466804acdd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Interface.h">
-      <Filter>Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Menu.h">
-      <Filter>Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Core.h">
-      <Filter>Etc.</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugInfo.h">
-      <Filter>Etc.</Filter>
-    </ClInclude>
-    <ClInclude Include="MacroDefine.h">
-      <Filter>Etc.</Filter>
-    </ClInclude>
-    <ClInclude Include="File.h">
-      <Filter>Resource</Filter>
-    </ClInclude>
-    <ClInclude Include="Input.h">
-      <Filter>Input</Filter>
-    </ClInclude>
-    <ClInclude Include="MouseCusor.h">
-      <Filter>MouseCursor</Filter>
-    </ClInclude>
-    <ClInclude Include="TextBox.h">
-      <Filter>Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Font.h">
-      <Filter>Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="Window.h">
-      <Filter>Window</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>Window</Filter>
-    </ClInclude>
     <ClInclude Include="InspirationEngine.h" />
-    <ClInclude Include="StrUTF8.h">
-      <Filter>Etc.</Filter>
+    <ClInclude Include="Core\Core.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\DebugInfo.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\MacroDefine.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Window\Window.h">
+      <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Window\Renderer.h">
+      <Filter>Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\Input.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\MouseCusor.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Interface.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\Menu.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\TextBox.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Text\Font.h">
+      <Filter>Text</Filter>
+    </ClInclude>
+    <ClInclude Include="Text\TextRenderer.h">
+      <Filter>Text</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\StrUTF8.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\File.h">
+      <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Core.cpp">
-      <Filter>Etc.</Filter>
+    <ClCompile Include="utf8proc\utf8proc.c" />
+    <ClCompile Include="Core\Core.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="DebugInfo.cpp">
-      <Filter>Etc.</Filter>
+    <ClCompile Include="Core\DebugInfo.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Interface.cpp">
-      <Filter>Interface</Filter>
+    <ClCompile Include="Window\Window.cpp">
+      <Filter>Window</Filter>
     </ClCompile>
-    <ClCompile Include="Menu.cpp">
-      <Filter>Interface</Filter>
+    <ClCompile Include="Window\Renderer.cpp">
+      <Filter>Window</Filter>
     </ClCompile>
-    <ClCompile Include="File.cpp">
-      <Filter>Resource</Filter>
-    </ClCompile>
-    <ClCompile Include="Input.cpp">
+    <ClCompile Include="Input\Input.cpp">
       <Filter>Input</Filter>
     </ClCompile>
-    <ClCompile Include="MouseCusor.cpp">
-      <Filter>MouseCursor</Filter>
+    <ClCompile Include="Input\MouseCusor.cpp">
+      <Filter>Input</Filter>
     </ClCompile>
-    <ClCompile Include="TextBox.cpp">
-      <Filter>Interface</Filter>
+    <ClCompile Include="UI\Interface.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
-    <ClCompile Include="Font.cpp">
-      <Filter>Interface</Filter>
+    <ClCompile Include="UI\Menu.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
-    <ClCompile Include="Window.cpp">
-      <Filter>Window</Filter>
+    <ClCompile Include="UI\TextBox.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Window</Filter>
+    <ClCompile Include="Text\Font.cpp">
+      <Filter>Text</Filter>
     </ClCompile>
-    <ClCompile Include="StrUTF8.cpp">
-      <Filter>Etc.</Filter>
+    <ClCompile Include="Text\TextRenderer.cpp">
+      <Filter>Text</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\StrUTF8.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\File.cpp">
+      <Filter>Util</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

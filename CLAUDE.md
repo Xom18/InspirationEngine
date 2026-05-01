@@ -11,7 +11,7 @@ Visual Studio 2022에서 `InspirationEngine/InspirationEngine.sln` 열고 빌드
 - C++20, MSVC v143, x86/x64 모두 지원
 - 외부 의존성(SDL2, SDL2_ttf, SDL2_image, SDL2_mixer)은 `include/`, `lib/`, `dll/`에 번들됨
 
-테스트 실행: Example 프로젝트 빌드 후 실행 → `TestStrUTF8` 함수가 콘솔에 결과 출력.
+테스트 실행: Example 프로젝트 빌드 후 실행 → `cTestStrUTF8::run()` 이 콘솔에 결과 출력.
 
 ## 아키텍처
 
@@ -56,9 +56,14 @@ cIECore::draw()           ← cvDrawCompleteWaiter 대기 후 SDL_RenderPresent 
 
 한국어/중국어/일본어 입력(IME)은 `cIECore::m_rtTextEditPosition`으로 후보창 위치를 SDL에 전달. `cTextBox`에서 포커스 변경 시 `updateTextEditPosition()` 호출.
 
-### 클래스 접두어 규칙
+## 코딩 컨벤션
 
-- `c` prefix → 클래스 (예: `cWindow`, `cRenderer`)
-- `m_lp` prefix → 포인터 멤버
-- `m_i` prefix → int 멤버
-- `_lp` / `_sz` / `_cs` → 함수 파라미터 (포인터 / size_t / const char*)
+`CODING_CONVENTION.md` 참조. 요약:
+
+- 클래스: PascalCase, 엔진 라이브러리 클래스는 `IE` 접두어 (예: `IECore`, `IEWindow`)
+- 멤버 변수: `m_` + camelCase (타입 접두어 없음)
+- 함수/메서드: PascalCase
+- 변수/파라미터: camelCase (타입 접두어 없음)
+- 정수: `int32_t`, `uint32_t` 등 고정 크기 타입
+
+> 현재 코드베이스는 구 컨벤션(`c` 접두어, `m_lp`/`m_i` 등)을 사용 중이며 순차 마이그레이션 예정.

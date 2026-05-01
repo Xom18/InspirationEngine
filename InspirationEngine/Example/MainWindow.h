@@ -1,6 +1,6 @@
 #pragma once
 
-class cMainWindow: public cWindow
+class MainWindow : public IEWindow
 {
 public:
 

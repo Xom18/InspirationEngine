@@ -1,9 +1,9 @@
 #pragma once
 
-class cDebugWindow: public cWindow
+class DebugWindow : public IEWindow
 {
 public:
-	cTextBox m_DebugText;
+	TextBox m_DebugText;
 
 
 private:

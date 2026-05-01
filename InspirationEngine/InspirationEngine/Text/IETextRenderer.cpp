@@ -2,13 +2,13 @@
 
 #ifndef IE_LEGACY_TTF
 // ──────────────────────────────────────────────
-//  cTextRenderer
+//  IETextRenderer
 // ──────────────────────────────────────────────
 
-std::vector<cShapedGlyph> cTextRenderer::shape(
+std::vector<ShapedGlyph> IETextRenderer::shape(
 	hb_font_t*     hbFont,
 	const char*    utf8Text,
-	int            byteLen,
+	int32_t        byteLen,
 	hb_script_t    script,
 	hb_direction_t direction)
 {
@@ -27,7 +27,7 @@ std::vector<cShapedGlyph> cTextRenderer::shape(
 	hb_glyph_info_t*     info      = hb_buffer_get_glyph_infos(buf, &count);
 	hb_glyph_position_t* positions = hb_buffer_get_glyph_positions(buf, &count);
 
-	std::vector<cShapedGlyph> result(count);
+	std::vector<ShapedGlyph> result(count);
 	for (uint32_t i = 0; i < count; ++i)
 	{
 		result[i].glyphIndex = info[i].codepoint;
@@ -42,35 +42,35 @@ std::vector<cShapedGlyph> cTextRenderer::shape(
 	return result;
 }
 
-cTextMeasure cTextRenderer::measure(FT_Face face, const std::vector<cShapedGlyph>& glyphs)
+TextMeasure IETextRenderer::measure(FT_Face face, const std::vector<ShapedGlyph>& glyphs)
 {
-	int width = 0;
+	int32_t width = 0;
 	for (const auto& g : glyphs)
 		width += g.xAdvance >> 6;
 
-	int ascent  =  (int)(face->size->metrics.ascender  >> 6);
-	int descent = -(int)(face->size->metrics.descender >> 6);
+	int32_t ascent  =  static_cast<int32_t>(face->size->metrics.ascender  >> 6);
+	int32_t descent = -static_cast<int32_t>(face->size->metrics.descender >> 6);
 
 	return { width, ascent + descent, ascent, descent };
 }
 
-SDL_Texture* cTextRenderer::renderToTexture(
+SDL_Texture* IETextRenderer::renderToTexture(
 	SDL_Renderer*                    renderer,
 	FT_Face                          face,
-	const std::vector<cShapedGlyph>& glyphs,
+	const std::vector<ShapedGlyph>&  glyphs,
 	SDL_Color                        color,
-	int                              w,
-	int                              h,
-	int                              ascent,
+	int32_t                          w,
+	int32_t                          h,
+	int32_t                          ascent,
 	bool                             bBold)
 {
 	if (w <= 0 || h <= 0)
 		return nullptr;
 
 	// CPU 픽셀 버퍼에 합성 — 소프트웨어 렌더러에서도 동작
-	std::vector<uint32_t> pixels((size_t)w * h, 0);
+	std::vector<uint32_t> pixels(static_cast<size_t>(w) * h, 0);
 
-	int penX = 0;
+	int32_t penX = 0;
 	for (const auto& g : glyphs)
 	{
 		if (FT_Load_Glyph(face, g.glyphIndex, FT_LOAD_DEFAULT) != 0) { penX += g.xAdvance >> 6; continue; }
@@ -78,37 +78,37 @@ SDL_Texture* cTextRenderer::renderToTexture(
 		if (FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL) != 0) { penX += g.xAdvance >> 6; continue; }
 
 		FT_Bitmap& bmp = face->glyph->bitmap;
-		int drawX = penX + (g.xOffset >> 6) + face->glyph->bitmap_left;
-		int drawY = ascent - face->glyph->bitmap_top + (g.yOffset >> 6);
+		int32_t drawX = penX + (g.xOffset >> 6) + face->glyph->bitmap_left;
+		int32_t drawY = ascent - face->glyph->bitmap_top + (g.yOffset >> 6);
 
 		for (unsigned row = 0; row < bmp.rows; ++row)
 		{
-			int dstY = drawY + (int)row;
+			int32_t dstY = drawY + static_cast<int32_t>(row);
 			if (dstY < 0 || dstY >= h) continue;
 			for (unsigned col = 0; col < bmp.width; ++col)
 			{
-				int dstX = drawX + (int)col;
+				int32_t dstX = drawX + static_cast<int32_t>(col);
 				if (dstX < 0 || dstX >= w) continue;
 
 				uint8_t alpha = bmp.buffer[row * bmp.pitch + col];
 				if (alpha == 0) continue;
 
 				// ARGB8888
-				uint32_t& dst = pixels[(size_t)dstY * w + dstX];
+				uint32_t& dst = pixels[static_cast<size_t>(dstY) * w + dstX];
 				// 알파 합성 (src over dst)
-				uint32_t srcA = (uint32_t)alpha * color.a / 255;
+				uint32_t srcA = static_cast<uint32_t>(alpha) * color.a / 255;
 				uint32_t dstA = (dst >> 24) & 0xFF;
 				uint32_t outA = srcA + dstA * (255 - srcA) / 255;
 
 				auto blend = [&](uint8_t sc, uint8_t dc) -> uint8_t {
 					if (outA == 0) return 0;
-					return (uint8_t)((sc * srcA + dc * dstA * (255 - srcA) / 255) / outA);
+					return static_cast<uint8_t>((sc * srcA + dc * dstA * (255 - srcA) / 255) / outA);
 				};
 
 				dst = (outA << 24)
-					| ((uint32_t)blend(color.r, (dst >> 16) & 0xFF) << 16)
-					| ((uint32_t)blend(color.g, (dst >>  8) & 0xFF) <<  8)
-					| ((uint32_t)blend(color.b,  dst        & 0xFF));
+					| (static_cast<uint32_t>(blend(color.r, (dst >> 16) & 0xFF)) << 16)
+					| (static_cast<uint32_t>(blend(color.g, (dst >>  8) & 0xFF)) <<  8)
+					| (static_cast<uint32_t>(blend(color.b,  dst        & 0xFF)));
 			}
 		}
 		penX += g.xAdvance >> 6;

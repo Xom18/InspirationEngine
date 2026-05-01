@@ -1,12 +1,11 @@
+#include <stdio.h>
+#include <SDL/SDL_ttf.h>
 #include "../InspirationEngine/InspirationEngine.h"
 #include "MainWindow.h"
 
-#include <SDL/SDL_ttf.h>
-#include <stdio.h>
-
-void cMainWindow::draw()
+void MainWindow::draw()
 {
-	cRenderer* pRenderer = getRenderer(1);
+	IERenderer* pRenderer = getRenderer(1);
 	if (pRenderer == nullptr)
 		return;
 
@@ -21,7 +20,7 @@ void cMainWindow::draw()
 	pRenderer->drawSurface(Surface, 0, 0);
 }
 
-void cMainWindow::callXButton()
+void MainWindow::callXButton()
 {
-	cIECore::stopEngine();
+	IECore::stopEngine();
 }

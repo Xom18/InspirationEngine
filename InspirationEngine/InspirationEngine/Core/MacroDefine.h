@@ -8,26 +8,26 @@
 /// <summary>
 /// 정수형 X, Y있는 변수
 /// </summary>
-class cIVector2
+class IVector2
 {
 public:
-	int m_iX;
-	int m_iY;
+	int32_t m_x;
+	int32_t m_y;
 
 private:
 
 
 public:
 
-	cIVector2()
+	IVector2()
 	{
 		reset();
 	}
 
 	void reset()
 	{
-		m_iX = 0;
-		m_iY = 0;
+		m_x = 0;
+		m_y = 0;
 	}
 
 private:

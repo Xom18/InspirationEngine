@@ -1,8 +1,10 @@
+#if defined(_WIN32) && defined(_DEBUG)
+#include <windows.h>
+#endif
 #include "../InspirationEngine/InspirationEngine.h"
 #include "MainWindow.h"
 #include "DebugWindow.h"
-
-void TestStrUTF8();
+#include "Test/TestStrUTF8.h"
 
 #ifdef _DEBUG
 #pragma comment(lib, "../x64/Debug/InspirationEngine.lib")
@@ -14,28 +16,32 @@ void TestStrUTF8();
 #pragma comment(linker, "/SUBSYSTEM:CONSOLE")
 #endif
 
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 720
+constexpr int32_t g_ScreenWidth = 1280;
+constexpr int32_t g_ScreenHeight = 720;
 
 int main(int argc, char* argv[])
 {
-	TestStrUTF8();
+#if defined(_WIN32) && defined(_DEBUG)
+	SetConsoleOutputCP(CP_UTF8);
+	SetConsoleCP(CP_UTF8);
+#endif
+	TestStrUTF8().run();
 
-	int iTickRate = 1000 / 60;;
+	int32_t iTickRate = 1000 / 60;;
 
 	//디버그용 창 좌표
-	int iX = 0;
-	int iY = 0;
-	int iW = 0;
-	int iH = 0;
+	int32_t iX = 0;
+	int32_t iY = 0;
+	int32_t iW = 0;
+	int32_t iH = 0;
 
 	//IME출력설정, 기본 텍스트 인풋모드인거 off
 	SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 
 	//주 게임 창 생성
 	{
-		cMainWindow* lpMainWindow = new cMainWindow();
-		bool bSuccess = cIECore::addNewWindow("Main", lpMainWindow);
+		MainWindow* lpMainWindow = new MainWindow();
+		bool bSuccess = IECore::addNewWindow("Main", lpMainWindow);
 
 		//실패
 		if (!bSuccess)
@@ -43,11 +49,11 @@ int main(int argc, char* argv[])
 			delete lpMainWindow;
 			return __LINE__;
 		}
-		cIECore::setMainWindow(lpMainWindow);
+		IECore::setMainWindow(lpMainWindow);
 
-		lpMainWindow->createWindow("Inspiration", SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 0, 2);	//창 생성
+		lpMainWindow->createWindow("Inspiration", g_ScreenWidth, g_ScreenHeight, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 0, 2);	//창 생성
 
-		cIECore::addWindowIndex(lpMainWindow);
+		IECore::addWindowIndex(lpMainWindow);
 
 		SDL_Window* lpSDLWindow = lpMainWindow->getSDLWindow();
 		SDL_GetWindowPosition(lpSDLWindow, &iX, &iY);
@@ -62,9 +68,9 @@ int main(int argc, char* argv[])
 	//디버그용 창 생성
 	if (true)
 	{
-		cDebugWindow* lpDebugWindow = new cDebugWindow();
+		DebugWindow* lpDebugWindow = new DebugWindow();
 
-		bool bSuccess = cIECore::addNewWindow("Debug", lpDebugWindow);
+		bool bSuccess = IECore::addNewWindow("Debug", lpDebugWindow);
 
 		//실패
 		if (!bSuccess)
@@ -74,40 +80,40 @@ int main(int argc, char* argv[])
 		}
 
 		lpDebugWindow->createWindow("Debugger", 600, 800, iX + iW, iY, 0, 2);	//창 생성
-		cIECore::addWindowIndex(lpDebugWindow);
+		IECore::addWindowIndex(lpDebugWindow);
 
 	}
 
 	//처리 간격 설정
-	cIECore::setTickRate(iTickRate);
+	IECore::setTickRate(iTickRate);
 
 	//폰트 추가
-	cIECore::m_Font.addNewFont(0, "../data/H2PORL.ttf", 20);
+	IECore::m_Font.addNewFont(0, "../data/H2PORL.ttf", 20);
 
 	//디버그 창 설정
-	cDebugWindow* lpDebugWindow = dynamic_cast<cDebugWindow*>(cIECore::getWindow("Debug"));
+	DebugWindow* lpDebugWindow = dynamic_cast<DebugWindow*>(IECore::getWindow("Debug"));
 	lpDebugWindow->initWindow();
 
 	//엔진 시작
-	cIECore::beginEngine();
+	IECore::beginEngine();
 
 	bool useIME = false;
 	//이벤트 처리루프
-	while (cIECore::isRunning())
+	while (IECore::isRunning())
 	{
 		SDL_Event Event;
 		if (SDL_WaitEventTimeout(&Event, iTickRate))
 		{
-			cIECore::eventPushBack(&Event);
+			IECore::eventPushBack(&Event);
 
 			//나머지 이벤트가 있을 수 있으니 처리
 			if (SDL_PollEvent(&Event))
-				cIECore::eventPushBack(&Event);
+				IECore::eventPushBack(&Event);
 		}
 
 		//메인스레드에서 호출해야 IME 창 위치 설정하는게 먹음
 		//스톱 시키고 바로 스타트 시키는걸 해야 IME 입력박스 위치를 갱신가능
-		auto rect = cIECore::getTextEditPosition();
+		auto rect = IECore::getTextEditPosition();
 		if (rect.has_value())
 		{
 			SDL_SetTextInputRect(&rect.value());
@@ -130,7 +136,7 @@ int main(int argc, char* argv[])
 	}
 
 	//엔진 종료
-	cIECore::endEngine();
+	IECore::endEngine();
 
 	return 0;
 }

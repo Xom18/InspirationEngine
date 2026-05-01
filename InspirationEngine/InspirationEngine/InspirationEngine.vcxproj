@@ -11,37 +11,37 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TextRenderer.h" />
-    <ClInclude Include="Core.h" />
-    <ClInclude Include="StrUTF8.h" />
-    <ClInclude Include="Interface.h" />
-    <ClInclude Include="MouseCusor.h" />
-    <ClInclude Include="DebugInfo.h" />
-    <ClInclude Include="Renderer.h" />
-    <ClInclude Include="TextBox.h" />
-    <ClInclude Include="Font.h" />
-    <ClInclude Include="Input.h" />
-    <ClInclude Include="Menu.h" />
-    <ClInclude Include="Window.h" />
     <ClInclude Include="InspirationEngine.h" />
-    <ClInclude Include="MacroDefine.h" />
-    <ClInclude Include="File.h" />
+    <ClInclude Include="Core\IECore.h" />
+    <ClInclude Include="Core\DebugInfo.h" />
+    <ClInclude Include="Core\MacroDefine.h" />
+    <ClInclude Include="Window\IEWindow.h" />
+    <ClInclude Include="Window\IERenderer.h" />
+    <ClInclude Include="Input\IEInput.h" />
+    <ClInclude Include="Input\MouseCusor.h" />
+    <ClInclude Include="UI\Interface.h" />
+    <ClInclude Include="UI\Menu.h" />
+    <ClInclude Include="UI\TextBox.h" />
+    <ClInclude Include="Text\Font.h" />
+    <ClInclude Include="Text\IETextRenderer.h" />
+    <ClInclude Include="Util\StrUTF8.h" />
+    <ClInclude Include="Util\File.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="utf8proc\utf8proc.c" />
-    <ClCompile Include="TextRenderer.cpp" />
-    <ClCompile Include="Core.cpp" />
-    <ClCompile Include="StrUTF8.cpp" />
-    <ClCompile Include="Interface.cpp" />
-    <ClCompile Include="MouseCusor.cpp" />
-    <ClCompile Include="DebugInfo.cpp" />
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="TextBox.cpp" />
-    <ClCompile Include="Font.cpp" />
-    <ClCompile Include="Menu.cpp" />
-    <ClCompile Include="Window.cpp" />
-    <ClCompile Include="Input.cpp" />
-    <ClCompile Include="File.cpp" />
+    <ClCompile Include="Core\IECore.cpp" />
+    <ClCompile Include="Core\DebugInfo.cpp" />
+    <ClCompile Include="Window\IEWindow.cpp" />
+    <ClCompile Include="Window\IERenderer.cpp" />
+    <ClCompile Include="Input\IEInput.cpp" />
+    <ClCompile Include="Input\MouseCusor.cpp" />
+    <ClCompile Include="UI\Interface.cpp" />
+    <ClCompile Include="UI\Menu.cpp" />
+    <ClCompile Include="UI\TextBox.cpp" />
+    <ClCompile Include="Text\Font.cpp" />
+    <ClCompile Include="Text\IETextRenderer.cpp" />
+    <ClCompile Include="Util\StrUTF8.cpp" />
+    <ClCompile Include="Util\File.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9D10CAC6-29F4-4F09-8DF2-BF7B37530E37}</ProjectGuid>
@@ -80,7 +80,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\include;.\include\freetype2;.\include\harfbuzz;.\utf8proc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;.\include;.\include\freetype2;.\include\harfbuzz;.\utf8proc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819;26812</DisableSpecificWarnings>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PreprocessorDefinitions>UTF8PROC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -104,7 +104,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\include;.\include\freetype2;.\include\harfbuzz;.\utf8proc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;.\include;.\include\freetype2;.\include\harfbuzz;.\utf8proc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819;26812</DisableSpecificWarnings>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PreprocessorDefinitions>UTF8PROC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>

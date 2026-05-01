@@ -1,22 +1,22 @@
 #include "../InspirationEngine/InspirationEngine.h"
 #include "DebugWindow.h"
 
-void cDebugWindow::draw()
+void DebugWindow::draw()
 {
 	m_DebugText.draw();
 }
 
-void cDebugWindow::callXButton()
+void DebugWindow::callXButton()
 {
 	hideWindow();
 }
 
-void cDebugWindow::initWindow()
+void DebugWindow::initWindow()
 {
 	//임시로 포커스 가있는 텍스트박스를 디버그용 텍스트박스에 줌
-	cIECore::m_lpFocusedTextBox = &m_DebugText;
+	IECore::m_focusedTextBox = &m_DebugText;
 
-	cFont* lpFont = cIECore::m_Font.getFont(0);
+	Font* lpFont = IECore::m_Font.getFont(0);
 	//폰트랑 렌더러 설정
 	m_DebugText.setFont(lpFont);
 	m_DebugText.setRenderer(getRenderer(0));
