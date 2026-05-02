@@ -131,7 +131,7 @@ public:
 	/// </summary>
 	void joinDrawThread()
 	{
-		if (!m_drawThread)
+		if (m_drawThread == nullptr)
 			return;
 		m_drawThread->join();
 	}

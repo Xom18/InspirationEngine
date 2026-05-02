@@ -2,13 +2,13 @@
 
 void TextBox::transToTexture()
 {
-	if (!m_renderer)
+	if (m_renderer == nullptr)
 		return;
 	if (m_font == nullptr)
 		return;
 
 	FontFace* pFontFace = m_font->get();
-	if (!pFontFace || !pFontFace->ftFace)
+	if (pFontFace == nullptr || pFontFace->ftFace == nullptr)
 		return;
 
 	m_textChanged = false;
@@ -125,7 +125,7 @@ void TextBox::transToTexture()
 
 		// 현재 스타일의 폰트 페이스 가져오기
 		FontFace* pCurFace = m_font->get(stkStyle.top());
-		if (!pCurFace) pCurFace = pFontFace;
+		if (pCurFace == nullptr) pCurFace = pFontFace;
 		FT_Face curFTFace = pCurFace->ftFace;
 		hb_font_t* curHBFont = pCurFace->hbFont;
 

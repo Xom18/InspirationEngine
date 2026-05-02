@@ -142,7 +142,7 @@ void IECore::operateWindowEvent(const SDL_Event* event)
 {
 	//이벤트에 해당하는 창 가져오고 없으면 반환
 	IEWindow* lpWindow = getWindowByID(event->window.windowID);
-	if (!lpWindow)
+	if (lpWindow == nullptr)
 		return;
 
 	switch (event->window.event)

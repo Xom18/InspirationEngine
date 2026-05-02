@@ -173,11 +173,28 @@ int32_t x = (int32_t)floatValue;
 ```cpp
 // Good
 IEWindow* w = nullptr;
-if (ptr == nullptr)
 
 // Bad
 IEWindow* w = NULL;
-if (!ptr)
+IEWindow* w = 0;
+```
+
+### 조건식 비교
+- **bool**: 비교식 없이 직접 사용 허용
+- **pointer**: `== nullptr` / `!= nullptr` 비교식 명시 필수
+- 사유: pointer를 `if (ptr)` 로 쓰면 bool·null 체크가 구분되지 않아 의도가 불명확해짐
+
+```cpp
+// Good
+if (m_isRunning)          // bool — 비교식 생략 허용
+if (!m_isActive)          // bool — 부정도 허용
+if (ptr == nullptr)       // pointer — 비교식 명시
+if (ptr != nullptr)       // pointer — 비교식 명시
+
+// Bad
+if (ptr)                  // pointer를 bool처럼 사용 금지
+if (!ptr)                 // pointer를 bool처럼 사용 금지
+if (m_isRunning == true)  // bool에 == true 불필요
 ```
 
 ### override

@@ -120,7 +120,7 @@ SDL_Texture* IETextRenderer::renderToTexture(
 		SDL_TEXTUREACCESS_STATIC,
 		w, h);
 
-	if (!tex)
+	if (tex == nullptr)
 		return nullptr;
 
 	SDL_UpdateTexture(tex, nullptr, pixels.data(), w * 4);

@@ -24,7 +24,7 @@ void IEWindow::resizeRenderer()
 	//실제 사용하는 랜더러 생성(UI스크린하고 게임스크린이 해상도가 다른경우가 있기때문에 여러개일 수 있다)
 	SDL_Surface* lpSurface = SDL_GetWindowSurface(m_sdlWindow);
 
-	if (!lpSurface)
+	if (lpSurface == nullptr)
 		return;
 
 	//창 크기 다시 설정

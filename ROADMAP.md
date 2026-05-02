@@ -45,18 +45,55 @@ IERenderer::drawTexture (srcRect 파라미터 추가)
 ### 1-2. 게임 오브젝트 시스템
 **이유**: 씬에 배치할 단위가 없으면 게임 구조를 잡을 수 없다.
 
-```
-IEGameObject
-  ├── m_transform (위치, 회전, 스케일)
-  ├── update(deltaTime)
-  ├── draw(renderer)
-  └── 활성화 / 비활성화
+#### 좌표계 설계 결정사항
 
-IETransform
-  ├── m_position (float x, y)
-  ├── m_rotation (float, 도)
-  └── m_scale    (float x, y)
+모든 월드 좌표는 `float` 통일. 타일 *데이터*만 `int` 인덱스. z축(높이) 포함 3D 좌표계.
+
 ```
+월드 (x, y, z: float)  →  [카메라 투영]  →  스크린 (screenX, screenY: int)
+타일 인덱스 (tileX, tileY: int)  →  world position 계산 후 동일 파이프라인
+```
+
+#### 오브젝트 분류
+
+| 분류 | 클래스 | 특징 |
+|------|--------|------|
+| 정적 | `IEStaticObject` | 배경·타일. update 없음. 위치 고정. |
+| 동적 | `IEEntity` | 캐릭터·투사체. 속도·가속도 보유. |
+
+```
+IETransform
+  ├── x, y, z   (float — z = 높이축)
+  ├── rotation  (float, 도)
+  └── scaleX, scaleY (float)
+
+IEGameObject  (추상 기반)
+  ├── m_transform (IETransform)
+  ├── m_sprite    (IESprite*, non-owning)
+  ├── m_active    (bool)
+  ├── update(deltaTime) — 기본 stub
+  ├── draw(renderer)    — 순수 가상
+  └── getSortKey()      — 드로우 정렬 키 (카메라 모드에 따라 다름)
+
+IEStaticObject : IEGameObject
+  └── draw() — 트랜스폼 위치에 스프라이트 렌더
+
+IEEntity : IEGameObject
+  ├── m_velX, m_velY, m_velZ (float)
+  ├── update(dt) — 속도 × dt 적용
+  └── draw()
+```
+
+#### 드로우 정렬 (Y-sort)
+
+씬에서 렌더 전 `getSortKey()` 기준 정렬 필요. 카메라 모드별 기본값:
+
+| 카메라 모드 | sortKey |
+|------------|---------|
+| TopView | `y` |
+| **Isometric** | `x + y - z × heightFactor` |
+| SideView | `x` (좌→우 순서) |
+| OverheadOblique | `y - z × factor` |
 
 - `IEWindow::draw()` 가상 함수를 통해 씬이 오브젝트들을 순회하는 구조
 - 상속 기반 (컴포넌트 패턴은 이후 필요 시 도입)
@@ -97,17 +134,32 @@ float deltaTime = elapsedMs / 1000.0f;  // 초 단위
 ### 2-1. 카메라
 **이유**: 월드 좌표 없이 모든 오브젝트가 화면 좌표를 직접 계산한다.
 
+#### 목표 카메라 모드 4종
+
+| 모드 | 레퍼런스 | screenX | screenY |
+|------|---------|---------|---------|
+| **TopView** | GTA2 | `worldX` | `worldY` |
+| **Isometric** | FF Tactics | `(x - y) × tw/2` | `(x + y) × th/2 - z × hf` |
+| **SideView** | 벨트스크롤 | `worldX` | `-worldZ` |
+| **OverheadOblique** | Binding of Isaac | `worldX` | `worldY - z × factor` |
+
 ```
-IECamera
-  ├── m_position (float x, y)
-  ├── m_zoom     (float)
-  ├── worldToScreen(wx, wy) → sx, sy
-  ├── screenToWorld(sx, sy) → wx, wy
-  └── follow(targetX, targetY, lerpFactor)
+IECamera (추상)
+  ├── m_x, m_y, m_z   (float — 월드 위치)
+  ├── m_zoom           (float)
+  ├── worldToScreen(x, y, z) → (screenX, screenY)
+  ├── screenToWorld(sx, sy)  → (worldX, worldY)
+  └── follow(target, lerpFactor)
+
+IECameraTopView      : IECamera
+IECameraIsometric    : IECamera  ← 현재 목표
+IECameraSideView     : IECamera
+IECameraOverheadOblique : IECamera
 ```
 
-- `IERenderer` 또는 `IEScene`에 현재 카메라 포인터를 물려서 draw 시 자동 변환
+- `IEScene`이 카메라를 보유, 렌더 시 `worldToScreen` 호출 후 오브젝트에 전달
 - `IEWindow::screenPosToRenderPos`와 연계
+- 카메라 모드 변경 = `IEScene::setCamera()` 교체만으로 완료
 
 ---
 

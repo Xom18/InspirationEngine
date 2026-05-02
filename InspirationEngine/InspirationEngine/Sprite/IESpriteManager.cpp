@@ -14,13 +14,13 @@ IESpriteManager::~IESpriteManager()
 bool IESpriteManager::addNewSprite(int32_t id, const char* path, IERenderer* renderer)
 {
 	SDL_Surface* pSurface = IMG_Load(path);
-	if (!pSurface)
+	if (pSurface == nullptr)
 		return false;
 
 	SDL_Texture* pTexture = SDL_CreateTextureFromSurface(renderer->getSDLRenderer(), pSurface);
 	SDL_FreeSurface(pSurface);
 
-	if (!pTexture)
+	if (pTexture == nullptr)
 		return false;
 
 	// 기존 ID 덮어쓰기
@@ -77,7 +77,7 @@ void IESprite::setTexture(SDL_Texture* texture)
 {
 	m_texture = texture;
 	m_hasClip = false;
-	if (texture)
+	if (texture != nullptr)
 	{
 		int32_t w = 0, h = 0;
 		SDL_QueryTexture(texture, nullptr, nullptr, &w, &h);
@@ -88,7 +88,7 @@ void IESprite::setTexture(SDL_Texture* texture)
 void IESprite::draw(IERenderer* renderer, int32_t x, int32_t y,
 	double scaleX, double scaleY, double angle, SDL_Point* pivot, SDL_RendererFlip flip)
 {
-	if (!m_texture || !renderer)
+	if (m_texture == nullptr || renderer == nullptr)
 		return;
 	renderer->drawTexture(m_texture, x, y, scaleX * 100.0, scaleY * 100.0, angle, pivot, flip, getSrcRect());
 }

@@ -82,9 +82,9 @@ void IERenderer::drawSurface(SDL_Surface* surface, int32_t x, int32_t y, double 
 
 void IERenderer::drawText(Font* font, const char* text, SDL_Color color, int32_t x, int32_t y, double widthPercent, double heightPercent, double angle, SDL_Point* pivot, SDL_RendererFlip flip)
 {
-	if (!font) return;
+	if (font == nullptr) return;
 	FontFace* pFace = font->get();
-	if (!pFace || !pFace->ftFace) return;
+	if (pFace == nullptr || pFace->ftFace == nullptr) return;
 
 	auto glyphs = IETextRenderer::shape(pFace->hbFont, text, static_cast<int32_t>(std::strlen(text)));
 	auto ms     = IETextRenderer::measure(pFace->ftFace, glyphs);
