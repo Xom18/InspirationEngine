@@ -1,6 +1,6 @@
 #include "InspirationEngine.h"
 
-void IEStaticObject::draw(IERenderer* renderer)
+void IEStaticObject::draw(IERenderer* renderer, int32_t screenX, int32_t screenY)
 {
 	if (!m_active || m_sprite == nullptr || renderer == nullptr)
 		return;
@@ -11,8 +11,8 @@ void IEStaticObject::draw(IERenderer* renderer)
 
 	m_sprite->draw(
 		renderer,
-		static_cast<int32_t>(t->x),
-		static_cast<int32_t>(t->y),
+		screenX,
+		screenY,
 		static_cast<double>(t->scaleX),
 		static_cast<double>(t->scaleY),
 		static_cast<double>(t->rotation));

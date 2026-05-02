@@ -52,10 +52,12 @@ public:
 	virtual void update(float deltaTime) {}
 
 	/// <summary>
-	/// 렌더러에 오브젝트 그리기
+	/// 렌더러에 오브젝트 그리기 — 씬이 카메라 투영 후 스크린 좌표 전달
 	/// </summary>
 	/// <param name="renderer">사용할 렌더러</param>
-	virtual void draw(IERenderer* renderer) = 0;
+	/// <param name="screenX">스크린 X (씬이 카메라 투영 결과 전달)</param>
+	/// <param name="screenY">스크린 Y</param>
+	virtual void draw(IERenderer* renderer, int32_t screenX, int32_t screenY) = 0;
 
 	/// <summary>
 	/// 드로우 정렬 키 반환 — 씬의 Y-sort 기준

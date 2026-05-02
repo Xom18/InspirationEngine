@@ -138,30 +138,39 @@ IEWindow::update(float deltaTime)  // virtual, 씬 연동 오버라이드 포인
 
 #### 목표 카메라 모드 4종
 
-| 모드 | 레퍼런스 | screenX | screenY |
-|------|---------|---------|---------|
-| **TopView** | GTA2 | `worldX` | `worldY` |
-| **Isometric** | FF Tactics | `(x - y) × tw/2` | `(x + y) × th/2 - z × hf` |
-| **SideView** | 벨트스크롤 | `worldX` | `-worldZ` |
-| **OverheadOblique** | Binding of Isaac | `worldX` | `worldY - z × factor` |
+| 모드 | 레퍼런스 | screenX | screenY | 정렬 키 |
+|------|---------|---------|---------|---------|
+| **✅ TopView** | GTA2 | `(wx-cx)×zoom` | `(wy-cy)×zoom` | `y` |
+| **✅ Isometric** | FF Tactics | `(x-y)×tw/2` | `(x+y)×th/2 - z×hf` | `(x+y)×th/2 - z×hf` |
+| **✅ SideView** | 벨트스크롤 | `(wx-cx)×zoom` | `(wy-cy-wz×hf)×zoom` | `y - z×hf` |
+| **✅ OverheadOblique** | Stoneshard / 구 Fallout | `(wx-cx)×zoom` | `(wy-cy-wz×hf)×zoom` | `y - z×hf` |
+| **✅ DepthSide** | Dungeon & Fighter | `(wx-cx)×zoom` | `(-wy×df - wz×hf)×zoom` | `-y` |
 
 ```
-IECamera (추상)
-  ├── m_x, m_y, m_z   (float — 월드 위치)
-  ├── m_zoom           (float)
-  ├── worldToScreen(x, y, z) → (screenX, screenY)
-  ├── screenToWorld(sx, sy)  → (worldX, worldY)
-  └── follow(target, lerpFactor)
+IECamera (추상)                          Camera/IECamera.h
+  ├── m_x, m_y, m_z, m_zoom, m_viewport
+  ├── worldToScreen(x, y, z) → IVector2  (순수 가상)
+  ├── screenToWorld(sx, sy)  → IVector2  (순수 가상, z=0 가정)
+  ├── getSortKey(x, y, z)    → float     (기본: y)
+  ├── follow(tx, ty, tz, lerpFactor, dt) — 선형 보간 추적
+  └── setCamera() 로 IEScene 에 주입, 교체만으로 모드 전환
 
-IECameraTopView      : IECamera
-IECameraIsometric    : IECamera  ← 현재 목표
-IECameraSideView     : IECamera
-IECameraOverheadOblique : IECamera
+IECameraIsometric : IECamera             Camera/IECameraIsometric.h  ✅
+  ├── m_tileWidth (64), m_tileHeight (32), m_heightFactor (16.0)
+  ├── worldToScreen — 아이소 투영 + 카메라 오프셋 + zoom
+  ├── screenToWorld — 역변환 (z=0 가정)
+  └── getSortKey   — (x+y)×th/2 - z×hf
+
+IECameraTopView         : IECamera  ✅   Camera/IECameraTopView.h
+IECameraSideView        : IECamera  ✅   Camera/IECameraSideView.h
+IECameraOverheadOblique : IECamera  ✅   Camera/IECameraOverheadOblique.h
+IECameraDepthSide       : IECamera  ✅   Camera/IECameraDepthSide.h
 ```
 
-- `IEScene`이 카메라를 보유, 렌더 시 `worldToScreen` 호출 후 오브젝트에 전달
-- `IEWindow::screenPosToRenderPos`와 연계
-- 카메라 모드 변경 = `IEScene::setCamera()` 교체만으로 완료
+#### 씬 연동 방식
+- `IEScene::setCamera(new IECameraIsometric(64, 32))` — 소유권 이전
+- `IEScene::draw()` 에서 자동으로 viewport 갱신 → sort → worldToScreen → 오브젝트 draw
+- 오브젝트는 카메라를 전혀 모름 — `draw(renderer, screenX, screenY)` 만 수신
 
 ---
 

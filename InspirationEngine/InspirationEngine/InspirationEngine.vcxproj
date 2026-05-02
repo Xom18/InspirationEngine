@@ -31,6 +31,12 @@
     <ClInclude Include="GameObject\IEGameObject.h" />
     <ClInclude Include="GameObject\IEStaticObject.h" />
     <ClInclude Include="GameObject\IEEntity.h" />
+    <ClInclude Include="Camera\IECamera.h" />
+    <ClInclude Include="Camera\IECameraTopView.h" />
+    <ClInclude Include="Camera\IECameraIsometric.h" />
+    <ClInclude Include="Camera\IECameraSideView.h" />
+    <ClInclude Include="Camera\IECameraOverheadOblique.h" />
+    <ClInclude Include="Camera\IECameraDepthSide.h" />
     <ClInclude Include="Scene\IEScene.h" />
     <ClInclude Include="Scene\IESceneManager.h" />
   </ItemGroup>

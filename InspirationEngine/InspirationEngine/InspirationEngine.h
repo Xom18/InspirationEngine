@@ -29,6 +29,12 @@
 #include "GameObject/IEGameObject.h"	//게임 오브젝트 기반
 #include "GameObject/IEStaticObject.h"	//정적 오브젝트
 #include "GameObject/IEEntity.h"		//동적 오브젝트
+#include "Camera/IECamera.h"					//카메라 기반
+#include "Camera/IECameraTopView.h"			//탑뷰 카메라
+#include "Camera/IECameraIsometric.h"			//아이소메트릭 카메라
+#include "Camera/IECameraSideView.h"			//사이드뷰 카메라
+#include "Camera/IECameraOverheadOblique.h"	//오버헤드 오블리크 카메라
+#include "Camera/IECameraDepthSide.h"			//뎁스 사이드뷰 카메라
 #include "Scene/IEScene.h"				//씬 기반
 #include "Scene/IESceneManager.h"		//씬 관리자
 #include "Util/File.h"			//파일

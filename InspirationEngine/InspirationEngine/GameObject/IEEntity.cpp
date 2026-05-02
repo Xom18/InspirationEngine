@@ -12,7 +12,7 @@ void IEEntity::update(float deltaTime)
 	t->z += v->vz * deltaTime;
 }
 
-void IEEntity::draw(IERenderer* renderer)
+void IEEntity::draw(IERenderer* renderer, int32_t screenX, int32_t screenY)
 {
 	if (!m_active || m_sprite == nullptr || renderer == nullptr)
 		return;
@@ -23,8 +23,8 @@ void IEEntity::draw(IERenderer* renderer)
 
 	m_sprite->draw(
 		renderer,
-		static_cast<int32_t>(t->x),
-		static_cast<int32_t>(t->y),
+		screenX,
+		screenY,
 		static_cast<double>(t->scaleX),
 		static_cast<double>(t->scaleY),
 		static_cast<double>(t->rotation));
