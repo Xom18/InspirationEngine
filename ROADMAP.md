@@ -5,11 +5,12 @@
 | 시스템 | 상태 | 비고 |
 |--------|------|------|
 | SDL2 멀티 윈도우 | ✅ | 창별 독립 드로우 스레드 |
-| 기본 렌더러 | ✅ | drawRect / Texture / Buffer / Surface / Text |
+| 기본 렌더러 | ✅ | drawRect / Texture(srcRect) / Buffer / Surface / Text |
 | 키보드 / 마우스 입력 | ✅ | SDL_Scancode 기반 |
 | 텍스트 렌더링 | ✅ | FreeType + HarfBuzz, 마크업, 멀티라인 |
 | 한글 IME | ✅ | TextBox 커서 / 그래핌 클러스터 |
 | 폰트 관리자 | ✅ | 스타일별 FontFace (Bold, Italic 합성) |
+| 스프라이트 관리자 | ✅ | IESpriteManager / IESprite, 스프라이트 시트 클리핑 |
 | 엔진 코어 루프 | ✅ | 위상 기반 (Event → Update → Draw) |
 | UTF-8 유틸리티 | ✅ | utf8proc 기반 |
 | 파일 읽기 | ✅ | 바이너리 파일 로드 |
@@ -18,25 +19,26 @@
 
 ## 우선순위 1 — 기반 시스템 (없으면 게임을 만들 수 없다)
 
-### 1-1. 스프라이트 리소스 관리자
-**이유**: 현재 `IMG_Load` 수동 호출, 텍스처 캐싱 없음. 모든 시각 오브젝트의 기반.
+### ~~1-1. 스프라이트 리소스 관리자~~ ✅ 완료
+
+`Sprite/IESpriteManager.h/.cpp` 구현 완료.
 
 ```
-IESpriteManager
-  ├── load(id, path) → IMG_Load + SDL_CreateTextureFromSurface
-  ├── get(id) → SDL_Texture*
-  ├── unload(id) / unloadAll()
-  └── ID 기반 reference count (선택)
+IESpriteManager  (IECore::m_Sprite 로 전역 접근)
+  ├── addNewSprite(id, path, renderer)
+  ├── getSprite(id) → IESprite*
+  └── unload(id) / unloadAll()
 
 IESprite
   ├── m_texture (SDL_Texture*, non-owning)
-  ├── m_srcRect (스프라이트 시트 클리핑용)
-  ├── draw(renderer, x, y, scaleX, scaleY, angle, flip)
-  └── setClip(x, y, w, h)
-```
+  ├── m_srcRect / m_hasClip (스프라이트 시트 클리핑)
+  ├── draw(renderer, x, y, scaleX, scaleY, angle, pivot, flip)
+  ├── setClip(x, y, w, h) / clearClip()
+  └── getSrcRect() → nullptr if no clip
 
-- `IERenderer::drawTexture` / `drawBuffer`에 `SDL_Rect* srcRect` 파라미터 추가 필요
-- `IEFontManager` 패턴 그대로 재사용 가능
+IERenderer::drawTexture (srcRect 파라미터 추가)
+  └── const SDL_Rect* srcRect = nullptr  ← 기존 호출 전부 호환
+```
 
 ---
 
@@ -283,7 +285,7 @@ IESaveData
 ## 추천 진행 순서 요약
 
 ```
-1-1 스프라이트 관리자
+✅ 1-1 스프라이트 관리자
   └─► 1-2 게임 오브젝트
         └─► 1-3 씬 관리자
               └─► 1-4 델타 타임
@@ -297,5 +299,4 @@ IESaveData
                                     └─► 4-3 파티클
 ```
 
-> **시작점**: 스프라이트 관리자 → 폰트 관리자(`IEFontManager`) 패턴 재사용으로 빠르게 구현 가능.
-> 이후 게임 오브젝트 + 씬까지 완성하면 Example 프로젝트에서 실제 게임 프로토타입 제작 가능.
+> **다음 목표**: 1-2 게임 오브젝트 시스템 → 씬까지 완성하면 Example 프로젝트에서 실제 게임 프로토타입 제작 가능.
