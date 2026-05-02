@@ -21,27 +21,28 @@ public:
 	virtual ~IEGameObject() = default;
 
 	/// <summary>
-	/// 컴포넌트 추가 — 소유권 이전, 추가된 컴포넌트 포인터 반환
+	/// 컴포넌트 추가 — 타입당 1개, 중복 시 교체. 추가된 컴포넌트 포인터 반환.
 	/// </summary>
 	template<typename T, typename... Args>
 	T* addComponent(Args&&... args)
 	{
-		auto c = std::make_unique<T>(std::forward<Args>(args)...);
-		T* ptr = c.get();
-		m_components.push_back(std::move(c));
-		return ptr;
+		size_t id = IEComponent::typeId<T>();
+		if (id >= m_components.size())
+			m_components.resize(id + 1);
+		m_components[id] = std::make_unique<T>(std::forward<Args>(args)...);
+		return static_cast<T*>(m_components[id].get());
 	}
 
 	/// <summary>
-	/// 타입으로 컴포넌트 조회 — 없으면 nullptr
+	/// 타입으로 컴포넌트 조회 — O(1) 배열 인덱싱, 없으면 nullptr
 	/// </summary>
 	template<typename T>
 	T* getComponent() const
 	{
-		for (const auto& c : m_components)
-			if (auto* p = dynamic_cast<T*>(c.get()))
-				return p;
-		return nullptr;
+		size_t id = IEComponent::typeId<T>();
+		if (id >= m_components.size())
+			return nullptr;
+		return static_cast<T*>(m_components[id].get());
 	}
 
 	/// <summary>
@@ -63,7 +64,7 @@ public:
 	virtual float getSortKey() const
 	{
 		auto* t = getComponent<IETransformComponent>();
-		return t ? t->y : 0.0f;
+		return t != nullptr ? t->y : 0.0f;
 	}
 
 	/// <summary>

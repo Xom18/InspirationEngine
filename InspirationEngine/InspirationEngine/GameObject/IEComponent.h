@@ -7,6 +7,19 @@ class IEComponent
 {
 public:
 	virtual ~IEComponent() = default;
+
+	static size_t allocTypeId()
+	{
+		static size_t counter = 0;
+		return counter++;
+	}
+
+	template<typename T>
+	static size_t typeId()
+	{
+		static size_t id = allocTypeId();
+		return id;
+	}
 };
 
 /// <summary>
