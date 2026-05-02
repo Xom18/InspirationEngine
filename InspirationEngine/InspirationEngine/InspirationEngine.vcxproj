@@ -26,6 +26,7 @@
     <ClInclude Include="Text\IETextRenderer.h" />
     <ClInclude Include="Util\StrUTF8.h" />
     <ClInclude Include="Util\File.h" />
+    <ClInclude Include="Sprite\IESpriteManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="utf8proc\utf8proc.c" />
@@ -42,6 +43,7 @@
     <ClCompile Include="Text\IETextRenderer.cpp" />
     <ClCompile Include="Util\StrUTF8.cpp" />
     <ClCompile Include="Util\File.cpp" />
+    <ClCompile Include="Sprite\IESpriteManager.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9D10CAC6-29F4-4F09-8DF2-BF7B37530E37}</ProjectGuid>

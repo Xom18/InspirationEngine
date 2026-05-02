@@ -16,6 +16,7 @@ public:
 	static IEInput			m_Input;			//입력, 클릭이나 창 내부 처리도 여기서 받은다음 각 창으로 보냄
 	static DebugInfo		m_DebugInfo;		//디버그 툴
 	static IEFontManager	m_Font;				//폰트 관리하는곳
+	static IESpriteManager	m_Sprite;			//스프라이트 관리하는곳
 	static IEWindow* m_mainWindow;			//메인 윈도우
 	static IEWindow* m_mouseOnWindow;		//마우스가 올라가 있는 윈도우
 	static IEWindow* m_focusedWindow;		//선택 되있는 윈도우

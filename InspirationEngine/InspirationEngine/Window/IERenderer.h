@@ -94,7 +94,16 @@ public:
 	/// <param name="angle">회전 각도 (도)</param>
 	/// <param name="pivot">회전 기준점 (nullptr이면 중앙)</param>
 	/// <param name="flip">반전 플래그</param>
-	void drawTexture(SDL_Texture* texture, int32_t x, int32_t y, double widthPercent = 100, double heightPercent = 100, double angle = 0, SDL_Point* pivot = nullptr, SDL_RendererFlip flip = SDL_FLIP_NONE);
+	/// <param name="srcRect">텍스쳐 내 클리핑 영역 (nullptr이면 전체)</param>
+	void drawTexture(SDL_Texture* texture, int32_t x, int32_t y, double widthPercent = 100, double heightPercent = 100, double angle = 0, SDL_Point* pivot = nullptr, SDL_RendererFlip flip = SDL_FLIP_NONE, const SDL_Rect* srcRect = nullptr);
+
+	/// <summary>
+	/// 내부 SDL_Renderer 반환
+	/// </summary>
+	SDL_Renderer* getSDLRenderer()
+	{
+		return m_renderer;
+	}
 
 	/// <summary>
 	/// 서페이스 그리기

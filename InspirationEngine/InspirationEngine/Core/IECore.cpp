@@ -5,6 +5,7 @@
 IEInput			IECore::m_Input;						//입력, 클릭이나 창 내부 처리도 여기서 받은다음 각 창으로 보냄
 DebugInfo		IECore::m_DebugInfo;					//디버그 툴
 IEFontManager	IECore::m_Font;							//폰트 관리하는곳
+IESpriteManager	IECore::m_Sprite;						//스프라이트 관리하는곳
 IEWindow* IECore::m_mainWindow = nullptr;			//메인 윈도우
 IEWindow* IECore::m_mouseOnWindow = nullptr;		//마우스가 올라가 있는 윈도우
 IEWindow* IECore::m_focusedWindow = nullptr;		//선택 되있는 윈도우

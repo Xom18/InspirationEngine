@@ -44,7 +44,7 @@ void IERenderer::drawBuffer(int32_t* buffer, int32_t bufferWidth, int32_t buffer
 	SDL_DestroyTexture(pTexture);
 }
 
-void IERenderer::drawTexture(SDL_Texture* texture, int32_t x, int32_t y, double widthPercent, double heightPercent, double angle, SDL_Point* pivot, SDL_RendererFlip flip)
+void IERenderer::drawTexture(SDL_Texture* texture, int32_t x, int32_t y, double widthPercent, double heightPercent, double angle, SDL_Point* pivot, SDL_RendererFlip flip, const SDL_Rect* srcRect)
 {
 	//텍스쳐 정보 받아오기
 	int32_t iWidth = 0;
@@ -52,23 +52,23 @@ void IERenderer::drawTexture(SDL_Texture* texture, int32_t x, int32_t y, double 
 	if (SDL_QueryTexture(texture, NULL, NULL, &iWidth, &iHeight) == -1)
 		return;
 
-	//텍스쳐 내에서의 위치
 	SDL_Rect SrcRect;
-	SrcRect.x = 0;
-	SrcRect.y = 0;
-	SrcRect.w = iWidth;
-	SrcRect.h = iHeight;
-
-	//화면에서의 위치
 	SDL_Rect DestRect;
 	DestRect.x = x;
 	DestRect.y = y;
-	DestRect.w = iWidth;
-	DestRect.h = iHeight;
-	if (widthPercent != 100.0)
-		DestRect.w = static_cast<int32_t>(iWidth * widthPercent * 0.01);
-	if (heightPercent != 100.0)
-		DestRect.h = static_cast<int32_t>(iHeight * heightPercent * 0.01);
+
+	if (srcRect)
+	{
+		SrcRect = *srcRect;
+		DestRect.w = static_cast<int32_t>(srcRect->w * widthPercent * 0.01);
+		DestRect.h = static_cast<int32_t>(srcRect->h * heightPercent * 0.01);
+	}
+	else
+	{
+		SrcRect = { 0, 0, iWidth, iHeight };
+		DestRect.w = (widthPercent != 100.0) ? static_cast<int32_t>(iWidth * widthPercent * 0.01) : iWidth;
+		DestRect.h = (heightPercent != 100.0) ? static_cast<int32_t>(iHeight * heightPercent * 0.01) : iHeight;
+	}
 
 	SDL_RenderCopyEx(m_renderer, texture, &SrcRect, &DestRect, angle, pivot, flip);
 }

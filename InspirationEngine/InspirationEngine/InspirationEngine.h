@@ -24,6 +24,7 @@
 #include "Input/MouseCusor.h"	//마우스 커서
 #include "Window/IERenderer.h"	//렌더러
 #include "Window/IEWindow.h"	//창
+#include "Sprite/IESpriteManager.h"	//스프라이트 관리
 #include "Util/File.h"			//파일
 #include "Core/DebugInfo.h"		//디버그 정보
 #include "Core/IECore.h"		//엔진
