@@ -29,6 +29,8 @@
 #include "GameObject/IEGameObject.h"	//게임 오브젝트 기반
 #include "GameObject/IEStaticObject.h"	//정적 오브젝트
 #include "GameObject/IEEntity.h"		//동적 오브젝트
+#include "Scene/IEScene.h"				//씬 기반
+#include "Scene/IESceneManager.h"		//씬 관리자
 #include "Util/File.h"			//파일
 #include "Core/DebugInfo.h"		//디버그 정보
 #include "Core/IECore.h"		//엔진

@@ -42,89 +42,91 @@ IERenderer::drawTexture (srcRect 파라미터 추가)
 
 ---
 
-### 1-2. 게임 오브젝트 시스템
-**이유**: 씬에 배치할 단위가 없으면 게임 구조를 잡을 수 없다.
+### ~~1-2. 게임 오브젝트 시스템~~ ✅ 완료
 
-#### 좌표계 설계 결정사항
+`GameObject/IEComponent.h`, `IEGameObject.h`, `IEStaticObject.h/.cpp`, `IEEntity.h/.cpp` 구현 완료.
 
-모든 월드 좌표는 `float` 통일. 타일 *데이터*만 `int` 인덱스. z축(높이) 포함 3D 좌표계.
+#### 좌표계
+
+모든 월드 좌표 `float` 통일. 타일 *데이터*만 `int` 인덱스. z축(높이) 포함 3D 좌표계.
 
 ```
 월드 (x, y, z: float)  →  [카메라 투영]  →  스크린 (screenX, screenY: int)
 타일 인덱스 (tileX, tileY: int)  →  world position 계산 후 동일 파이프라인
 ```
 
-#### 오브젝트 분류
-
-| 분류 | 클래스 | 특징 |
-|------|--------|------|
-| 정적 | `IEStaticObject` | 배경·타일. update 없음. 위치 고정. |
-| 동적 | `IEEntity` | 캐릭터·투사체. 속도·가속도 보유. |
+#### ECS 컴포넌트 구조
 
 ```
-IETransform
-  ├── x, y, z   (float — z = 높이축)
-  ├── rotation  (float, 도)
-  └── scaleX, scaleY (float)
+IEComponent  (추상 기반)
+  ├── typeId<T>()  — 타입당 정적 ID, 전역 단조 증가 카운터
+  ├── IETransformComponent  x, y, z, rotation, scaleX, scaleY
+  └── IEVelocityComponent   vx, vy, vz
 
 IEGameObject  (추상 기반)
-  ├── m_transform (IETransform)
+  ├── m_components  vector<unique_ptr<IEComponent>>  (인덱스 = typeId)
+  ├── addComponent<T>()  — O(1), 중복 시 교체
+  ├── getComponent<T>()  — O(1) 배열 인덱싱
   ├── m_sprite    (IESprite*, non-owning)
   ├── m_active    (bool)
   ├── update(deltaTime) — 기본 stub
   ├── draw(renderer)    — 순수 가상
-  └── getSortKey()      — 드로우 정렬 키 (카메라 모드에 따라 다름)
+  └── getSortKey()      — 기본 transform.y, isometric에서 오버라이드
 
 IEStaticObject : IEGameObject
-  └── draw() — 트랜스폼 위치에 스프라이트 렌더
+  ├── 생성자 → addComponent<IETransformComponent>() 자동
+  └── draw() — transform 위치에 스프라이트 렌더
 
 IEEntity : IEGameObject
-  ├── m_velX, m_velY, m_velZ (float)
-  ├── update(dt) — 속도 × dt 적용
+  ├── 생성자 → Transform + Velocity 자동 추가
+  ├── update(dt) — vx/vy/vz × dt 를 transform 에 적용
   └── draw()
 ```
 
 #### 드로우 정렬 (Y-sort)
 
-씬에서 렌더 전 `getSortKey()` 기준 정렬 필요. 카메라 모드별 기본값:
+씬에서 렌더 전 `getSortKey()` 기준 정렬. 카메라 모드별 기본값:
 
 | 카메라 모드 | sortKey |
 |------------|---------|
 | TopView | `y` |
 | **Isometric** | `x + y - z × heightFactor` |
-| SideView | `x` (좌→우 순서) |
+| SideView | `x` |
 | OverheadOblique | `y - z × factor` |
-
-- `IEWindow::draw()` 가상 함수를 통해 씬이 오브젝트들을 순회하는 구조
-- 상속 기반 (컴포넌트 패턴은 이후 필요 시 도입)
 
 ---
 
-### 1-3. 씬 관리자
-**이유**: 오브젝트 묶음 단위 없이는 스테이지 전환, 초기화 흐름을 관리할 수 없다.
+### ~~1-3. 씬 관리자~~ ✅ 완료
+
+`Scene/IEScene.h/.cpp`, `Scene/IESceneManager.h` 구현 완료.
 
 ```
 IEScene
-  ├── update(deltaTime)
-  ├── draw(renderer)
+  ├── update(deltaTime) — 활성 오브젝트 순회
+  ├── draw(renderer)    — Y-sort 후 순회
   ├── onEnter() / onExit()
+  ├── addObject<T>()    — T 생성 후 소유권 획득, 포인터 반환
+  ├── removeObject(ptr)
   └── vector<unique_ptr<IEGameObject>> m_objects
 
-IESceneManager (IECore 멤버)
-  ├── push(scene) / pop() / replace(scene)
-  └── getCurrentScene() → IEScene*
+IESceneManager (IECore::m_Scene 전역 접근)
+  ├── push(scene*) / pop() / replace(scene*)
+  ├── getCurrentScene() → IEScene*
+  ├── update(deltaTime) / draw(renderer)
+  └── 스택 기반 — push/pop 시 onExit/onEnter 자동 호출
 ```
 
 ---
 
-### 1-4. 델타 타임
-**이유**: 현재 고정 tick(16ms)만 있어 물리·애니메이션이 프레임률에 묶인다.
+### ~~1-4. 델타 타임~~ ✅ 완료
+
+`IECore::mainThread()` 에 `steady_clock` 기반 deltaTime 계산 추가.
+`IECore::update(float deltaTime)` → 각 Window의 `update(float deltaTime)` 전파.
+`IECore::getDeltaTime()` 정적 접근자로 어디서든 조회 가능.
 
 ```cpp
-// IECore::mainThread() 에 추가
-float deltaTime = elapsedMs / 1000.0f;  // 초 단위
-// IECore::update(float deltaTime) 으로 시그니처 변경
-// IEGameObject::update(float deltaTime) 전파
+IECore::getDeltaTime()  → float  // 초 단위, 매 프레임 갱신
+IEWindow::update(float deltaTime)  // virtual, 씬 연동 오버라이드 포인트
 ```
 
 ---
@@ -338,9 +340,9 @@ IESaveData
 
 ```
 ✅ 1-1 스프라이트 관리자
-  └─► 1-2 게임 오브젝트
-        └─► 1-3 씬 관리자
-              └─► 1-4 델타 타임
+  └─► ✅ 1-2 게임 오브젝트
+        └─► ✅ 1-3 씬 관리자
+              └─► ✅ 1-4 델타 타임
                     ├─► 2-1 카메라
                     ├─► 2-2 충돌 감지
                     ├─► 2-3 오디오

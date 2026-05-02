@@ -23,6 +23,12 @@ public:
 	~IEWindow();
 
 	/// <summary>
+	/// 프레임 업데이트
+	/// </summary>
+	/// <param name="deltaTime">경과 시간 (초)</param>
+	virtual void update(float deltaTime) {}
+
+	/// <summary>
 	/// 그리기
 	/// </summary>
 	virtual void draw() {};

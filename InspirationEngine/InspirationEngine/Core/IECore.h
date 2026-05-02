@@ -17,6 +17,9 @@ public:
 	static DebugInfo		m_DebugInfo;		//디버그 툴
 	static IEFontManager	m_Font;				//폰트 관리하는곳
 	static IESpriteManager	m_Sprite;			//스프라이트 관리하는곳
+	static IESceneManager	m_Scene;			//씬 관리하는곳
+	static float			m_deltaTime;		//직전 프레임 경과 시간 (초)
+	static uint64_t			m_deltaTimeMs;		//직전 프레임 경과 시간 (ms)
 	static IEWindow* m_mainWindow;			//메인 윈도우
 	static IEWindow* m_mouseOnWindow;		//마우스가 올라가 있는 윈도우
 	static IEWindow* m_focusedWindow;		//선택 되있는 윈도우
@@ -84,6 +87,22 @@ public:
 	static bool isRunning()
 	{
 		return m_isRunning;
+	}
+
+	/// <summary>
+	/// 직전 프레임 경과 시간 (초) 반환
+	/// </summary>
+	static float getDeltaTime()
+	{
+		return m_deltaTime;
+	}
+
+	/// <summary>
+	/// 직전 프레임 경과 시간 (ms) 반환
+	/// </summary>
+	static uint64_t getDeltaTimeMs()
+	{
+		return m_deltaTimeMs;
 	}
 
 	/// <summary>
@@ -275,7 +294,7 @@ private:
 	/// <summary>
 	/// 업데이트용
 	/// </summary>
-	static void update();
+	static void update(float deltaTime);
 
 	/// <summary>
 	/// 그리는용

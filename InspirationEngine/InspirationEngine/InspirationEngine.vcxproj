@@ -31,6 +31,8 @@
     <ClInclude Include="GameObject\IEGameObject.h" />
     <ClInclude Include="GameObject\IEStaticObject.h" />
     <ClInclude Include="GameObject\IEEntity.h" />
+    <ClInclude Include="Scene\IEScene.h" />
+    <ClInclude Include="Scene\IESceneManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="utf8proc\utf8proc.c" />
@@ -50,6 +52,7 @@
     <ClCompile Include="Sprite\IESpriteManager.cpp" />
     <ClCompile Include="GameObject\IEStaticObject.cpp" />
     <ClCompile Include="GameObject\IEEntity.cpp" />
+    <ClCompile Include="Scene\IEScene.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9D10CAC6-29F4-4F09-8DF2-BF7B37530E37}</ProjectGuid>

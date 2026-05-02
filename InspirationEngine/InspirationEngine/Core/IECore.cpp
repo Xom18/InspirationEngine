@@ -5,7 +5,10 @@
 IEInput			IECore::m_Input;						//입력, 클릭이나 창 내부 처리도 여기서 받은다음 각 창으로 보냄
 DebugInfo		IECore::m_DebugInfo;					//디버그 툴
 IEFontManager	IECore::m_Font;							//폰트 관리하는곳
-IESpriteManager	IECore::m_Sprite;						//스프라이트 관리하는곳
+IESpriteManager	IECore::m_Sprite;
+IESceneManager	IECore::m_Scene;
+float			IECore::m_deltaTime   = 0.0f;
+uint64_t		IECore::m_deltaTimeMs = 0;						//스프라이트 관리하는곳
 IEWindow* IECore::m_mainWindow = nullptr;			//메인 윈도우
 IEWindow* IECore::m_mouseOnWindow = nullptr;		//마우스가 올라가 있는 윈도우
 IEWindow* IECore::m_focusedWindow = nullptr;		//선택 되있는 윈도우
@@ -35,11 +38,18 @@ SDL_Rect IECore::m_textEditPosition;					// 텍스트 편집 사용중일때 커
 void IECore::mainThread()
 {
 	auto tickCycle = std::chrono::milliseconds(m_tickRate);
+	auto lastTime  = std::chrono::steady_clock::now();
 	std::chrono::system_clock::time_point StartTime = std::chrono::system_clock::now();	//시작시간
 	std::chrono::system_clock::time_point NextTime = StartTime + tickCycle;				//다음틱
 
 	while (m_isRunning)
 	{
+		auto now     = std::chrono::steady_clock::now();
+		auto elapsed = now - lastTime;
+		m_deltaTime   = std::chrono::duration<float>(elapsed).count();
+		m_deltaTimeMs = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count());
+		lastTime = now;
+
 		auto TargetNextTime = NextTime;	//목표 틱
 		NextTime += tickCycle;			//다음 목표틱
 
@@ -47,7 +57,7 @@ void IECore::mainThread()
 		operateEvent();
 
 		m_operatePhase = EnginePhase::Update;
-		update();
+		update(m_deltaTime);
 
 		m_operatePhase = EnginePhase::Draw;
 		draw();
@@ -160,9 +170,10 @@ void IECore::operateWindowEvent(const SDL_Event* event)
 	}
 }
 
-void IECore::update()
+void IECore::update(float deltaTime)
 {
-
+	for (auto& [_, window] : m_windows)
+		window->update(deltaTime);
 }
 
 void IECore::draw()
