@@ -133,6 +133,17 @@ public:
 	/// <param name="flip">반전 플래그</param>
 	void drawText(Font* font, const char* text, SDL_Color color, int32_t x, int32_t y, double widthPercent = 100, double heightPercent = 100, double angle = 0, SDL_Point* pivot = nullptr, SDL_RendererFlip flip = SDL_FLIP_NONE);
 
+	/// <summary>
+	/// 선 그리기
+	/// </summary>
+	void drawLine(SDL_Color color, int32_t x1, int32_t y1, int32_t x2, int32_t y2);
+
+	/// <summary>
+	/// 현재 렌더러 화면을 PNG 파일로 저장
+	/// </summary>
+	/// <param name="path">저장 경로 (.png)</param>
+	bool saveScreenshot(const char* path);
+
 private:
 
 };

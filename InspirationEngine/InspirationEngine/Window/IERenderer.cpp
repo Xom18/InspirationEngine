@@ -80,6 +80,31 @@ void IERenderer::drawSurface(SDL_Surface* surface, int32_t x, int32_t y, double 
 	SDL_DestroyTexture(pTexture);
 }
 
+void IERenderer::drawLine(SDL_Color color, int32_t x1, int32_t y1, int32_t x2, int32_t y2)
+{
+	SDL_SetRenderDrawColor(m_renderer, color.r, color.g, color.b, color.a);
+	SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND);
+	SDL_RenderDrawLine(m_renderer, x1, y1, x2, y2);
+}
+
+bool IERenderer::saveScreenshot(const char* path)
+{
+	int32_t w = 0, h = 0;
+	SDL_GetRendererOutputSize(m_renderer, &w, &h);
+	if (w <= 0 || h <= 0) return false;
+
+	SDL_Surface* surface = SDL_CreateRGBSurface(0, w, h, 32,
+		0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+	if (!surface) return false;
+
+	SDL_RenderReadPixels(m_renderer, nullptr, SDL_PIXELFORMAT_ARGB8888,
+		surface->pixels, surface->pitch);
+
+	bool ok = IMG_SavePNG(surface, path) == 0;
+	SDL_FreeSurface(surface);
+	return ok;
+}
+
 void IERenderer::drawText(Font* font, const char* text, SDL_Color color, int32_t x, int32_t y, double widthPercent, double heightPercent, double angle, SDL_Point* pivot, SDL_RendererFlip flip)
 {
 	if (font == nullptr) return;

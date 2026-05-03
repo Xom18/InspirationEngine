@@ -59,4 +59,6 @@ public:
 	/// 포인터로 오브젝트 제거
 	/// </summary>
 	void removeObject(IEGameObject* obj);
+
+	const std::vector<std::unique_ptr<IEGameObject>>& getObjects() const { return m_objects; }
 };

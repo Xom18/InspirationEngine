@@ -1,4 +1,112 @@
-#include <SDL/SDL.h>
-#include <iostream>
-#include <vector>
-#include "DebugInfo.h"
+#include "InspirationEngine.h"
+
+void DebugInfo::drawOverlay(IERenderer* renderer, IEScene* scene, Font* font)
+{
+	if (renderer == nullptr) return;
+
+	IECamera* camera = scene ? scene->getCamera() : nullptr;
+
+	drawGrid(renderer, camera);
+	if (scene) drawObjectMarkers(renderer, scene, camera, font);
+	drawCameraInfo(renderer, camera, font);
+}
+
+void DebugInfo::drawGrid(IERenderer* renderer, IECamera* camera)
+{
+	SDL_Color gridColor = { 80, 80, 80, 128 };
+
+	int32_t vw = renderer->m_logicalWidth  > 0 ? renderer->m_logicalWidth  : renderer->m_w;
+	int32_t vh = renderer->m_logicalHeight > 0 ? renderer->m_logicalHeight : renderer->m_h;
+
+	if (camera == nullptr)
+	{
+		for (int32_t x = 0; x < vw; x += 64)
+			renderer->drawLine(gridColor, x, 0, x, vh);
+		for (int32_t y = 0; y < vh; y += 64)
+			renderer->drawLine(gridColor, 0, y, vw, y);
+		return;
+	}
+
+	const int32_t STEP  = 64;
+	const int32_t RANGE = 16;
+
+	int32_t baseX = (static_cast<int32_t>(camera->getX()) / STEP) * STEP;
+	int32_t baseY = (static_cast<int32_t>(camera->getY()) / STEP) * STEP;
+	int32_t startX = baseX - RANGE * STEP;
+	int32_t startY = baseY - RANGE * STEP;
+	int32_t endX   = baseX + RANGE * STEP;
+	int32_t endY   = baseY + RANGE * STEP;
+
+	for (int32_t wx = startX; wx <= endX; wx += STEP)
+	{
+		auto p0 = camera->worldToScreen(static_cast<float>(wx), static_cast<float>(startY));
+		auto p1 = camera->worldToScreen(static_cast<float>(wx), static_cast<float>(endY));
+		renderer->drawLine(gridColor, p0.m_x, p0.m_y, p1.m_x, p1.m_y);
+	}
+	for (int32_t wy = startY; wy <= endY; wy += STEP)
+	{
+		auto p0 = camera->worldToScreen(static_cast<float>(startX), static_cast<float>(wy));
+		auto p1 = camera->worldToScreen(static_cast<float>(endX), static_cast<float>(wy));
+		renderer->drawLine(gridColor, p0.m_x, p0.m_y, p1.m_x, p1.m_y);
+	}
+}
+
+void DebugInfo::drawObjectMarkers(IERenderer* renderer, IEScene* scene, IECamera* camera, Font* font)
+{
+	SDL_Color markerColor = { 255, 100,   0, 200 };
+	SDL_Color textColor   = { 255, 220,   0, 255 };
+	const int32_t CROSS = 6;
+
+	for (const auto& obj : scene->getObjects())
+	{
+		if (!obj->isActive()) continue;
+
+		auto* t = obj->getComponent<IETransformComponent>();
+		if (t == nullptr) continue;
+
+		int32_t sx, sy;
+		if (camera != nullptr)
+		{
+			auto pos = camera->worldToScreen(t->x, t->y, t->z);
+			sx = pos.m_x;
+			sy = pos.m_y;
+		}
+		else
+		{
+			sx = static_cast<int32_t>(t->x);
+			sy = static_cast<int32_t>(t->y);
+		}
+
+		renderer->drawLine(markerColor, sx - CROSS, sy, sx + CROSS, sy);
+		renderer->drawLine(markerColor, sx, sy - CROSS, sx, sy + CROSS);
+
+		if (font != nullptr)
+		{
+			char buf[64];
+			snprintf(buf, sizeof(buf), "(%.0f,%.0f,%.0f)", t->x, t->y, t->z);
+			renderer->drawText(font, buf, textColor, sx + CROSS + 2, sy - 8);
+		}
+	}
+}
+
+void DebugInfo::drawCameraInfo(IERenderer* renderer, IECamera* camera, Font* font)
+{
+	if (font == nullptr) return;
+
+	SDL_Color textColor = { 0, 255, 128, 255 };
+	char buf[128];
+
+	if (camera != nullptr)
+	{
+		snprintf(buf, sizeof(buf), "CAM (%.1f, %.1f, %.1f) zoom:%.2f vp:%dx%d",
+			camera->getX(), camera->getY(), camera->getZ(),
+			camera->getZoom(),
+			camera->getViewportWidth(), camera->getViewportHeight());
+	}
+	else
+	{
+		snprintf(buf, sizeof(buf), "CAM: none");
+	}
+
+	renderer->drawText(font, buf, textColor, 4, 4);
+}
