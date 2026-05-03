@@ -1,7 +1,7 @@
 {
-  "camera": { "tileWidth": 32, "tileHeight": 19, "zoom": 2.0, "x": 2.0, "y": 2.0 },
+  "camera": { "tileWidth": 32, "tileHeight": 16, "zoom": 2.0, "x": 2.0, "y": 2.0 },
   "objects": [
-    { "x": 0, "y": 0, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 0, "y": 0, "z":3, "tile": { "atlas": "floors", "tile": "grass" } },
     { "x": 1, "y": 0, "tile": { "atlas": "floors", "tile": "grass" } },
     { "x": 2, "y": 0, "tile": { "atlas": "floors", "tile": "grass" } },
     { "x": 3, "y": 0, "tile": { "atlas": "floors", "tile": "grass" } },

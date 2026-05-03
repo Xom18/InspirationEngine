@@ -17,17 +17,18 @@ void GameScene::onEnter()
 
 	auto& camJson = j["camera"];
 	float zoom = camJson.value("zoom", 2.0f);
-	float cx   = camJson.value("x", 0.0f);
-	float cy   = camJson.value("y", 0.0f);
+	float cx = camJson.value("x", 0.0f);
+	float cy = camJson.value("y", 0.0f);
+	float cz = camJson.value("z", 0.0f);
 
 	// atlas에서 tileStep 읽기 — world 좌표당 픽셀 stride 정의
 	auto [stepX, stepY] = IECore::m_Atlas.getTileStep("floors");
 	int32_t tileW = camJson.value("tileWidth",  stepX > 0 ? stepX : 32);
-	int32_t tileH = camJson.value("tileHeight", stepY > 0 ? stepY : 19);
+	int32_t tileH = camJson.value("tileHeight", stepY > 0 ? stepY : 16);
 
 	auto* camera = new IECameraIsometric(tileW, tileH);
 	camera->setZoom(zoom);
-	camera->setPosition(cx, cy, 0.0f);
+	camera->setPosition(cx, cy, cz);
 	camera->setViewport(512, 512);
 	setCamera(camera);
 
