@@ -14,23 +14,21 @@
 /// 투영 공식:
 ///   screenX = (wx - cx) * zoom + vw/2
 ///   screenY = (-(wy - cy) * depthFactor - (wz - cz) * heightFactor) * zoom + vh/2
-///   ─ y+ 가 멀어질수록 화면 위쪽으로 이동 (먼 오브젝트 = 화면 상단)
-///   ─ z+ 가 높아질수록 화면 위쪽으로 이동 (점프)
 ///
 /// 정렬 키: -y
 ///   ─ y 가 클수록(멀수록) 낮은 정렬 키 → 먼저 그려짐(뒤)
 /// </summary>
 class IECameraDepthSide : public IECamera
 {
-	float m_depthFactor  = 0.5f;	// y 1단위 → 화면 픽셀 수직 이동량
-	float m_heightFactor = 1.0f;	// z 1단위 → 화면 픽셀 수직 이동량
+	float m_depthFactor  = 0.5f;
+	float m_heightFactor = 1.0f;
 
 public:
 	IECameraDepthSide() = default;
 	IECameraDepthSide(float depthFactor, float heightFactor = 1.0f)
 		: m_depthFactor(depthFactor), m_heightFactor(heightFactor) {}
 
-	IVector2 worldToScreen(float wx, float wy, float wz = 0.0f) const override
+	IVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const override
 	{
 		IVector2 result;
 		result.m_x = static_cast<int32_t>((wx - m_x) * m_zoom + m_viewportWidth  * 0.5f);
@@ -38,12 +36,10 @@ public:
 		return result;
 	}
 
-	// screenToWorld: z = 0 가정, y 복원
-	IVector2 screenToWorld(int32_t sx, int32_t sy) const override
+	IVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
 	{
 		IVector2 result;
 		result.m_x = static_cast<int32_t>((sx - m_viewportWidth  * 0.5f) / m_zoom + m_x);
-		// z = 0: screenY = -wy * depthFactor * zoom + vh/2  →  wy = -(sy - vh/2) / (depthFactor * zoom)
 		if (m_depthFactor != 0.0f)
 			result.m_y = static_cast<int32_t>(-(sy - m_viewportHeight * 0.5f) / (m_depthFactor * m_zoom) + m_y);
 		else
@@ -51,14 +47,13 @@ public:
 		return result;
 	}
 
-	float getSortKey(float x, float y, float z) const override
+	float GetSortKey(float x, float y, float z) const override
 	{
-		// y 가 클수록 멀리 있음 → 먼저 그려짐 → 낮은 정렬 키
 		return -y;
 	}
 
-	void  setDepthFactor(float f)  { m_depthFactor  = f; }
-	void  setHeightFactor(float f) { m_heightFactor = f; }
-	float getDepthFactor()  const  { return m_depthFactor; }
-	float getHeightFactor() const  { return m_heightFactor; }
+	void  SetDepthFactor(float f)  { m_depthFactor  = f; }
+	void  SetHeightFactor(float f) { m_heightFactor = f; }
+	float GetDepthFactor()  const  { return m_depthFactor; }
+	float GetHeightFactor() const  { return m_heightFactor; }
 };

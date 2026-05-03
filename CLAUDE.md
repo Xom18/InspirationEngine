@@ -58,12 +58,27 @@ cIECore::draw()           ← cvDrawCompleteWaiter 대기 후 SDL_RenderPresent 
 
 ## 코딩 컨벤션
 
-`CODING_CONVENTION.md` 참조. 요약:
+**이 프로젝트의 모든 코드 작업은 반드시 `CODING_CONVENTION.md` 규칙을 준수해야 한다.**
+새 파일 작성, 기존 파일 수정, 리팩터링 모두 예외 없이 적용.
 
-- 클래스: PascalCase, 엔진 라이브러리 클래스는 `IE` 접두어 (예: `IECore`, `IEWindow`)
-- 멤버 변수: `m_` + camelCase (타입 접두어 없음)
-- 함수/메서드: PascalCase
-- 변수/파라미터: camelCase (타입 접두어 없음)
-- 정수: `int32_t`, `uint32_t` 등 고정 크기 타입
+`CODING_CONVENTION.md` 핵심 규칙:
 
-> 현재 코드베이스는 구 컨벤션(`c` 접두어, `m_lp`/`m_i` 등)을 사용 중이며 순차 마이그레이션 예정.
+| 항목 | 규칙 | 예시 |
+|------|------|------|
+| 클래스/구조체 | PascalCase, 엔진 클래스 `IE` 접두어 | `IECamera`, `IEScene` |
+| 함수/메서드 | **PascalCase** | `WorldToScreen()`, `GetTile()` |
+| 멤버 변수 | `m_` + camelCase, 타입 접두어 없음 | `m_tileWidth`, `m_camera` |
+| 변수/파라미터 | camelCase, 타입 접두어 없음 | `deltaTime`, `screenX` |
+| 정수형 | `int32_t`, `uint32_t` 등 고정 크기 | `int32_t m_width` |
+| 포인터 비교 | `== nullptr` / `!= nullptr` 명시 | `if (ptr == nullptr)` |
+| 단일행 if | 본문은 반드시 다음 줄에 | `if (cond)\n    return;` |
+| try/catch | 여러 줄 블록 형식 | `try { } catch (...) { }` 금지 |
+| 문서 주석 | `/// <summary>` + `/// <param>` 유지 | 메서드 선언부에 필수 |
+| 멤버 변수 접근 제어 | **`private` 원칙**, 파생 클래스 공유 시 `protected` | public 멤버 변수 금지 |
+| 포인터 스마트 포인터 | 소유 시 `unique_ptr`/`shared_ptr` | raw `new` 직접 멤버 보유 금지 |
+| 캐스팅 | C++ 캐스트 연산자만 | `static_cast<int32_t>(x)` |
+| try-catch | 네트워크·외부 파싱 등 불가피한 경계 외 금지 | 반환값 + 로그로 대체 |
+| assert | 사용 배제 | 조건문 + 로그로 대체 |
+
+> 현재 코드베이스 일부는 구 컨벤션(`c` 접두어, `m_lp`/`m_i` 등)을 사용 중이며 순차 마이그레이션 예정.
+> **신규 코드와 수정 코드는 항상 신 컨벤션 적용.**

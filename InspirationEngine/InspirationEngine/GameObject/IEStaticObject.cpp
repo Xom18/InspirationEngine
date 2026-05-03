@@ -1,16 +1,17 @@
 #include "InspirationEngine.h"
 
-void IEStaticObject::draw(IERenderer* renderer, int32_t screenX, int32_t screenY, float zoom)
+void IEStaticObject::Draw(IERenderer* renderer, int32_t screenX, int32_t screenY, float zoom)
 {
 	if (!m_active || renderer == nullptr)
 		return;
 
-	auto* tc = getComponent<IETileComponent>();
+	auto* tc = GetComponent<IETileComponent>();
 	if (tc != nullptr)
 	{
-		const IETileDef* def = IECore::m_Atlas.getTile(tc->atlas, tc->tile);
-		SDL_Texture*     tex = IECore::m_Atlas.getTexture(tc->atlas);
-		if (def == nullptr || tex == nullptr) return;
+		const IETileDef* def = IECore::m_Atlas.GetTile(tc->GetAtlas(), tc->GetTile());
+		SDL_Texture*     tex = IECore::m_Atlas.GetTexture(tc->GetAtlas());
+		if (def == nullptr || tex == nullptr)
+			return;
 
 		int32_t dw = static_cast<int32_t>(def->top.w * zoom);
 		int32_t dh = static_cast<int32_t>(def->top.h * zoom);
@@ -31,9 +32,10 @@ void IEStaticObject::draw(IERenderer* renderer, int32_t screenX, int32_t screenY
 		return;
 	}
 
-	if (m_sprite == nullptr) return;
+	if (m_sprite == nullptr)
+		return;
 
-	auto* t = getComponent<IETransformComponent>();
+	auto* t = GetComponent<IETransformComponent>();
 	if (t == nullptr)
 		return;
 
@@ -41,7 +43,7 @@ void IEStaticObject::draw(IERenderer* renderer, int32_t screenX, int32_t screenY
 		renderer,
 		screenX,
 		screenY,
-		static_cast<double>(t->scaleX),
-		static_cast<double>(t->scaleY),
-		static_cast<double>(t->rotation));
+		static_cast<double>(t->GetScaleX()),
+		static_cast<double>(t->GetScaleY()),
+		static_cast<double>(t->GetRotation()));
 }

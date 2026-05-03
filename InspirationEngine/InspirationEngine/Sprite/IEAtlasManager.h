@@ -18,21 +18,24 @@ struct IETileDef {
 };
 
 class IEAtlas {
+	friend class IEAtlasManager;
+
+	SDL_Texture*                               m_texture   = nullptr;
+	std::unordered_map<std::string, IETileDef> m_tiles;
+	int32_t                                    m_tileStepX = 0;
+	int32_t                                    m_tileStepY = 0;
+
 public:
-	SDL_Texture* texture = nullptr;
-	std::unordered_map<std::string, IETileDef> tiles;
-	int32_t tileStepX = 0;
-	int32_t tileStepY = 0;
-	~IEAtlas() { if (texture) SDL_DestroyTexture(texture); }
+	~IEAtlas() { if (m_texture != nullptr) SDL_DestroyTexture(m_texture); }
 };
 
 class IEAtlasManager {
 	std::unordered_map<std::string, std::unique_ptr<IEAtlas>> m_atlases;
 public:
-	bool load(const std::string& name, const std::string& jsonPath, SDL_Renderer* renderer);
-	void unload(const std::string& name);
+	bool Load(const std::string& name, const std::string& jsonPath, SDL_Renderer* renderer);
+	void Unload(const std::string& name);
 
-	const IETileDef*             getTile(const std::string& atlas, const std::string& tile) const;
-	SDL_Texture*                 getTexture(const std::string& atlas) const;
-	std::pair<int32_t, int32_t>  getTileStep(const std::string& atlas) const;
+	const IETileDef*             GetTile(const std::string& atlas, const std::string& tile) const;
+	SDL_Texture*                 GetTexture(const std::string& atlas) const;
+	std::pair<int32_t, int32_t>  GetTileStep(const std::string& atlas) const;
 };

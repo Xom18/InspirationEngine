@@ -11,6 +11,8 @@
 | 한글 IME | ✅ | TextBox 커서 / 그래핌 클러스터 |
 | 폰트 관리자 | ✅ | 스타일별 FontFace (Bold, Italic 합성) |
 | 스프라이트 관리자 | ✅ | IESpriteManager / IESprite, 스프라이트 시트 클리핑 |
+| 아틀라스 관리자 | ✅ | IEAtlasManager — JSON 기반 타일 정의, top/side/anchor 지원 |
+| 타일 컴포넌트 | ✅ | IETileComponent, IEStaticObject 타일 드로우 (zoom, anchor) |
 | 엔진 코어 루프 | ✅ | 위상 기반 (Event → Update → Draw) |
 | UTF-8 유틸리티 | ✅ | utf8proc 기반 |
 | 파일 읽기 | ✅ | 바이너리 파일 로드 |
@@ -345,6 +347,69 @@ IESaveData
 
 ---
 
+---
+
+## 에디터 도구 (Editor Tools)
+
+> **분리 원칙**: 에디터 도구는 엔진 라이브러리(`InspirationEngine.lib`)에 포함하지 않는다.  
+> 게임 배포본에 툴 코드가 들어가지 않도록, 독립 실행파일 또는 별도 프로젝트로 분리.
+
+```
+InspirationEngine.sln
+ ├── InspirationEngine  (lib) — 엔진 런타임, 툴 코드 없음
+ ├── InspirationEditor        (exe) — 에디터 도구, 엔진 lib 링크
+ └── Example            (exe) — 게임 샘플, 엔진 lib 링크
+```
+
+---
+
+### E-1. Atlas Editor
+
+**이유**: 아틀라스 JSON을 텍스트로 직접 편집하면 픽셀 좌표 실수가 잦다.  
+PNG를 로드하고 타일을 GUI로 정의하는 전용 도구가 필요하다.
+
+**프로젝트**: `InspirationEditor` (VS 솔루션 내 별도 exe)  
+`InspirationEngine.lib` + `SDL2` + `SDL2_image` 링크.
+
+#### 핵심 기능 (Phase 1 MVP)
+
+| 기능 | 설명 |
+|------|------|
+| PNG 로드 | 경로 입력 → SDL_Surface 로드 후 캔버스 표시 |
+| 자동 분할 | tileW / tileH 입력 → 그리드로 슬라이스, `tile_r{row}_c{col}` 이름 자동 부여 |
+| 타일 선택 | 캔버스 클릭 → 해당 타일 강조 (빨간 테두리) |
+| 속성 편집 | 선택된 타일의 name / x / y / w / h / anchorX / anchorY 수정 |
+| JSON 저장 | floors.json / ramps.json 동일 포맷으로 파일 저장 |
+
+#### UI 레이아웃
+
+```
+┌─────────────────────────────────────────┐
+│ [PNG 경로]  [W:32] [H:32]  [로드/분할]   │
+├──────────────────────┬──────────────────┤
+│  PNG 캔버스           │  name: [______]  │
+│  (줌 / 스크롤 지원)   │  x:    [______]  │
+│  선택 타일 = 빨간 rect │  y:    [______]  │
+│                      │  w:    [______]  │
+│                      │  h:    [______]  │
+│                      │  anchorX: [___]  │
+│                      │  anchorY: [___]  │
+│                      │  [적용]          │
+├──────────────────────┴──────────────────┤
+│  [JSON 저장]   타일 수: 0                │
+└─────────────────────────────────────────┘
+```
+
+#### 신규 파일
+
+| 파일 | 역할 |
+|------|------|
+| `InspirationEditor/main.cpp` | SDL 초기화 + 이벤트 루프 |
+| `InspirationEditor/InspirationEditorApp.h/.cpp` | 캔버스 렌더 + 마우스 이벤트 + JSON 저장 |
+| `InspirationEditor/InspirationEditor.vcxproj` | VS 프로젝트 (InspirationEngine.lib 링크) |
+
+---
+
 ## 추천 진행 순서 요약
 
 ```
@@ -362,4 +427,9 @@ IESaveData
                                     └─► 4-3 파티클
 ```
 
-> **다음 목표**: 1-2 게임 오브젝트 시스템 → 씬까지 완성하면 Example 프로젝트에서 실제 게임 프로토타입 제작 가능.
+**에디터 도구** (게임 기능과 독립적으로 진행 가능):
+```
+E-1 Atlas Editor  ← 현재 계획 중
+```
+
+> **현재 상태**: 카메라 5종 / 아틀라스 / 타일 드로우 완료. 다음은 충돌 감지(2-2) 또는 Atlas Editor(E-1).

@@ -17,7 +17,7 @@ class IECameraTopView : public IECamera
 public:
 	IECameraTopView() = default;
 
-	IVector2 worldToScreen(float wx, float wy, float wz = 0.0f) const override
+	IVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const override
 	{
 		IVector2 result;
 		result.m_x = static_cast<int32_t>((wx - m_x) * m_zoom + m_viewportWidth  * 0.5f);
@@ -25,7 +25,7 @@ public:
 		return result;
 	}
 
-	IVector2 screenToWorld(int32_t sx, int32_t sy) const override
+	IVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
 	{
 		IVector2 result;
 		result.m_x = static_cast<int32_t>((sx - m_viewportWidth  * 0.5f) / m_zoom + m_x);
@@ -33,5 +33,5 @@ public:
 		return result;
 	}
 
-	// getSortKey: 기본 y 그대로 사용 (IECamera 기본값)
+	// GetSortKey: 기본 y 그대로 사용 (IECamera 기본값)
 };

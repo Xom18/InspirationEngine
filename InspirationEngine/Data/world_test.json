@@ -8,7 +8,7 @@
     { "x": 4, "y": 0, "tile": { "atlas": "floors", "tile": "grass" } },
     { "x": 0, "y": 1, "tile": { "atlas": "floors", "tile": "grass" } },
     { "x": 1, "y": 1, "tile": { "atlas": "floors", "tile": "grass" } },
-    { "x": 2, "y": 1, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 2, "y": 1, "tile": { "atlas": "floors", "tile": "stone" } },
     { "x": 3, "y": 1, "tile": { "atlas": "floors", "tile": "grass" } },
     { "x": 4, "y": 1, "tile": { "atlas": "floors", "tile": "grass" } },
     { "x": 0, "y": 2, "tile": { "atlas": "floors", "tile": "grass" } },

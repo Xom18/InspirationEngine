@@ -3,6 +3,6 @@
 
 class GameScene : public IEScene {
 public:
-	void onEnter() override;
-	void onExit()  override;
+	void OnEnter() override;
+	void OnExit()  override;
 };

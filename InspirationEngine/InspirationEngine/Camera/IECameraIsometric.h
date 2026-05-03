@@ -26,16 +26,14 @@ public:
 	IECameraIsometric(int32_t tileW, int32_t tileH, float heightFactor = 16.0f)
 		: m_tileWidth(tileW), m_tileHeight(tileH), m_heightFactor(heightFactor) {}
 
-	IVector2 worldToScreen(float wx, float wy, float wz = 0.0f) const override
+	IVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const override
 	{
 		float hw = m_tileWidth  * 0.5f;
 		float hh = m_tileHeight * 0.5f;
 
-		// 오브젝트의 아이소 화면 좌표
 		float isoX = (wx - wy) * hw;
 		float isoY = (wx + wy) * hh - wz * m_heightFactor;
 
-		// 카메라의 아이소 화면 좌표
 		float camIsoX = (m_x - m_y) * hw;
 		float camIsoY = (m_x + m_y) * hh - m_z * m_heightFactor;
 
@@ -45,21 +43,19 @@ public:
 		return result;
 	}
 
-	IVector2 screenToWorld(int32_t sx, int32_t sy) const override
+	IVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
 	{
 		float hw = m_tileWidth  * 0.5f;
 		float hh = m_tileHeight * 0.5f;
 
-		// 카메라 기준 아이소 로컬 좌표 (z = 0 가정)
 		float camIsoX = (m_x - m_y) * hw;
 		float camIsoY = (m_x + m_y) * hh;
 
 		float localX = (sx - m_viewportWidth  * 0.5f) / m_zoom + camIsoX;
 		float localY = (sy - m_viewportHeight * 0.5f) / m_zoom + camIsoY;
 
-		// 역변환: localX = (rx-ry)*hw, localY = (rx+ry)*hh (z=0)
-		float diff = localX / hw;  // wx - wy
-		float sum  = localY / hh;  // wx + wy
+		float diff = localX / hw;
+		float sum  = localY / hh;
 
 		IVector2 result;
 		result.m_x = static_cast<int32_t>((sum + diff) * 0.5f);
@@ -67,15 +63,14 @@ public:
 		return result;
 	}
 
-	float getSortKey(float x, float y, float z) const override
+	float GetSortKey(float x, float y, float z) const override
 	{
-		// 투영된 screenY 기준 — 화면 위에 있는 오브젝트(먼 것)가 먼저 그려짐
 		return (x + y) * (m_tileHeight * 0.5f) - z * m_heightFactor;
 	}
 
-	void    setTileSize(int32_t w, int32_t h) { m_tileWidth = w; m_tileHeight = h; }
-	void    setHeightFactor(float f)          { m_heightFactor = f; }
-	int32_t getTileWidth()     const          { return m_tileWidth; }
-	int32_t getTileHeight()    const          { return m_tileHeight; }
-	float   getHeightFactor()  const          { return m_heightFactor; }
+	void    SetTileSize(int32_t w, int32_t h) { m_tileWidth = w; m_tileHeight = h; }
+	void    SetHeightFactor(float f)          { m_heightFactor = f; }
+	int32_t GetTileWidth()     const          { return m_tileWidth; }
+	int32_t GetTileHeight()    const          { return m_tileHeight; }
+	float   GetHeightFactor()  const          { return m_heightFactor; }
 };

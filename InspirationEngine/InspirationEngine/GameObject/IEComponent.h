@@ -8,16 +8,16 @@ class IEComponent
 public:
 	virtual ~IEComponent() = default;
 
-	static size_t allocTypeId()
+	static size_t AllocTypeId()
 	{
 		static size_t counter = 0;
 		return counter++;
 	}
 
 	template<typename T>
-	static size_t typeId()
+	static size_t TypeId()
 	{
-		static size_t id = allocTypeId();
+		static size_t id = AllocTypeId();
 		return id;
 	}
 };
@@ -27,13 +27,27 @@ public:
 /// </summary>
 class IETransformComponent : public IEComponent
 {
+	float m_x        = 0.0f;
+	float m_y        = 0.0f;
+	float m_z        = 0.0f;
+	float m_rotation = 0.0f;
+	float m_scaleX   = 1.0f;
+	float m_scaleY   = 1.0f;
+
 public:
-	float x = 0.0f;
-	float y = 0.0f;
-	float z = 0.0f;			// 높이축 (isometric / side view 에서 사용)
-	float rotation = 0.0f;	// 회전 각도 (도)
-	float scaleX = 1.0f;
-	float scaleY = 1.0f;
+	float GetX()        const { return m_x; }
+	float GetY()        const { return m_y; }
+	float GetZ()        const { return m_z; }
+	float GetRotation() const { return m_rotation; }
+	float GetScaleX()   const { return m_scaleX; }
+	float GetScaleY()   const { return m_scaleY; }
+
+	void SetX(float x)               { m_x = x; }
+	void SetY(float y)               { m_y = y; }
+	void SetZ(float z)               { m_z = z; }
+	void SetRotation(float rotation) { m_rotation = rotation; }
+	void SetScaleX(float scaleX)     { m_scaleX = scaleX; }
+	void SetScaleY(float scaleY)     { m_scaleY = scaleY; }
 };
 
 /// <summary>
@@ -41,10 +55,18 @@ public:
 /// </summary>
 class IEVelocityComponent : public IEComponent
 {
+	float m_vx = 0.0f;
+	float m_vy = 0.0f;
+	float m_vz = 0.0f;
+
 public:
-	float vx = 0.0f;
-	float vy = 0.0f;
-	float vz = 0.0f;	// 높이 방향 속도 (점프 등)
+	float GetVx() const { return m_vx; }
+	float GetVy() const { return m_vy; }
+	float GetVz() const { return m_vz; }
+
+	void SetVx(float vx) { m_vx = vx; }
+	void SetVy(float vy) { m_vy = vy; }
+	void SetVz(float vz) { m_vz = vz; }
 };
 
 /// <summary>
@@ -52,7 +74,13 @@ public:
 /// </summary>
 class IETileComponent : public IEComponent
 {
+	std::string m_atlas;
+	std::string m_tile;
+
 public:
-	std::string atlas;	// 예: "floors"
-	std::string tile;	// 예: "grass"
+	const std::string& GetAtlas() const { return m_atlas; }
+	const std::string& GetTile()  const { return m_tile; }
+
+	void SetAtlas(const std::string& atlas) { m_atlas = atlas; }
+	void SetTile(const std::string& tile)   { m_tile = tile; }
 };

@@ -197,6 +197,18 @@ if (!ptr)                 // pointer를 bool처럼 사용 금지
 if (m_isRunning == true)  // bool에 == true 불필요
 ```
 
+### 내용이 한줄인 if
+- 한줄일 경우 괄호 생략가능, 단 if와 동일한 줄에 분기동작 금지
+
+```cpp
+// Good
+if (m_isCheck) // return과 같이 if 다음에 한줄일 경우 줄바꿈 / 괄호 생략
+  return;
+
+// Bad
+if (m_isCheck) return; // 줄바꿈까지 생략 금지
+```
+
 ### override
 - 가상 함수 재정의 시 **`override`** 키워드 필수
 
@@ -239,4 +251,51 @@ constexpr int32_t g_screenHeight = 720;
 
 // Bad
 #define SCREEN_WIDTH 1280
+```
+
+### 클래스 내부 함수에 대한 설명
+class와 그 내부 함수에는 반드시 주석으로 <summary>와 <param>에 대한 코멘트를 남겨준다
+
+### 클래스 멤버 변수
+멤버 변수는 private을 원칙으로 한다. 파생 클래스에서 직접 접근이 필요한 경우에만 protected 허용. public 멤버 변수 금지.
+
+---
+
+### try-catch 사용 배제
+네트워크, 외부 파일 파싱 등 **예외가 불가피한 경계**가 아니라면 try-catch 사용 금지.
+엔진 내부 로직에서의 try-catch는 예외를 숨겨 디버깅을 어렵게 만든다.
+대신 반환값(`bool`, 에러 코드) 또는 로그로 처리한다.
+
+```cpp
+// Good — 반환값으로 처리
+bool Load(const std::string& path)
+{
+    std::ifstream f(path);
+    if (!f.is_open())
+    {
+        IELog::Error("파일 열기 실패: " + path);
+        return false;
+    }
+    // ...
+    return true;
+}
+
+// Bad — 엔진 내부에서 예외 은폐
+try { DoSomething(); } catch (...) { }
+```
+
+### assert 사용 배제
+`assert`는 릴리즈 빌드에서 제거되므로 의존하지 않는다.
+조건 검사가 필요하면 명시적 조건문 + 로그로 대체한다.
+
+```cpp
+// Good
+if (ptr == nullptr)
+{
+    IELog::Error("ptr이 nullptr — 초기화 누락 가능성");
+    return;
+}
+
+// Bad
+assert(ptr != nullptr);
 ```

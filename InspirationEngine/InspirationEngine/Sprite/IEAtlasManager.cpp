@@ -2,16 +2,18 @@
 #include "nlohmann/json.hpp"
 #include <fstream>
 
-bool IEAtlasManager::load(const std::string& name, const std::string& jsonPath, SDL_Renderer* renderer)
+bool IEAtlasManager::Load(const std::string& name, const std::string& jsonPath, SDL_Renderer* renderer)
 {
 	std::ifstream f(jsonPath);
-	if (!f.is_open()) return false;
+	if (!f.is_open())
+		return false;
 
-	nlohmann::json j;
-	try { f >> j; }
-	catch (...) { return false; }
+	nlohmann::json j = nlohmann::json::parse(f, nullptr, false);
+	if (j.is_discarded())
+		return false;
 
-	if (!j.contains("image")) return false;
+	if (!j.contains("image"))
+		return false;
 	std::string imagePath = j["image"].get<std::string>();
 
 	std::string dir;
@@ -21,17 +23,19 @@ bool IEAtlasManager::load(const std::string& name, const std::string& jsonPath, 
 	std::string fullImagePath = dir + imagePath;
 
 	SDL_Surface* surf = IMG_Load(fullImagePath.c_str());
-	if (!surf) return false;
+	if (surf == nullptr)
+		return false;
 
 	auto atlas = std::make_unique<IEAtlas>();
-	atlas->texture = SDL_CreateTextureFromSurface(renderer, surf);
+	atlas->m_texture = SDL_CreateTextureFromSurface(renderer, surf);
 	SDL_FreeSurface(surf);
-	if (!atlas->texture) return false;
+	if (atlas->m_texture == nullptr)
+		return false;
 
 	if (j.contains("tileStep") && j["tileStep"].is_object())
 	{
-		atlas->tileStepX = j["tileStep"].value("x", 0);
-		atlas->tileStepY = j["tileStep"].value("y", 0);
+		atlas->m_tileStepX = j["tileStep"].value("x", 0);
+		atlas->m_tileStepY = j["tileStep"].value("y", 0);
 	}
 
 	float defaultAnchorX = j.value("defaultAnchorX", 0.5f);
@@ -67,7 +71,7 @@ bool IEAtlasManager::load(const std::string& name, const std::string& jsonPath, 
 				def.anchorX = tileData.value("anchorX", defaultAnchorX);
 				def.anchorY = tileData.value("anchorY", defaultAnchorY);
 			}
-			atlas->tiles[tileName] = def;
+			atlas->m_tiles[tileName] = def;
 		}
 	}
 
@@ -75,30 +79,34 @@ bool IEAtlasManager::load(const std::string& name, const std::string& jsonPath, 
 	return true;
 }
 
-void IEAtlasManager::unload(const std::string& name)
+void IEAtlasManager::Unload(const std::string& name)
 {
 	m_atlases.erase(name);
 }
 
-const IETileDef* IEAtlasManager::getTile(const std::string& atlas, const std::string& tile) const
+const IETileDef* IEAtlasManager::GetTile(const std::string& atlas, const std::string& tile) const
 {
 	auto it = m_atlases.find(atlas);
-	if (it == m_atlases.end()) return nullptr;
-	auto jt = it->second->tiles.find(tile);
-	if (jt == it->second->tiles.end()) return nullptr;
+	if (it == m_atlases.end())
+		return nullptr;
+	auto jt = it->second->m_tiles.find(tile);
+	if (jt == it->second->m_tiles.end())
+		return nullptr;
 	return &jt->second;
 }
 
-SDL_Texture* IEAtlasManager::getTexture(const std::string& atlas) const
+SDL_Texture* IEAtlasManager::GetTexture(const std::string& atlas) const
 {
 	auto it = m_atlases.find(atlas);
-	if (it == m_atlases.end()) return nullptr;
-	return it->second->texture;
+	if (it == m_atlases.end())
+		return nullptr;
+	return it->second->m_texture;
 }
 
-std::pair<int32_t, int32_t> IEAtlasManager::getTileStep(const std::string& atlas) const
+std::pair<int32_t, int32_t> IEAtlasManager::GetTileStep(const std::string& atlas) const
 {
 	auto it = m_atlases.find(atlas);
-	if (it == m_atlases.end()) return { 0, 0 };
-	return { it->second->tileStepX, it->second->tileStepY };
+	if (it == m_atlases.end())
+		return { 0, 0 };
+	return { it->second->m_tileStepX, it->second->m_tileStepY };
 }

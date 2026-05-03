@@ -1,23 +1,23 @@
 #include "InspirationEngine.h"
 
-void IEEntity::update(float deltaTime)
+void IEEntity::Update(float deltaTime)
 {
-	auto* t = getComponent<IETransformComponent>();
-	auto* v = getComponent<IEVelocityComponent>();
+	auto* t = GetComponent<IETransformComponent>();
+	auto* v = GetComponent<IEVelocityComponent>();
 	if (t == nullptr || v == nullptr)
 		return;
 
-	t->x += v->vx * deltaTime;
-	t->y += v->vy * deltaTime;
-	t->z += v->vz * deltaTime;
+	t->SetX(t->GetX() + v->GetVx() * deltaTime);
+	t->SetY(t->GetY() + v->GetVy() * deltaTime);
+	t->SetZ(t->GetZ() + v->GetVz() * deltaTime);
 }
 
-void IEEntity::draw(IERenderer* renderer, int32_t screenX, int32_t screenY, float zoom)
+void IEEntity::Draw(IERenderer* renderer, int32_t screenX, int32_t screenY, float zoom)
 {
 	if (!m_active || m_sprite == nullptr || renderer == nullptr)
 		return;
 
-	auto* t = getComponent<IETransformComponent>();
+	auto* t = GetComponent<IETransformComponent>();
 	if (t == nullptr)
 		return;
 
@@ -25,7 +25,7 @@ void IEEntity::draw(IERenderer* renderer, int32_t screenX, int32_t screenY, floa
 		renderer,
 		screenX,
 		screenY,
-		static_cast<double>(t->scaleX),
-		static_cast<double>(t->scaleY),
-		static_cast<double>(t->rotation));
+		static_cast<double>(t->GetScaleX()),
+		static_cast<double>(t->GetScaleY()),
+		static_cast<double>(t->GetRotation()));
 }

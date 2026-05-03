@@ -16,13 +16,13 @@
 /// </summary>
 class IECameraSideView : public IECamera
 {
-	float m_heightFactor = 1.0f;  // z 1단위 → 화면 픽셀 높이
+	float m_heightFactor = 1.0f;
 
 public:
 	IECameraSideView() = default;
 	explicit IECameraSideView(float heightFactor) : m_heightFactor(heightFactor) {}
 
-	IVector2 worldToScreen(float wx, float wy, float wz = 0.0f) const override
+	IVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const override
 	{
 		IVector2 result;
 		result.m_x = static_cast<int32_t>((wx - m_x) * m_zoom + m_viewportWidth  * 0.5f);
@@ -30,21 +30,19 @@ public:
 		return result;
 	}
 
-	// screenToWorld: z = 0 (지면 기준), y 복원
-	IVector2 screenToWorld(int32_t sx, int32_t sy) const override
+	IVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
 	{
 		IVector2 result;
 		result.m_x = static_cast<int32_t>((sx - m_viewportWidth  * 0.5f) / m_zoom + m_x);
-		// z = 0 가정: screenY = (wy - cy) * zoom + vh/2
 		result.m_y = static_cast<int32_t>((sy - m_viewportHeight * 0.5f) / m_zoom + m_y);
 		return result;
 	}
 
-	float getSortKey(float x, float y, float z) const override
+	float GetSortKey(float x, float y, float z) const override
 	{
 		return y - z * m_heightFactor;
 	}
 
-	void  setHeightFactor(float f) { m_heightFactor = f; }
-	float getHeightFactor() const  { return m_heightFactor; }
+	void  SetHeightFactor(float f) { m_heightFactor = f; }
+	float GetHeightFactor() const  { return m_heightFactor; }
 };

@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
 	lpDebugWindow->initWindow();
 
 	//테스트 씬 푸시
-	IECore::m_Scene.push(new GameScene());
+	IECore::m_Scene.Push(new GameScene());
 
 	//엔진 시작
 	IECore::beginEngine();
