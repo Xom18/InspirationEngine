@@ -62,7 +62,7 @@ void IEScene::draw(IERenderer* renderer)
 			sy = t != nullptr ? static_cast<int32_t>(t->y) : 0;
 		}
 
-		obj->draw(renderer, sx, sy);
+		obj->draw(renderer, sx, sy, m_camera != nullptr ? m_camera->getZoom() : 1.0f);
 	}
 }
 

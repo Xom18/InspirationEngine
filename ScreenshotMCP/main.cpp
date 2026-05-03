@@ -93,17 +93,40 @@ static std::vector<uint8_t> captureWindowToBMP(const std::string& titleSearch)
 
     PrintWindow(fd.hwnd, hdcMem, PW_CLIENTONLY);
 
-    // BMP 파일 메모리 조립
+    // 50% 다운스케일 (nearest-neighbor) — BMP 크기 감소
+    int sw = w / 2;
+    int sh = h / 2;
+    if (sw < 1) sw = 1;
+    if (sh < 1) sh = 1;
+    std::vector<uint8_t> smallPixels(sw * sh * 4);
+    uint8_t* src = static_cast<uint8_t*>(pBits);
+    for (int sy = 0; sy < sh; sy++) {
+        for (int sx = 0; sx < sw; sx++) {
+            int srcOff = (sy * 2) * w * 4 + (sx * 2) * 4;
+            int dstOff = sy * sw * 4 + sx * 4;
+            smallPixels[dstOff+0] = src[srcOff+0];
+            smallPixels[dstOff+1] = src[srcOff+1];
+            smallPixels[dstOff+2] = src[srcOff+2];
+            smallPixels[dstOff+3] = src[srcOff+3];
+        }
+    }
+
+    // BMP 파일 메모리 조립 (스케일된 크기)
+    BITMAPINFOHEADER biSmall = bi;
+    biSmall.biWidth     = sw;
+    biSmall.biHeight    = -sh;
+    biSmall.biSizeImage = sw * sh * 4;
+
     BITMAPFILEHEADER bfh = {};
     bfh.bfType    = 0x4D42;   // 'BM'
     bfh.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
-    bfh.bfSize    = bfh.bfOffBits + bi.biSizeImage;
+    bfh.bfSize    = bfh.bfOffBits + biSmall.biSizeImage;
 
     std::vector<uint8_t> result(bfh.bfSize);
     uint8_t* p = result.data();
-    memcpy(p, &bfh, sizeof(bfh)); p += sizeof(bfh);
-    memcpy(p, &bi,  sizeof(bi));  p += sizeof(bi);
-    memcpy(p, pBits, bi.biSizeImage);
+    memcpy(p, &bfh,    sizeof(bfh));    p += sizeof(bfh);
+    memcpy(p, &biSmall, sizeof(biSmall)); p += sizeof(biSmall);
+    memcpy(p, smallPixels.data(), biSmall.biSizeImage);
 
     SelectObject(hdcMem, hOld);
     DeleteObject(hBitmap);

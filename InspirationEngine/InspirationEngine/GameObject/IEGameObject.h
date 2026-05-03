@@ -57,7 +57,7 @@ public:
 	/// <param name="renderer">사용할 렌더러</param>
 	/// <param name="screenX">스크린 X (씬이 카메라 투영 결과 전달)</param>
 	/// <param name="screenY">스크린 Y</param>
-	virtual void draw(IERenderer* renderer, int32_t screenX, int32_t screenY) = 0;
+	virtual void draw(IERenderer* renderer, int32_t screenX, int32_t screenY, float zoom = 1.0f) = 0;
 
 	/// <summary>
 	/// 드로우 정렬 키 반환 — 씬의 Y-sort 기준

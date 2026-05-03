@@ -4,6 +4,7 @@
 #include "../InspirationEngine/InspirationEngine.h"
 #include "MainWindow.h"
 #include "DebugWindow.h"
+#include "GameScene.h"
 #include "Test/TestStrUTF8.h"
 
 #ifdef _DEBUG
@@ -25,6 +26,16 @@ int main(int argc, char* argv[])
 	SetConsoleOutputCP(CP_UTF8);
 	SetConsoleCP(CP_UTF8);
 #endif
+
+	// exe 위치(x64/Debug/) 기준으로 Example/ 폴더를 워킹 디렉토리로 고정
+	// → "../Data/" 등 상대 경로가 항상 올바르게 해석됨
+	if (char* bp = SDL_GetBasePath())
+	{
+		std::string wd = std::string(bp) + "..\\..\\Example";
+		SetCurrentDirectoryA(wd.c_str());
+		SDL_free(bp);
+	}
+
 	TestStrUTF8().run();
 
 	int32_t iTickRate = 1000 / 60;;
@@ -93,6 +104,9 @@ int main(int argc, char* argv[])
 	//디버그 창 설정
 	DebugWindow* lpDebugWindow = dynamic_cast<DebugWindow*>(IECore::getWindow("Debug"));
 	lpDebugWindow->initWindow();
+
+	//테스트 씬 푸시
+	IECore::m_Scene.push(new GameScene());
 
 	//엔진 시작
 	IECore::beginEngine();

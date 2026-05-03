@@ -30,18 +30,12 @@ void MainWindow::draw()
 	if (pRenderer == nullptr)
 		return;
 
-	static SDL_Surface* Surface;
-	static bool isOn = false;
-	if (isOn == false)
-	{
-		Surface = IMG_Load("../data/DungeonCrawl_ProjectUtumnoTileset.png");
-		isOn = true;
-	}
-
-	pRenderer->drawSurface(Surface, 0, 0);
+	IEScene* pScene = IECore::m_Scene.getCurrentScene();
+	if (pScene != nullptr)
+		pScene->draw(pRenderer);
 
 	if (m_debug.m_visible)
-		m_debug.drawOverlay(pRenderer, IECore::m_Scene.getCurrentScene(), IECore::m_Font.getFont(0));
+		m_debug.drawOverlay(pRenderer, pScene, IECore::m_Font.getFont(0));
 }
 
 void MainWindow::callXButton()

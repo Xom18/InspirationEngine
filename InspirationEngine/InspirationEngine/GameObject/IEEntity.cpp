@@ -12,7 +12,7 @@ void IEEntity::update(float deltaTime)
 	t->z += v->vz * deltaTime;
 }
 
-void IEEntity::draw(IERenderer* renderer, int32_t screenX, int32_t screenY)
+void IEEntity::draw(IERenderer* renderer, int32_t screenX, int32_t screenY, float zoom)
 {
 	if (!m_active || m_sprite == nullptr || renderer == nullptr)
 		return;

@@ -28,6 +28,15 @@ bool IEAtlasManager::load(const std::string& name, const std::string& jsonPath, 
 	SDL_FreeSurface(surf);
 	if (!atlas->texture) return false;
 
+	if (j.contains("tileStep") && j["tileStep"].is_object())
+	{
+		atlas->tileStepX = j["tileStep"].value("x", 0);
+		atlas->tileStepY = j["tileStep"].value("y", 0);
+	}
+
+	float defaultAnchorX = j.value("defaultAnchorX", 0.5f);
+	float defaultAnchorY = j.value("defaultAnchorY", 0.5f);
+
 	auto parseTileRect = [](const nlohmann::json& o) -> IETileRect {
 		IETileRect r;
 		r.x = o.value("x", 0);
@@ -48,15 +57,15 @@ bool IEAtlasManager::load(const std::string& name, const std::string& jsonPath, 
 				def.hasSide = tileData.contains("side");
 				if (def.hasSide)
 					def.side = parseTileRect(tileData["side"]);
-				def.anchorX = tileData.value("anchorX", 0.5f);
-				def.anchorY = tileData.value("anchorY", 0.5f);
+				def.anchorX = tileData.value("anchorX", defaultAnchorX);
+				def.anchorY = tileData.value("anchorY", defaultAnchorY);
 			}
 			else
 			{
 				def.top     = parseTileRect(tileData);
 				def.hasSide = false;
-				def.anchorX = tileData.value("anchorX", 0.5f);
-				def.anchorY = tileData.value("anchorY", 0.5f);
+				def.anchorX = tileData.value("anchorX", defaultAnchorX);
+				def.anchorY = tileData.value("anchorY", defaultAnchorY);
 			}
 			atlas->tiles[tileName] = def;
 		}
@@ -85,4 +94,11 @@ SDL_Texture* IEAtlasManager::getTexture(const std::string& atlas) const
 	auto it = m_atlases.find(atlas);
 	if (it == m_atlases.end()) return nullptr;
 	return it->second->texture;
+}
+
+std::pair<int32_t, int32_t> IEAtlasManager::getTileStep(const std::string& atlas) const
+{
+	auto it = m_atlases.find(atlas);
+	if (it == m_atlases.end()) return { 0, 0 };
+	return { it->second->tileStepX, it->second->tileStepY };
 }

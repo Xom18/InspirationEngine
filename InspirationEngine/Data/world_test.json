@@ -1,0 +1,30 @@
+{
+  "camera": { "tileWidth": 32, "tileHeight": 19, "zoom": 2.0, "x": 2.0, "y": 2.0 },
+  "objects": [
+    { "x": 0, "y": 0, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 1, "y": 0, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 2, "y": 0, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 3, "y": 0, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 4, "y": 0, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 0, "y": 1, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 1, "y": 1, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 2, "y": 1, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 3, "y": 1, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 4, "y": 1, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 0, "y": 2, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 1, "y": 2, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 2, "y": 2, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 3, "y": 2, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 4, "y": 2, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 0, "y": 3, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 1, "y": 3, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 2, "y": 3, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 3, "y": 3, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 4, "y": 3, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 0, "y": 4, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 1, "y": 4, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 2, "y": 4, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 3, "y": 4, "tile": { "atlas": "floors", "tile": "grass" } },
+    { "x": 4, "y": 4, "tile": { "atlas": "floors", "tile": "grass" } }
+  ]
+}

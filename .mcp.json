@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "game-screenshot": {
+      "type": "stdio",
+      "command": "d:/Project/Github/InspirationEngine/ScreenshotMCP/x64/Release/ScreenshotMCP.exe"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 {
+  "enableAllProjectMcpServers": true,
   "mcpServers": {
     "game-screenshot": {
       "type": "stdio",

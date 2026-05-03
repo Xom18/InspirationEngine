@@ -97,6 +97,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DebugWindow.cpp" />
+    <ClCompile Include="GameScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="Test\Test.cpp" />
@@ -104,6 +105,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebugWindow.h" />
+    <ClInclude Include="GameScene.h" />
     <ClInclude Include="MainWindow.h" />
     <ClInclude Include="Test\Test.h" />
     <ClInclude Include="Test\TestStrUTF8.h" />

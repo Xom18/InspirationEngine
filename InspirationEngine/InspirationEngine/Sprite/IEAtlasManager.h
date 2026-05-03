@@ -21,6 +21,8 @@ class IEAtlas {
 public:
 	SDL_Texture* texture = nullptr;
 	std::unordered_map<std::string, IETileDef> tiles;
+	int32_t tileStepX = 0;
+	int32_t tileStepY = 0;
 	~IEAtlas() { if (texture) SDL_DestroyTexture(texture); }
 };
 
@@ -30,6 +32,7 @@ public:
 	bool load(const std::string& name, const std::string& jsonPath, SDL_Renderer* renderer);
 	void unload(const std::string& name);
 
-	const IETileDef* getTile(const std::string& atlas, const std::string& tile) const;
-	SDL_Texture*     getTexture(const std::string& atlas) const;
+	const IETileDef*             getTile(const std::string& atlas, const std::string& tile) const;
+	SDL_Texture*                 getTexture(const std::string& atlas) const;
+	std::pair<int32_t, int32_t>  getTileStep(const std::string& atlas) const;
 };
