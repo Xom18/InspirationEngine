@@ -46,3 +46,13 @@ public:
 	float vy = 0.0f;
 	float vz = 0.0f;	// 높이 방향 속도 (점프 등)
 };
+
+/// <summary>
+/// 타일 컴포넌트 — atlas 이름 + 타일 이름으로 IEAtlasManager에서 타일 조회
+/// </summary>
+class IETileComponent : public IEComponent
+{
+public:
+	std::string atlas;	// 예: "floors"
+	std::string tile;	// 예: "grass"
+};

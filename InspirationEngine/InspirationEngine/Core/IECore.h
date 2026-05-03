@@ -17,6 +17,7 @@ public:
 	static DebugInfo		m_DebugInfo;		//디버그 툴
 	static IEFontManager	m_Font;				//폰트 관리하는곳
 	static IESpriteManager	m_Sprite;			//스프라이트 관리하는곳
+	static IEAtlasManager	m_Atlas;			//타일 아틀라스 관리하는곳
 	static IESceneManager	m_Scene;			//씬 관리하는곳
 	static float			m_deltaTime;		//직전 프레임 경과 시간 (초)
 	static uint64_t			m_deltaTimeMs;		//직전 프레임 경과 시간 (ms)

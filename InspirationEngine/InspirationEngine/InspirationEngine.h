@@ -26,6 +26,7 @@
 #include "Window/IERenderer.h"	//렌더러
 #include "Window/IEWindow.h"	//창
 #include "Sprite/IESpriteManager.h"	//스프라이트 관리
+#include "Sprite/IEAtlasManager.h"	//타일 아틀라스 관리
 #include "GameObject/IEGameObject.h"	//게임 오브젝트 기반
 #include "GameObject/IEStaticObject.h"	//정적 오브젝트
 #include "GameObject/IEEntity.h"		//동적 오브젝트
