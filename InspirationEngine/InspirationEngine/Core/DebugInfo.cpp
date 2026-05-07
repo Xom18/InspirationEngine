@@ -17,8 +17,8 @@ void DebugInfo::DrawGrid(IERenderer* renderer, IECamera* camera)
 {
 	SDL_Color gridColor = { 80, 80, 80, 128 };
 
-	int32_t vw = renderer->m_logicalWidth  > 0 ? renderer->m_logicalWidth  : renderer->m_w;
-	int32_t vh = renderer->m_logicalHeight > 0 ? renderer->m_logicalHeight : renderer->m_h;
+	int32_t vw = renderer->m_w;
+	int32_t vh = renderer->m_h;
 
 	if (camera == nullptr)
 	{
@@ -32,8 +32,8 @@ void DebugInfo::DrawGrid(IERenderer* renderer, IECamera* camera)
 	const int32_t STEP  = 64;
 	const int32_t RANGE = 16;
 
-	int32_t baseX = (static_cast<int32_t>(camera->GetX()) / STEP) * STEP;
-	int32_t baseY = (static_cast<int32_t>(camera->GetY()) / STEP) * STEP;
+	int32_t baseX = (std::lround(camera->GetX()) / STEP) * STEP;
+	int32_t baseY = (std::lround(camera->GetY()) / STEP) * STEP;
 	int32_t startX = baseX - RANGE * STEP;
 	int32_t startY = baseY - RANGE * STEP;
 	int32_t endX   = baseX + RANGE * STEP;

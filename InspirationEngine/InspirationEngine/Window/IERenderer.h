@@ -6,13 +6,8 @@ class IERenderer
 public:
 	IEWindow* m_window;			//얘가 종속되있는 윈도우
 	SDL_Renderer* m_renderer;	//랜더러
-	int32_t m_logicalWidth;		//논리너비
-	int32_t m_logicalHeight;	//논리높이
-	int32_t m_x;				//창에서 랜더러 위치
-	int32_t m_y;				//창에서 랜더러 위치
 	int32_t m_w;				//창에서 랜더러 너비
 	int32_t m_h;				//창에서 랜더러 높이
-	double m_scaleFactor;		//랜더러 마우스위치 스케일 계수
 
 private:
 
@@ -22,13 +17,8 @@ public:
 	{
 		m_window = nullptr;
 		m_renderer = nullptr;
-		m_logicalWidth = 0;
-		m_logicalHeight = 0;
-		m_x = 0;
-		m_y = 0;
 		m_w = 0;
 		m_h = 0;
-		m_scaleFactor = 0.0;
 	}
 
 	~IERenderer()
@@ -45,13 +35,8 @@ public:
 		if (m_renderer != nullptr)
 			SDL_DestroyRenderer(m_renderer);
 		m_renderer = nullptr;
-		m_logicalWidth = 0;
-		m_logicalHeight = 0;
-		m_x = 0;
-		m_y = 0;
 		m_w = 0;
 		m_h = 0;
-		m_scaleFactor = 0.0;
 	}
 
 	/// <summary>

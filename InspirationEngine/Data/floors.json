@@ -1,8 +1,8 @@
 {
   "image": "floors.png",
   "tileStep": { "x": 32, "y": 16 },
-  "defaultAnchorX": 0.5,
-  "defaultAnchorY": 0.0,
+  "defaultPivotX": 16,
+  "defaultPivotY": 8,
   "tiles": {
     "sand":   { "x":   0, "y":  0, "w": 32, "h": 19 },
     "stone":  { "x":  32, "y":  0, "w": 32, "h": 19 },
@@ -45,8 +45,8 @@
     "box": {
       "top":     { "x": 400, "y": 53, "w": 32, "h": 19 },
       "side":    { "x": 400, "y": 72, "w": 32, "h": 13 },
-      "anchorX": 0.5,
-      "anchorY": 1.0
+      "pivotX": 16,
+      "pivotY": 19
     }
   }
 }

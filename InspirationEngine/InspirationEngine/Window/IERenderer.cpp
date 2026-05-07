@@ -60,14 +60,14 @@ void IERenderer::drawTexture(SDL_Texture* texture, int32_t x, int32_t y, double 
 	if (srcRect)
 	{
 		SrcRect = *srcRect;
-		DestRect.w = static_cast<int32_t>(srcRect->w * widthPercent * 0.01);
-		DestRect.h = static_cast<int32_t>(srcRect->h * heightPercent * 0.01);
+		DestRect.w = std::lround(srcRect->w * widthPercent * 0.01);
+		DestRect.h = std::lround(srcRect->h * heightPercent * 0.01);
 	}
 	else
 	{
 		SrcRect = { 0, 0, iWidth, iHeight };
-		DestRect.w = (widthPercent != 100.0) ? static_cast<int32_t>(iWidth * widthPercent * 0.01) : iWidth;
-		DestRect.h = (heightPercent != 100.0) ? static_cast<int32_t>(iHeight * heightPercent * 0.01) : iHeight;
+		DestRect.w = (widthPercent != 100.0) ? std::lround(iWidth * widthPercent * 0.01) : iWidth;
+		DestRect.h = (heightPercent != 100.0) ? std::lround(iHeight * heightPercent * 0.01) : iHeight;
 	}
 
 	SDL_RenderCopyEx(m_renderer, texture, &SrcRect, &DestRect, angle, pivot, flip);

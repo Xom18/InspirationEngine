@@ -38,8 +38,8 @@ public:
 		float camIsoY = (m_x + m_y) * hh - m_z * m_heightFactor;
 
 		IVector2 result;
-		result.m_x = static_cast<int32_t>((isoX - camIsoX) * m_zoom + m_viewportWidth  * 0.5f);
-		result.m_y = static_cast<int32_t>((isoY - camIsoY) * m_zoom + m_viewportHeight * 0.5f);
+		result.m_x = std::lround((isoX - camIsoX) * m_zoom + m_viewportWidth  * 0.5f);
+		result.m_y = std::lround((isoY - camIsoY) * m_zoom + m_viewportHeight * 0.5f);
 		return result;
 	}
 

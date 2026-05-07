@@ -15,8 +15,8 @@ void IEScene::Draw(IERenderer* renderer)
 {
 	if (m_camera != nullptr)
 	{
-		int32_t vw = renderer->m_logicalWidth  > 0 ? renderer->m_logicalWidth  : renderer->m_w;
-		int32_t vh = renderer->m_logicalHeight > 0 ? renderer->m_logicalHeight : renderer->m_h;
+		int32_t vw = renderer->m_w;
+		int32_t vh = renderer->m_h;
 		m_camera->SetViewport(vw, vh);
 	}
 

@@ -31,16 +31,15 @@ void IEWindow::resizeRenderer()
 	m_width = lpSurface->w;
 	m_height = lpSurface->h;
 
-	//기존에 랜더러가 있으면 논리크기는 따로 빼두고 삭제
 	for (size_t i = 0; i < m_renderers.size(); ++i)
 	{
 		if (m_renderers[i].m_renderer != nullptr)
 			SDL_DestroyRenderer(m_renderers[i].m_renderer);
 		m_renderers[i].m_renderer = SDL_CreateSoftwareRenderer(lpSurface);
 		m_renderers[i].m_window = this;
+		m_renderers[i].m_w = m_width;
+		m_renderers[i].m_h = m_height;
 		SDL_SetRenderDrawColor(m_renderers[i].m_renderer, 0, 0, 0, 0xFF);
-
-		setRendererLogicalSize(i, m_renderers[i].m_logicalWidth, m_renderers[i].m_logicalHeight);
 	}
 }
 
@@ -98,45 +97,6 @@ bool IEWindow::closed()
 		return true;
 	else
 		return false;
-}
-
-void IEWindow::setRendererLogicalSize(size_t rendererIndex, int32_t width, int32_t height)
-{
-	if (m_renderers.size() <= rendererIndex)
-		return;
-
-	IERenderer* lpRenderer = &m_renderers[rendererIndex];
-	lpRenderer->m_logicalWidth = width;
-	lpRenderer->m_logicalHeight = height;
-	SDL_RenderSetLogicalSize(lpRenderer->m_renderer, lpRenderer->m_logicalWidth, lpRenderer->m_logicalHeight);
-	lpRenderer->m_scaleFactor = 1;
-
-	//화면크기 따라가는거
-	if (lpRenderer->m_logicalWidth == 0 && lpRenderer->m_logicalHeight == 0)
-		return;
-
-	//화면 좌우가 잘리도록 되있기때문에 실제로 그려지는 위치를 기억
-	double dWindowRatio = static_cast<double>(m_width) / m_height;
-	double dRenderRatio = static_cast<double>(lpRenderer->m_logicalWidth) / lpRenderer->m_logicalHeight;
-
-	if (dWindowRatio > dRenderRatio)
-	{//좌우에 여백있는거
-		int32_t iBlank = m_width - static_cast<int32_t>(m_width / dWindowRatio);
-		lpRenderer->m_x = static_cast<int32_t>(iBlank * 0.5);
-		lpRenderer->m_y = 0;
-		lpRenderer->m_w = m_width - iBlank;
-		lpRenderer->m_h = m_height;
-		lpRenderer->m_scaleFactor = static_cast<double>(lpRenderer->m_logicalHeight) / m_height;
-	}
-	else
-	{//상하에 여백있는거
-		int32_t iBlank = static_cast<int32_t>(m_height * (dRenderRatio - dWindowRatio));
-		lpRenderer->m_x = 0;
-		lpRenderer->m_y = static_cast<int32_t>(iBlank * 0.5);
-		lpRenderer->m_w = m_width;
-		lpRenderer->m_h = m_height - iBlank;
-		lpRenderer->m_scaleFactor = static_cast<double>(lpRenderer->m_logicalWidth) / m_width;
-	}
 }
 
 void IEWindow::drawThread()

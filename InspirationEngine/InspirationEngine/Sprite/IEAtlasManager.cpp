@@ -38,8 +38,8 @@ bool IEAtlasManager::Load(const std::string& name, const std::string& jsonPath, 
 		atlas->m_tileStepY = j["tileStep"].value("y", 0);
 	}
 
-	float defaultAnchorX = j.value("defaultAnchorX", 0.5f);
-	float defaultAnchorY = j.value("defaultAnchorY", 0.5f);
+	float defaultPivotX = j.value("defaultPivotX", 0.0f);
+	float defaultPivotY = j.value("defaultPivotY", 0.0f);
 
 	auto parseTileRect = [](const nlohmann::json& o) -> IETileRect {
 		IETileRect r;
@@ -61,16 +61,14 @@ bool IEAtlasManager::Load(const std::string& name, const std::string& jsonPath, 
 				def.hasSide = tileData.contains("side");
 				if (def.hasSide)
 					def.side = parseTileRect(tileData["side"]);
-				def.anchorX = tileData.value("anchorX", defaultAnchorX);
-				def.anchorY = tileData.value("anchorY", defaultAnchorY);
 			}
 			else
 			{
 				def.top     = parseTileRect(tileData);
 				def.hasSide = false;
-				def.anchorX = tileData.value("anchorX", defaultAnchorX);
-				def.anchorY = tileData.value("anchorY", defaultAnchorY);
 			}
+			def.pivotX = std::lround(tileData.value("pivotX", defaultPivotX));
+			def.pivotY = std::lround(tileData.value("pivotY", defaultPivotY));
 			atlas->m_tiles[tileName] = def;
 		}
 	}

@@ -17,8 +17,8 @@
 #pragma comment(linker, "/SUBSYSTEM:CONSOLE")
 #endif
 
-constexpr int32_t g_ScreenWidth = 1280;
-constexpr int32_t g_ScreenHeight = 720;
+constexpr int32_t g_ScreenWidth = 1920;
+constexpr int32_t g_ScreenHeight = 1080;
 
 int main(int argc, char* argv[])
 {
@@ -69,9 +69,6 @@ int main(int argc, char* argv[])
 		SDL_Window* lpSDLWindow = lpMainWindow->getSDLWindow();
 		SDL_GetWindowPosition(lpSDLWindow, &iX, &iY);
 		SDL_GetWindowSize(lpSDLWindow, &iW, &iH);
-
-		lpMainWindow->setRendererLogicalSize(0, 64, 64);
-		lpMainWindow->setRendererLogicalSize(1, 512, 512);
 
 	}
 

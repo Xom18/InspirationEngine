@@ -13,8 +13,8 @@ struct IETileDef {
 	IETileRect top;
 	IETileRect side;
 	bool       hasSide = false;
-	float      anchorX = 0.5f;
-	float      anchorY = 0.5f;
+	int32_t    pivotX  = 0;     // 스프라이트 내 x 픽셀 오프셋 (screenX 정렬점)
+	int32_t    pivotY  = 0;     // 스프라이트 내 y 픽셀 오프셋 (screenY 정렬점)
 };
 
 class IEAtlas {

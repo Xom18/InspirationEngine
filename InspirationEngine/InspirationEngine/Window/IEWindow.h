@@ -96,14 +96,6 @@ public:
 	void render();
 
 	/// <summary>
-	/// 렌더러의 논리적 해상도 설정
-	/// </summary>
-	/// <param name="rendererIndex">렌더러 인덱스</param>
-	/// <param name="width">논리 너비 (0이면 창 크기 따라감)</param>
-	/// <param name="height">논리 높이 (0이면 창 크기 따라감)</param>
-	void setRendererLogicalSize(size_t rendererIndex, int32_t width, int32_t height);
-
-	/// <summary>
 	/// 이 창이 하이드 상태인지
 	/// </summary>
 	bool isWindowHide()
@@ -156,61 +148,6 @@ public:
 	void resetDrawed()
 	{
 		m_isDrawed = false;
-	}
-
-	/// <summary>
-	/// 스크린 좌표를 렌더러 논리 좌표로 변환
-	/// </summary>
-	/// <param name="rendererIndex">렌더러 인덱스</param>
-	/// <param name="screenX">스크린 X</param>
-	/// <param name="screenY">스크린 Y</param>
-	IVector2 screenPosToRenderPos(int32_t rendererIndex, int32_t screenX, int32_t screenY)
-	{
-		IVector2 Pos;
-		Pos.m_x = screenX;
-		Pos.m_y = screenY;
-
-		const IERenderer* lpRenderer = getRenderer(rendererIndex);
-		if (lpRenderer == nullptr)
-			return Pos;
-
-		if (lpRenderer->m_logicalWidth == 0 && lpRenderer->m_logicalHeight == 0)
-			return Pos;
-
-		//상하 또는 좌우 여백이 있는거 처리
-		screenX = screenX - lpRenderer->m_x;
-		screenY = screenY - lpRenderer->m_y;
-
-		//픽셀 스케일 배수 처리
-		Pos.m_x = static_cast<int32_t>(screenX * lpRenderer->m_scaleFactor);
-		Pos.m_y = static_cast<int32_t>(screenY * lpRenderer->m_scaleFactor);
-		return Pos;
-	}
-
-	/// <summary>
-	/// 렌더러 논리 좌표를 스크린 좌표로 변환
-	/// </summary>
-	/// <param name="rendererIndex">렌더러 인덱스</param>
-	/// <param name="screenX">렌더러 논리 X</param>
-	/// <param name="screenY">렌더러 논리 Y</param>
-	IVector2 renderPosToScreenPos(int32_t rendererIndex, int32_t screenX, int32_t screenY)
-	{
-		IVector2 Pos;
-		Pos.m_x = screenX;
-		Pos.m_y = screenY;
-
-		const IERenderer* lpRenderer = getRenderer(rendererIndex);
-		if (lpRenderer == nullptr)
-			return Pos;
-
-		if (lpRenderer->m_logicalWidth == 0 && lpRenderer->m_logicalHeight == 0)
-			return Pos;
-
-		//픽셀 스케일 배수 처리
-		Pos.m_x = static_cast<int32_t>(screenX / lpRenderer->m_scaleFactor) + lpRenderer->m_x;
-		Pos.m_y = static_cast<int32_t>(screenY / lpRenderer->m_scaleFactor) + lpRenderer->m_y;
-
-		return Pos;
 	}
 
 	/// <summary>

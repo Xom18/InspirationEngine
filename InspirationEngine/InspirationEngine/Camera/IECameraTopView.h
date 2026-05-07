@@ -20,16 +20,16 @@ public:
 	IVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const override
 	{
 		IVector2 result;
-		result.m_x = static_cast<int32_t>((wx - m_x) * m_zoom + m_viewportWidth  * 0.5f);
-		result.m_y = static_cast<int32_t>((wy - m_y) * m_zoom + m_viewportHeight * 0.5f);
+		result.m_x = std::lround((wx - m_x) * m_zoom + m_viewportWidth  * 0.5f);
+		result.m_y = std::lround((wy - m_y) * m_zoom + m_viewportHeight * 0.5f);
 		return result;
 	}
 
 	IVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
 	{
 		IVector2 result;
-		result.m_x = static_cast<int32_t>((sx - m_viewportWidth  * 0.5f) / m_zoom + m_x);
-		result.m_y = static_cast<int32_t>((sy - m_viewportHeight * 0.5f) / m_zoom + m_y);
+		result.m_x = std::lround((sx - m_viewportWidth  * 0.5f) / m_zoom + m_x);
+		result.m_y = std::lround((sy - m_viewportHeight * 0.5f) / m_zoom + m_y);
 		return result;
 	}
 
