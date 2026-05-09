@@ -1,4 +1,4 @@
-#if defined(_WIN32) && defined(_DEBUG)
+#ifdef _WIN32
 #include <windows.h>
 #endif
 #include "../InspirationEngine/InspirationEngine.h"
@@ -6,12 +6,6 @@
 #include "DebugWindow.h"
 #include "GameScene.h"
 #include "Test/TestStrUTF8.h"
-
-#ifdef _DEBUG
-#pragma comment(lib, "../x64/Debug/InspirationEngine.lib")
-#else
-#pragma comment(lib, "../x64/Release/InspirationEngine.lib")
-#endif
 
 #ifdef _DEBUG
 #pragma comment(linker, "/SUBSYSTEM:CONSOLE")
@@ -27,13 +21,16 @@ int main(int argc, char* argv[])
 	SetConsoleCP(CP_UTF8);
 #endif
 
+	// IME 후보창을 OS 네이티브 UI로 표시 (일본어 등 CJK 입력 힌트)
+	SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "1");
+
 	// exe 위치(x64/Debug/) 기준으로 Example/ 폴더를 워킹 디렉토리로 고정
 	// → "../Data/" 등 상대 경로가 항상 올바르게 해석됨
-	if (char* bp = SDL_GetBasePath())
+	if (const char* bp = SDL_GetBasePath())
 	{
 		std::string wd = std::string(bp) + "..\\..\\Example";
 		SetCurrentDirectoryA(wd.c_str());
-		SDL_free(bp);
+		SDL_free(const_cast<char*>(bp));
 	}
 
 	TestStrUTF8().run();
@@ -45,9 +42,6 @@ int main(int argc, char* argv[])
 	int32_t iY = 0;
 	int32_t iW = 0;
 	int32_t iH = 0;
-
-	//IME출력설정, 기본 텍스트 인풋모드인거 off
-	SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 
 	//주 게임 창 생성
 	{
@@ -108,8 +102,9 @@ int main(int argc, char* argv[])
 	//엔진 시작
 	IECore::beginEngine();
 
-	bool useIME = false;
 	//이벤트 처리루프
+	SDL_Window* lastFocusWin = nullptr;
+
 	while (IECore::isRunning())
 	{
 		SDL_Event Event;
@@ -117,33 +112,29 @@ int main(int argc, char* argv[])
 		{
 			IECore::eventPushBack(&Event);
 
-			//나머지 이벤트가 있을 수 있으니 처리
-			if (SDL_PollEvent(&Event))
+			//큐에 남은 이벤트 전부 처리 (TEXT_EDITING 누락 방지)
+			while (SDL_PollEvent(&Event))
 				IECore::eventPushBack(&Event);
 		}
 
-		//메인스레드에서 호출해야 IME 창 위치 설정하는게 먹음
-		//스톱 시키고 바로 스타트 시키는걸 해야 IME 입력박스 위치를 갱신가능
+		//포커스된 창에 텍스트 입력 활성화 (창 바뀔 때만 stop/start)
+		SDL_Window* focusWin = SDL_GetKeyboardFocus();
+		if (focusWin != lastFocusWin)
+		{
+			if (lastFocusWin)
+				SDL_StopTextInput(lastFocusWin);
+			if (focusWin)
+				SDL_StartTextInput(focusWin);
+			lastFocusWin = focusWin;
+		}
+
+		//메인스레드에서 호출해야 IME 후보창 위치 설정이 반영됨
 		auto rect = IECore::getTextEditPosition();
-		if (rect.has_value())
-		{
-			SDL_SetTextInputRect(&rect.value());
-			if (!useIME)
-			{
-				useIME = true;
-				SDL_StopTextInput();
-				SDL_StartTextInput();
-			}
-		}
-		else
-		{
-			if (useIME)
-			{
-				useIME = false;
-				SDL_StopTextInput();
-				SDL_StartTextInput();
-			}
-		}
+		if (rect.has_value() && focusWin)
+			SDL_SetTextInputArea(focusWin, &rect.value(), 0);
+
+		//SDL3가 Windows에서 TEXT_EDITING을 생성하지 않으므로 플랫폼 폴링으로 대체
+		IECore::pollPlatformIME(focusWin);
 	}
 
 	//엔진 종료

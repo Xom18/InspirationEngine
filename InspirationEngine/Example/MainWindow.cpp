@@ -1,11 +1,10 @@
 #include <stdio.h>
-#include <SDL/SDL_ttf.h>
 #include "../InspirationEngine/InspirationEngine.h"
 #include "MainWindow.h"
 
 void MainWindow::update(float deltaTime)
 {
-	const Uint8* keys = SDL_GetKeyboardState(nullptr);
+	const bool* keys = SDL_GetKeyboardState(nullptr);
 
 	static bool f1Prev = false;
 	bool f1Now = keys[SDL_SCANCODE_F1] != 0;

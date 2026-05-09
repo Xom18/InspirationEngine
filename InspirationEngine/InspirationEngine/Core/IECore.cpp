@@ -1,6 +1,16 @@
-﻿#include <future>
+#include <future>
 #include <iostream>
 #include "InspirationEngine.h"
+
+// SDL3가 Windows TEXT_EDITING 이벤트를 생성하지 않는 동안 직접 IME 폴링
+// SDL3가 이 문제를 수정하면 아래 define을 제거하면 됨
+#define _CUSTOM_IME
+
+#if defined(_WIN32) && defined(_CUSTOM_IME)
+#include <windows.h>
+#include <imm.h>
+#pragma comment(lib, "imm32.lib")
+#endif
 //public
 IEInput			IECore::m_Input;						//입력, 클릭이나 창 내부 처리도 여기서 받은다음 각 창으로 보냄
 IEDebugInfo		IECore::m_DebugInfo;					//디버그 툴
@@ -34,6 +44,9 @@ bool IECore::m_useIME = false;
 std::mutex IECore::m_textEditMutex;						// IME 사용 처리를 위한 뮤텍스
 bool IECore::m_textEdit = false;						// 텍스트 편집 사용중인지
 SDL_Rect IECore::m_textEditPosition;					// 텍스트 편집 사용중일때 커서 위치
+
+std::string IECore::m_pendingIMEComposition;
+bool IECore::m_imeCompositionDirty = false;
 
 
 void IECore::mainThread()
@@ -80,14 +93,23 @@ void IECore::mainThread()
 
 void IECore::operateEvent()
 {
-	//큐에서 이벤트 가져옴
+	//큐에서 이벤트 가져옴 + pending IME composition 수거
 	std::deque<SDL_Event> dqEventQueue;
-	m_eventMutex.lock();
-	std::swap(dqEventQueue, m_eventQueue);
-	m_eventMutex.unlock();
+	std::string pendingIME;
+	bool imeDirty = false;
+	{
+		std::lock_guard<std::mutex> lock(m_eventMutex);
+		std::swap(dqEventQueue, m_eventQueue);
+		if (m_imeCompositionDirty)
+		{
+			pendingIME = std::move(m_pendingIMEComposition);
+			m_pendingIMEComposition.clear();
+			m_imeCompositionDirty = false;
+			imeDirty = true;
+		}
+	}
 
-
-	//이벤트 처리
+	//이벤트 처리 (TEXT_INPUT 커밋이 먼저 반영돼야 pendingIME가 올바르게 이어짐)
 	while (!dqEventQueue.empty())
 	{
 		SDL_Event Event = dqEventQueue.front();
@@ -98,8 +120,8 @@ void IECore::operateEvent()
 
 		switch (Event.type)
 		{
-		case SDL_EventType::SDL_MOUSEBUTTONDOWN:
-		case SDL_EventType::SDL_MOUSEBUTTONUP:
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
 		{
 			//테스트용 코드
 			m_textEditMutex.lock();
@@ -109,30 +131,62 @@ void IECore::operateEvent()
 				m_textEditPosition.x = m_focusedTextBox->getCursurScreenPos().x;
 				m_textEditPosition.y = m_focusedTextBox->getCursurScreenPos().y;
 				m_textEditPosition.w = 0;
-				m_textEditPosition.h = m_textEditPosition.y + m_focusedTextBox->getFontHeight();
+				m_textEditPosition.h = m_focusedTextBox->getFontHeight();
 			}
 			m_textEditMutex.unlock();
 		}
 		break;
-		case SDL_EventType::SDL_KEYDOWN:
-		case SDL_EventType::SDL_KEYUP:
+		case SDL_EVENT_KEY_DOWN:
+		case SDL_EVENT_KEY_UP:
 		{
-			m_Input.setKeyState(Event.key.keysym.scancode, Event.key.state);
+			m_Input.setKeyState(Event.key.scancode, Event.key.down);
 		}
 		break;
-		case SDL_EventType::SDL_WINDOWEVENT:
+		case SDL_EVENT_WINDOW_RESIZED:
 		{
-			operateWindowEvent(&Event);
+			IEWindow* lpWindow = getWindowByID(Event.window.windowID);
+			if (lpWindow != nullptr)
+				lpWindow->resizeRenderer();
+		}
+		break;
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+		{
+			IEWindow* lpWindow = getWindowByID(Event.window.windowID);
+			if (lpWindow != nullptr)
+				lpWindow->callXButton();
 		}
 		break;
 		}
 	}
 
+	//Windows IME 폴링 결과 처리 (이벤트 큐 처리 이후 — TEXT_INPUT 커밋 반영 후 새 composition 삽입)
+	if (imeDirty && m_focusedTextBox != nullptr && m_textEdit)
+	{
+		if (pendingIME.empty())
+		{
+			if (m_useIME)
+			{
+				m_focusedTextBox->removeIMEInput();
+				m_useIME = false;
+			}
+		}
+		else
+		{
+			if (m_useIME)
+				m_focusedTextBox->removeIMEInput();
+			m_focusedTextBox->insertCusorPos(pendingIME.c_str());
+			m_focusedTextBox->setIMELength(pendingIME.size());
+			m_useIME = true;
+		}
+	}
+
 	//마우스 위치 갱신
 	{
-		int32_t iMouseX = 0;
-		int32_t iMouseY = 0;
-		SDL_GetMouseState(&iMouseX, &iMouseY);
+		float fMouseX = 0.0f;
+		float fMouseY = 0.0f;
+		SDL_GetMouseState(&fMouseX, &fMouseY);
+		int32_t iMouseX = static_cast<int32_t>(fMouseX);
+		int32_t iMouseY = static_cast<int32_t>(fMouseY);
 		m_Input.updateMousePos(iMouseX, iMouseY);
 
 		//마우스가 올라와있는 윈도우
@@ -149,27 +203,6 @@ void IECore::operateEvent()
 	}
 }
 
-void IECore::operateWindowEvent(const SDL_Event* event)
-{
-	//이벤트에 해당하는 창 가져오고 없으면 반환
-	IEWindow* lpWindow = getWindowByID(event->window.windowID);
-	if (lpWindow == nullptr)
-		return;
-
-	switch (event->window.event)
-	{
-	case SDL_WindowEventID::SDL_WINDOWEVENT_RESIZED:
-	{
-		lpWindow->resizeRenderer();
-	}
-	break;
-	case SDL_WindowEventID::SDL_WINDOWEVENT_CLOSE:
-	{
-		lpWindow->callXButton();
-	}
-	break;
-	}
-}
 
 void IECore::update(float deltaTime)
 {
@@ -234,41 +267,43 @@ bool IECore::endEngine()
 
 bool IECore::operateTextEdit(SDL_Event* event)
 {
+	printf("textedit : %d\n", event->type);
 	if (m_focusedTextBox == nullptr
 		|| !m_textEdit)
 		return false;
 
 	switch (event->type)
 	{
-	case SDL_EventType::SDL_KEYDOWN:
+	case SDL_EVENT_KEY_DOWN:
 	{
 		if (!m_useIME)
 		{
 			//텍스트 지우기
-			if (event->key.keysym.sym == SDLK_BACKSPACE
+			if (event->key.key == SDLK_BACKSPACE
 				&& m_focusedTextBox->getTextLength() > 0)
 				m_focusedTextBox->removeByBackspace();
 
-			if (event->key.keysym.sym == SDLK_DELETE
+			if (event->key.key == SDLK_DELETE
 				&& m_focusedTextBox->getTextLength() > 0)
 				m_focusedTextBox->removeByDelete();
 
 			//커서 좌우로 이동
-			if (event->key.keysym.sym == SDLK_RIGHT)
+			if (event->key.key == SDLK_RIGHT)
 				m_focusedTextBox->cusorMoveNext();
-			if (event->key.keysym.sym == SDLK_LEFT)
+			if (event->key.key == SDLK_LEFT)
 				m_focusedTextBox->cusorMovePrevious();
 
 			//엔터
-			if (event->key.keysym.sym == SDLK_RETURN
-				|| event->key.keysym.sym == SDLK_KP_ENTER)
+			if (event->key.key == SDLK_RETURN
+				|| event->key.key == SDLK_KP_ENTER)
 				m_focusedTextBox->insertCusorPos("\n");
 		}
 	}
 	break;
-	case SDL_EventType::SDL_TEXTEDITING:
+	case SDL_EVENT_TEXT_EDITING:
 	{//조합형 입력중
-		if (strlen(event->text.text) == 0)
+		const char* editText = event->edit.text;
+		if (editText == nullptr || strlen(editText) == 0)
 		{
 			if (m_useIME)
 				m_focusedTextBox->removeIMEInput();
@@ -279,12 +314,12 @@ bool IECore::operateTextEdit(SDL_Event* event)
 		if (m_useIME)
 			m_focusedTextBox->removeIMEInput();
 
-		m_focusedTextBox->insertCusorPos(event->text.text);
-		m_focusedTextBox->setIMELength(strlen(event->text.text));
+		m_focusedTextBox->insertCusorPos(editText);
+		m_focusedTextBox->setIMELength(strlen(editText));
 		m_useIME = true;
 	}
 	break;
-	case SDL_EventType::SDL_TEXTINPUT:
+	case SDL_EVENT_TEXT_INPUT:
 	{//입력
 		if (m_useIME)
 			m_focusedTextBox->removeIMEInput();
@@ -308,4 +343,78 @@ std::optional<SDL_Rect> IECore::getTextEditPosition()
 		return std::nullopt;
 
 	return m_textEditPosition;
+}
+
+void IECore::pollPlatformIME(SDL_Window* focusWin)
+{
+#if defined(_WIN32) && defined(_CUSTOM_IME)
+	static std::string s_lastComposition;
+	static SDL_Window* s_lastFocusWin = nullptr;
+
+	if (focusWin != s_lastFocusWin)
+	{
+		if (!s_lastComposition.empty())
+		{
+			SetIMEComposition("");
+			s_lastComposition.clear();
+		}
+		s_lastFocusWin = focusWin;
+	}
+
+	if (focusWin == nullptr)
+		return;
+
+	HWND hwnd = (HWND)SDL_GetPointerProperty(
+		SDL_GetWindowProperties(focusWin), "SDL.window.win32.hwnd", nullptr);
+	if (hwnd == nullptr)
+		return;
+
+	HIMC hImc = ImmGetContext(hwnd);
+	if (hImc == nullptr)
+		return;
+
+	//후보창을 커서 바로 아래/옆에 위치 (CFS_EXCLUDE: 지정 rect와 겹치지 않게 배치)
+	{
+		SDL_Rect cursorRect = {};
+		{
+			std::lock_guard<std::mutex> lock(m_textEditMutex);
+			cursorRect = m_textEditPosition;
+		}
+		CANDIDATEFORM cf = {};
+		cf.dwIndex        = 0;
+		cf.dwStyle        = CFS_EXCLUDE;
+		cf.ptCurrentPos   = { cursorRect.x, cursorRect.y + cursorRect.h };
+		cf.rcArea         = { cursorRect.x, cursorRect.y,
+		                      cursorRect.x + cursorRect.w, cursorRect.y + cursorRect.h };
+		ImmSetCandidateWindow(hImc, &cf);
+	}
+
+	LONG dwSize = ImmGetCompositionStringW(hImc, GCS_COMPSTR, nullptr, 0);
+	if (dwSize > 0)
+	{
+		std::wstring wcomp(static_cast<size_t>(dwSize) / sizeof(wchar_t), L'\0');
+		ImmGetCompositionStringW(hImc, GCS_COMPSTR, wcomp.data(), dwSize);
+
+		int utf8Len = WideCharToMultiByte(CP_UTF8, 0,
+			wcomp.c_str(), static_cast<int>(wcomp.size()),
+			nullptr, 0, nullptr, nullptr);
+		std::string utf8comp(static_cast<size_t>(utf8Len), '\0');
+		WideCharToMultiByte(CP_UTF8, 0,
+			wcomp.c_str(), static_cast<int>(wcomp.size()),
+			utf8comp.data(), utf8Len, nullptr, nullptr);
+
+		if (utf8comp != s_lastComposition)
+		{
+			s_lastComposition = utf8comp;
+			SetIMEComposition(utf8comp);
+		}
+	}
+	else if (!s_lastComposition.empty())
+	{
+		s_lastComposition.clear();
+		SetIMEComposition("");
+	}
+
+	ImmReleaseContext(hwnd, hImc);
+#endif
 }

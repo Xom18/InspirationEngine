@@ -12,7 +12,7 @@ private:
 	/// 안눌려있으면 false
 	/// 눌려있으면 true
 	/// </summary>
-	bool m_keyInput[SDL_NUM_SCANCODES] = { false, };
+	bool m_keyInput[SDL_SCANCODE_COUNT] = { false, };
 	bool m_isTextEditting = false;	//텍스트 입력중
 	std::mutex m_operateEventMutex;
 
@@ -29,9 +29,9 @@ public:
 	/// </summary>
 	/// <param name="scanCode">대상 키 스캔코드</param>
 	/// <param name="state">눌림: 1, 뗌: 0</param>
-	void setKeyState(SDL_Scancode scanCode, Uint8 state)
+	void setKeyState(SDL_Scancode scanCode, bool down)
 	{
-		m_keyInput[scanCode] = state;
+		m_keyInput[scanCode] = down;
 	}
 
 	/// <summary>
