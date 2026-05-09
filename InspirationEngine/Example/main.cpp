@@ -24,12 +24,11 @@ int main(int argc, char* argv[])
 	// IME 후보창을 OS 네이티브 UI로 표시 (일본어 등 CJK 입력 힌트)
 	SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, "1");
 
-	// exe 위치(x64/Debug/) 기준으로 Example/ 폴더를 워킹 디렉토리로 고정
-	// → "../Data/" 등 상대 경로가 항상 올바르게 해석됨
+	// exe 위치(Binary/) 기준으로 워킹 디렉토리 고정
+	// → "Data/" 등 상대 경로가 항상 올바르게 해석됨
 	if (const char* bp = SDL_GetBasePath())
 	{
-		std::string wd = std::string(bp) + "..\\..\\Example";
-		SetCurrentDirectoryA(wd.c_str());
+		SetCurrentDirectoryA(bp);
 		SDL_free(const_cast<char*>(bp));
 	}
 
@@ -90,7 +89,7 @@ int main(int argc, char* argv[])
 	IECore::setTickRate(iTickRate);
 
 	//폰트 추가
-	IECore::GetFont().addNewFont(0, "../data/H2PORL.ttf", 20);
+	IECore::GetFont().addNewFont(0, "Data/H2PORL.TTF", 20);
 
 	//디버그 창 설정
 	DebugWindow* lpDebugWindow = dynamic_cast<DebugWindow*>(IECore::getWindow("Debug"));

@@ -267,7 +267,6 @@ bool IECore::endEngine()
 
 bool IECore::operateTextEdit(SDL_Event* event)
 {
-	printf("textedit : %d\n", event->type);
 	if (m_focusedTextBox == nullptr
 		|| !m_textEdit)
 		return false;

@@ -73,14 +73,7 @@ void IERenderer::drawTexture(SDL_Texture* texture, int32_t x, int32_t y, double 
 	}
 
 	if (angle == 0.0 && flip == SDL_FLIP_NONE && pivot == nullptr)
-	{
-		bool isSuccess = SDL_RenderTexture(m_renderer, texture, &SrcRect, &DestRect);
-		if (!isSuccess)
-		{
-			printf("WHAT");
-		}
-	}
-	else
+		SDL_RenderTexture(m_renderer, texture, &SrcRect, &DestRect);
 		SDL_RenderTextureRotated(m_renderer, texture, &SrcRect, &DestRect, angle, pivot, flip);
 }
 
