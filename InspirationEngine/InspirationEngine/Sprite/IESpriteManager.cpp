@@ -6,16 +6,16 @@ IESpriteManager::IESpriteManager()
 
 IESpriteManager::~IESpriteManager()
 {
-	unloadAll();
+	UnloadAll();
 }
 
-bool IESpriteManager::addNewSprite(int32_t id, const char* path, IERenderer* renderer)
+bool IESpriteManager::AddNewSprite(int32_t id, const char* path, IERenderer* renderer)
 {
 	SDL_Surface* pSurface = IMG_Load(path);
 	if (pSurface == nullptr)
 		return false;
 
-	SDL_Texture* pTexture = SDL_CreateTextureFromSurface(renderer->getSDLRenderer(), pSurface);
+	SDL_Texture* pTexture = SDL_CreateTextureFromSurface(renderer->GetSDLRenderer(), pSurface);
 	SDL_DestroySurface(pSurface);
 
 	if (pTexture == nullptr)
@@ -38,19 +38,19 @@ bool IESpriteManager::addNewSprite(int32_t id, const char* path, IERenderer* ren
 	auto iteS = m_sprites.find(id);
 	if (iteS != m_sprites.end())
 	{
-		iteS->second->setTexture(pTexture);
+		iteS->second->SetTexture(pTexture);
 	}
 	else
 	{
 		auto pSprite = std::make_unique<IESprite>();
-		pSprite->setTexture(pTexture);
+		pSprite->SetTexture(pTexture);
 		m_sprites.try_emplace(id, std::move(pSprite));
 	}
 
 	return true;
 }
 
-void IESpriteManager::unload(int32_t id)
+void IESpriteManager::Unload(int32_t id)
 {
 	auto iteT = m_textures.find(id);
 	if (iteT != m_textures.end())
@@ -61,7 +61,7 @@ void IESpriteManager::unload(int32_t id)
 	m_sprites.erase(id);
 }
 
-void IESpriteManager::unloadAll()
+void IESpriteManager::UnloadAll()
 {
 	for (auto& [id, texture] : m_textures)
 		SDL_DestroyTexture(texture);
@@ -73,7 +73,7 @@ void IESpriteManager::unloadAll()
 //  IESprite
 // ──────────────────────────────────────────────
 
-void IESprite::setTexture(SDL_Texture* texture)
+void IESprite::SetTexture(SDL_Texture* texture)
 {
 	m_texture = texture;
 	m_hasClip = false;
@@ -85,10 +85,10 @@ void IESprite::setTexture(SDL_Texture* texture)
 	}
 }
 
-void IESprite::draw(IERenderer* renderer, int32_t x, int32_t y,
+void IESprite::Draw(IERenderer* renderer, int32_t x, int32_t y,
 	double scaleX, double scaleY, double angle, SDL_FPoint* pivot, SDL_FlipMode flip)
 {
 	if (m_texture == nullptr || renderer == nullptr)
 		return;
-	renderer->drawTexture(m_texture, x, y, scaleX * 100.0, scaleY * 100.0, angle, pivot, flip, getSrcRect());
+	renderer->DrawTexture(m_texture, x, y, scaleX * 100.0, scaleY * 100.0, angle, pivot, flip, GetSrcRect());
 }

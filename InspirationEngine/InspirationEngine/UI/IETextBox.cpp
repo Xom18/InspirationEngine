@@ -1,23 +1,23 @@
-﻿#include "InspirationEngine.h"
+#include "InspirationEngine.h"
 
-void IETextBox::transToTexture()
+void IETextBox::TransToTexture()
 {
-	if (m_renderer == nullptr)
+	if (GetRenderer() == nullptr)
 		return;
 	if (m_font == nullptr)
 		return;
 
-	IEFontFace* pFontFace = m_font->get();
+	IEFontFace* pFontFace = m_font->Get();
 	if (pFontFace == nullptr || pFontFace->m_ftFace == nullptr)
 		return;
 
 	m_textChanged = false;
-	size_t szHash = std::hash<std::string>{}(m_text);
-	if (m_drawHash == szHash)
+	size_t hash = std::hash<std::string>{}(m_text);
+	if (m_drawHash == hash)
 		return;
 
-	m_drawHash = szHash;
-	resetTexture();
+	m_drawHash = hash;
+	ResetTexture();
 
 	std::stack<SDL_Color> stkColor;
 	stkColor.push(m_color);
@@ -26,285 +26,292 @@ void IETextBox::transToTexture()
 	std::stack<int32_t> stkStyle;
 	stkStyle.push(IE_FONT_STYLE_NORMAL);
 
-	size_t szTextLength = m_text.length();
-	if (szTextLength == 0)
+	size_t textLength = m_text.length();
+	if (textLength == 0)
 		return;
 
 	FT_Face ftFace = pFontFace->m_ftFace;
-	int32_t iAscent = m_font->getAscent();
+	int32_t ascent = m_font->GetAscent();
 
-	size_t szBegPoint = 0;
-	int32_t iXOffset = 0;
-	int32_t iYOffset = 0;
+	size_t begPoint = 0;
+	int32_t xOffset = 0;
+	int32_t yOffset = 0;
 
-	while (szTextLength > szBegPoint)
+	while (textLength > begPoint)
 	{
-		size_t szEndPoint = szTextLength;
-		bool bIsEnterLine = false;
-		size_t iNextOffset = 0;
+		size_t endPoint = textLength;
+		bool isEnterLine = false;
+		size_t nextOffset = 0;
 
 		// 마크업 파싱 (기존 로직 동일)
 		{
-			size_t szCodeBegPoint = m_text.find("<s:", szBegPoint);
-			if (szCodeBegPoint == szBegPoint)
+			size_t codeBegPoint = m_text.find("<s:", begPoint);
+			if (codeBegPoint == begPoint)
 			{
-				size_t szCodeEndPoint = m_text.find(">", szBegPoint);
-				if (szCodeEndPoint != std::string::npos)
+				size_t codeEndPoint = m_text.find(">", begPoint);
+				if (codeEndPoint != std::string::npos)
 				{
-					++szCodeEndPoint;
-					std::string strStyleCode;
-					strStyleCode.append(m_text, szCodeBegPoint, szCodeEndPoint - szCodeBegPoint);
-					int32_t iStyle = IE_FONT_STYLE_NORMAL;
-					if (operateStyleCode(&strStyleCode, &iStyle))
+					++codeEndPoint;
+					std::string styleCode;
+					styleCode.append(m_text, codeBegPoint, codeEndPoint - codeBegPoint);
+					int32_t style = IE_FONT_STYLE_NORMAL;
+					if (OperateStyleCode(&styleCode, &style))
 					{
-						stkStyle.push(iStyle);
-						szBegPoint = szCodeEndPoint;
+						stkStyle.push(style);
+						begPoint = codeEndPoint;
 						continue;
 					}
 				}
-				szCodeBegPoint = std::string::npos;
+				codeBegPoint = std::string::npos;
 			}
-			if (szCodeBegPoint < szEndPoint) szEndPoint = szCodeBegPoint;
+			if (codeBegPoint < endPoint)
+				endPoint = codeBegPoint;
 		}
 		{
 			const char* c_csCloseCode = "</s>";
-			size_t szClosePoint = m_text.find(c_csCloseCode, szBegPoint);
-			if (szClosePoint == szBegPoint)
+			size_t closePoint = m_text.find(c_csCloseCode, begPoint);
+			if (closePoint == begPoint)
 			{
-				if (stkStyle.size() > 1) stkStyle.pop();
-				szBegPoint += std::strlen(c_csCloseCode);
+				if (stkStyle.size() > 1)
+					stkStyle.pop();
+				begPoint += std::strlen(c_csCloseCode);
 				continue;
 			}
-			if (szClosePoint < szEndPoint) szEndPoint = szClosePoint;
+			if (closePoint < endPoint)
+				endPoint = closePoint;
 		}
 		{
-			size_t szCodeBegPoint = m_text.find("<c:", szBegPoint);
-			if (szCodeBegPoint == szBegPoint)
+			size_t codeBegPoint = m_text.find("<c:", begPoint);
+			if (codeBegPoint == begPoint)
 			{
-				size_t szCodeEndPoint = m_text.find(">", szBegPoint);
-				if (szCodeEndPoint != std::string::npos)
+				size_t codeEndPoint = m_text.find(">", begPoint);
+				if (codeEndPoint != std::string::npos)
 				{
-					++szCodeEndPoint;
-					std::string strStyleCode;
-					strStyleCode.append(m_text, szCodeBegPoint, szCodeEndPoint - szCodeBegPoint);
-					SDL_Color FontColor;
-					if (operateColorCode(&strStyleCode, &FontColor))
+					++codeEndPoint;
+					std::string styleCode;
+					styleCode.append(m_text, codeBegPoint, codeEndPoint - codeBegPoint);
+					SDL_Color fontColor;
+					if (OperateColorCode(&styleCode, &fontColor))
 					{
-						stkColor.push(FontColor);
-						szBegPoint = szCodeEndPoint;
+						stkColor.push(fontColor);
+						begPoint = codeEndPoint;
 						continue;
 					}
 				}
-				szCodeBegPoint = std::string::npos;
+				codeBegPoint = std::string::npos;
 			}
-			if (szCodeBegPoint < szEndPoint) szEndPoint = szCodeBegPoint;
+			if (codeBegPoint < endPoint)
+				endPoint = codeBegPoint;
 		}
 		{
 			const char* c_csCloseCode = "</c>";
-			size_t szClosePoint = m_text.find(c_csCloseCode, szBegPoint);
-			if (szClosePoint == szBegPoint)
+			size_t closePoint = m_text.find(c_csCloseCode, begPoint);
+			if (closePoint == begPoint)
 			{
-				if (stkColor.size() > 1) stkColor.pop();
-				szBegPoint += std::strlen(c_csCloseCode);
+				if (stkColor.size() > 1)
+					stkColor.pop();
+				begPoint += std::strlen(c_csCloseCode);
 				continue;
 			}
-			if (szClosePoint < szEndPoint) szEndPoint = szClosePoint;
+			if (closePoint < endPoint)
+				endPoint = closePoint;
 		}
 		{
-			size_t szEnterPoint = m_text.find("\n", szBegPoint);
-			if (szEnterPoint != std::string::npos && szEnterPoint < szEndPoint)
+			size_t enterPoint = m_text.find("\n", begPoint);
+			if (enterPoint != std::string::npos && enterPoint < endPoint)
 			{
-				bIsEnterLine = true;
-				++iNextOffset;
-				szEndPoint = szEnterPoint;
+				isEnterLine = true;
+				++nextOffset;
+				endPoint = enterPoint;
 			}
 		}
 
-		std::string strTargetText;
-		strTargetText.append(m_text, szBegPoint, szEndPoint - szBegPoint);
+		std::string targetText;
+		targetText.append(m_text, begPoint, endPoint - begPoint);
 
 		// 현재 스타일의 폰트 페이스 가져오기
-		IEFontFace* pCurFace = m_font->get(stkStyle.top());
-		if (pCurFace == nullptr) pCurFace = pFontFace;
+		IEFontFace* pCurFace = m_font->Get(stkStyle.top());
+		if (pCurFace == nullptr)
+			pCurFace = pFontFace;
 		FT_Face curFTFace = pCurFace->m_ftFace;
 		hb_font_t* curHBFont = pCurFace->m_hbFont;
 
 		// 너비 제한 처리
 		if (m_rect.w != 0 && m_rect.h != 0 && (m_textBoxStyle & dTEXT_BOX_AUTO_NEXTLINE))
 		{
-			auto shaped = IETextRenderer::shape(curHBFont, strTargetText.c_str(), static_cast<int32_t>(strTargetText.size()));
+			auto shaped = IETextRenderer::shape(curHBFont, targetText.c_str(), static_cast<int32_t>(targetText.size()));
 			auto m = IETextRenderer::measure(curFTFace, shaped);
-			int32_t iTextWidth = m.width;
+			int32_t textWidth = m.width;
 
-			if (iXOffset + iTextWidth > m_rect.w)
+			if (xOffset + textWidth > m_rect.w)
 			{
-				bool bIsSpaceCut = true;
-				bool bIsCorrectSpace = false;
-				std::string strResultText;
+				bool isSpaceCut = true;
+				bool isCorrectSpace = false;
+				std::string resultText;
 
-				while (strTargetText.length())
+				while (targetText.length())
 				{
-					if (bIsSpaceCut)
+					if (isSpaceCut)
 					{
-						size_t szSpaceBeginPos = strTargetText.find_first_of(" ");
-						if (szSpaceBeginPos == std::string::npos)
+						size_t spaceBeginPos = targetText.find_first_of(" ");
+						if (spaceBeginPos == std::string::npos)
 						{
-							if ((m_textBoxStyle & dTEXT_BOX_AUTO_SPACE_NEXTLINE) && bIsCorrectSpace)
+							if ((m_textBoxStyle & dTEXT_BOX_AUTO_SPACE_NEXTLINE) && isCorrectSpace)
 							{
-								size_t removeSpaceBegin = strResultText.find_last_not_of(' ');
-								size_t removeSpaceEnd   = strResultText.find_last_of(' ');
+								size_t removeSpaceBegin = resultText.find_last_not_of(' ');
+								size_t removeSpaceEnd   = resultText.find_last_of(' ');
 								if (removeSpaceBegin != std::string::npos && removeSpaceEnd != std::string::npos)
 								{
-									strResultText.erase(removeSpaceBegin + 1, removeSpaceEnd);
-									iNextOffset += removeSpaceEnd - removeSpaceBegin;
+									resultText.erase(removeSpaceBegin + 1, removeSpaceEnd);
+									nextOffset += removeSpaceEnd - removeSpaceBegin;
 								}
 								break;
 							}
-							bIsSpaceCut = false;
+							isSpaceCut = false;
 							continue;
 						}
-						size_t szSpaceEndPos = strTargetText.find_first_not_of(" ", szSpaceBeginPos + 1);
+						size_t spaceEndPos = targetText.find_first_not_of(" ", spaceBeginPos + 1);
 
-						size_t szResultLength = strResultText.length();
-						if (szSpaceEndPos == std::string::npos)
-							strResultText.append(strTargetText, 0, szSpaceBeginPos + 1);
+						size_t resultLength = resultText.length();
+						if (spaceEndPos == std::string::npos)
+							resultText.append(targetText, 0, spaceBeginPos + 1);
 						else
-							strResultText.append(strTargetText, 0, szSpaceEndPos);
+							resultText.append(targetText, 0, spaceEndPos);
 
-						auto ts = IETextRenderer::shape(curHBFont, strResultText.c_str(), static_cast<int32_t>(strResultText.size()));
-						int32_t iTempWidth = IETextRenderer::measure(curFTFace, ts).width;
+						auto ts = IETextRenderer::shape(curHBFont, resultText.c_str(), static_cast<int32_t>(resultText.size()));
+						int32_t tempWidth = IETextRenderer::measure(curFTFace, ts).width;
 
 						if (m_textBoxStyle & dTEXT_BOX_AUTO_SPACE_NEXTLINE)
 						{
-							if (m_rect.w < iXOffset + iTempWidth)
+							if (m_rect.w < xOffset + tempWidth)
 							{
-								size_t spaceBeginPoint = strResultText.find_last_not_of(' ');
+								size_t spaceBeginPoint = resultText.find_last_not_of(' ');
 								if (spaceBeginPoint != std::string::npos)
 								{
 									std::string tempString;
-									tempString.append(strResultText, 0, spaceBeginPoint + 1);
+									tempString.append(resultText, 0, spaceBeginPoint + 1);
 									auto ts2 = IETextRenderer::shape(curHBFont, tempString.c_str(), static_cast<int32_t>(tempString.size()));
 									int32_t spaceRemoveWidth = IETextRenderer::measure(curFTFace, ts2).width;
-									if (iXOffset + spaceRemoveWidth <= m_rect.w)
+									if (xOffset + spaceRemoveWidth <= m_rect.w)
 									{
-										iNextOffset += strResultText.length() - spaceBeginPoint - 1;
-										strResultText = tempString;
+										nextOffset += resultText.length() - spaceBeginPoint - 1;
+										resultText = tempString;
 										break;
 									}
 								}
 							}
 						}
 
-						if (m_rect.w < iXOffset + iTempWidth)
+						if (m_rect.w < xOffset + tempWidth)
 						{
-							strResultText.erase(szResultLength);
-							if ((m_textBoxStyle & dTEXT_BOX_AUTO_SPACE_NEXTLINE) && bIsCorrectSpace)
+							resultText.erase(resultLength);
+							if ((m_textBoxStyle & dTEXT_BOX_AUTO_SPACE_NEXTLINE) && isCorrectSpace)
 								break;
-							bIsSpaceCut = false;
+							isSpaceCut = false;
 							continue;
 						}
 
-						if (szSpaceEndPos == std::string::npos)
-							strTargetText.erase(0, szSpaceBeginPos + 1);
+						if (spaceEndPos == std::string::npos)
+							targetText.erase(0, spaceBeginPos + 1);
 						else
-							strTargetText.erase(0, szSpaceEndPos);
-						bIsCorrectSpace = true;
+							targetText.erase(0, spaceEndPos);
+						isCorrectSpace = true;
 					}
 					else
 					{
-						size_t szSecondPos = IEStrUTF8::getMemoryPoint(strTargetText, 1);
-						size_t szResultLength = strResultText.length();
-						strResultText.append(strTargetText, 0, szSecondPos);
+						size_t secondPos = IEStrUTF8::getMemoryPoint(targetText, 1);
+						size_t resultLength = resultText.length();
+						resultText.append(targetText, 0, secondPos);
 
-						auto ts = IETextRenderer::shape(curHBFont, strResultText.c_str(), static_cast<int32_t>(strResultText.size()));
-						int32_t iTempWidth = IETextRenderer::measure(curFTFace, ts).width;
+						auto ts = IETextRenderer::shape(curHBFont, resultText.c_str(), static_cast<int32_t>(resultText.size()));
+						int32_t tempWidth = IETextRenderer::measure(curFTFace, ts).width;
 
-						if (iXOffset + iTempWidth > m_rect.w)
+						if (xOffset + tempWidth > m_rect.w)
 						{
-							strResultText.erase(szResultLength);
+							resultText.erase(resultLength);
 							break;
 						}
-						strTargetText.erase(0, szSecondPos);
+						targetText.erase(0, secondPos);
 					}
 				}
-				strTargetText = strResultText;
+				targetText = resultText;
 
-				if (strTargetText.length() == 0)
+				if (targetText.length() == 0)
 					break;
-				if (bIsSpaceCut == false)
-					iNextOffset = 0;
+				if (isSpaceCut == false)
+					nextOffset = 0;
 
-				szEndPoint = szBegPoint + strTargetText.length();
-				bIsEnterLine = true;
+				endPoint = begPoint + targetText.length();
+				isEnterLine = true;
 			}
 		}
 
-		int32_t iWidthOffset = 0;
+		int32_t widthOffset = 0;
 
-		if (strTargetText.length())
+		if (targetText.length())
 		{
-			auto shaped = IETextRenderer::shape(curHBFont, strTargetText.c_str(), static_cast<int32_t>(strTargetText.size()));
+			auto shaped = IETextRenderer::shape(curHBFont, targetText.c_str(), static_cast<int32_t>(targetText.size()));
 			auto ms     = IETextRenderer::measure(curFTFace, shaped);
 
 			SDL_Texture* pTex = IETextRenderer::renderToTexture(
-				m_renderer->getSDLRenderer(),
+				GetRenderer()->GetSDLRenderer(),
 				curFTFace,
 				shaped,
 				stkColor.top(),
 				ms.width  > 0 ? ms.width  : 1,
 				ms.height > 0 ? ms.height : 1,
-				iAscent,
+				ascent,
 				pCurFace->m_bold);
 
-			if (pTex)
+			if (pTex != nullptr)
 			{
 				auto pTTexture = std::make_unique<IETextTexture>();
 				pTTexture->m_texture = pTex;
-				pTTexture->m_bufferPos = static_cast<int32_t>(szBegPoint);
-				pTTexture->m_rect.x = iXOffset;
-				pTTexture->m_rect.y = iYOffset;
+				pTTexture->m_bufferPos = static_cast<int32_t>(begPoint);
+				pTTexture->m_rect.x = xOffset;
+				pTTexture->m_rect.y = yOffset;
 				pTTexture->m_rect.w = ms.width;
 				pTTexture->m_rect.h = ms.height;
 
 				m_textures.push_back(std::move(pTTexture));
-				iWidthOffset = ms.width;
+				widthOffset = ms.width;
 			}
 		}
 
 		// 커서 픽셀 위치 계산
-		size_t cursurPos = m_cursorPos - m_imeInputLength;
-		if (szBegPoint <= cursurPos && cursurPos < szEndPoint + iNextOffset)
+		size_t cursorPos = m_cursorPos - m_imeInputLength;
+		if (begPoint <= cursorPos && cursorPos < endPoint + nextOffset)
 		{
-			std::string prefix = strTargetText.substr(0, cursurPos - szBegPoint);
+			std::string prefix = targetText.substr(0, cursorPos - begPoint);
 			auto ps = IETextRenderer::shape(curHBFont, prefix.c_str(), static_cast<int32_t>(prefix.size()));
-			int32_t iTextWidth  = IETextRenderer::measure(curFTFace, ps).width;
-			int32_t iTextHeight = m_fontHeight;
+			int32_t prefixWidth  = IETextRenderer::measure(curFTFace, ps).width;
+			int32_t textHeight = m_fontHeight;
 
-			m_cursorScreenPos.x = m_rect.x + iXOffset + iTextWidth;
-			m_cursorScreenPos.y = m_rect.y + iYOffset;
+			m_cursorScreenPos.x = m_rect.x + xOffset + prefixWidth;
+			m_cursorScreenPos.y = m_rect.y + yOffset;
 
 			SDL_Rect rect{
 				.x = m_cursorScreenPos.x,
 				.y = m_cursorScreenPos.y,
 				.w = 0,
-				.h = iTextHeight,
+				.h = textHeight,
 			};
-			IECore::updateTextEditPosition(rect);
+			IECore::UpdateTextEditPosition(rect);
 		}
 
-		if (szTextLength <= szEndPoint + iNextOffset || szEndPoint == std::string::npos)
+		if (textLength <= endPoint + nextOffset || endPoint == std::string::npos)
 			break;
 
-		szBegPoint = szEndPoint + iNextOffset;
+		begPoint = endPoint + nextOffset;
 
-		if (bIsEnterLine)
+		if (isEnterLine)
 		{
-			iYOffset += m_fontHeight;
-			iXOffset = 0;
+			yOffset += m_fontHeight;
+			xOffset = 0;
 		}
 		else
 		{
-			iXOffset += iWidthOffset;
+			xOffset += widthOffset;
 		}
 	}
 }
@@ -313,63 +320,67 @@ void IETextBox::transToTexture()
 //  공통 (양쪽 경로 동일)
 // ──────────────────────────────────────────────
 
-void IETextBox::draw()
+void IETextBox::Draw()
 {
-	if (m_renderer == nullptr)
+	if (GetRenderer() == nullptr)
 		return;
 
 	if (m_textChanged)
-		transToTexture();
+		TransToTexture();
 
 	for (const auto& pTTexture : m_textures)
-		m_renderer->drawTexture(pTTexture->m_texture, m_rect.x + pTTexture->m_rect.x, m_rect.y + pTTexture->m_rect.y);
+		GetRenderer()->DrawTexture(pTTexture->m_texture, m_rect.x + pTTexture->m_rect.x, m_rect.y + pTTexture->m_rect.y);
 }
 
-void IETextBox::update()
+void IETextBox::Update()
 {
 }
 
-bool IETextBox::operateStyleCode(const std::string* strText, int32_t* outResult)
+bool IETextBox::OperateStyleCode(const std::string* strText, int32_t* outResult)
 {
-	size_t szCursor = strText->find_first_not_of("<s:");
+	size_t cursor = strText->find_first_not_of("<s:");
 
-	if (szCursor == std::string::npos || strText->find_first_of("<s:") == std::string::npos)
+	if (cursor == std::string::npos || strText->find_first_of("<s:") == std::string::npos)
 		return false;
 
 	if (strText->find_last_of(">") == std::string::npos)
 		return false;
 
-	int32_t iResult = IE_FONT_STYLE_NORMAL;
-	if (strText->find("BOLD",          szCursor) != std::string::npos) iResult |= IE_FONT_STYLE_BOLD;
-	if (strText->find("ITALIC",        szCursor) != std::string::npos) iResult |= IE_FONT_STYLE_ITALIC;
-	if (strText->find("UNDERLINE",     szCursor) != std::string::npos) iResult |= IE_FONT_STYLE_UNDERLINE;
-	if (strText->find("STRIKETHROUGH", szCursor) != std::string::npos) iResult |= IE_FONT_STYLE_STRIKETHROUGH;
+	int32_t result = IE_FONT_STYLE_NORMAL;
+	if (strText->find("BOLD",          cursor) != std::string::npos)
+		result |= IE_FONT_STYLE_BOLD;
+	if (strText->find("ITALIC",        cursor) != std::string::npos)
+		result |= IE_FONT_STYLE_ITALIC;
+	if (strText->find("UNDERLINE",     cursor) != std::string::npos)
+		result |= IE_FONT_STYLE_UNDERLINE;
+	if (strText->find("STRIKETHROUGH", cursor) != std::string::npos)
+		result |= IE_FONT_STYLE_STRIKETHROUGH;
 
-	*outResult = iResult;
+	*outResult = result;
 	return true;
 }
 
-bool IETextBox::operateColorCode(const std::string* strText, SDL_Color* outResult)
+bool IETextBox::OperateColorCode(const std::string* strText, SDL_Color* outResult)
 {
-	size_t szEndPoint = strText->find_last_of(">");
-	if (szEndPoint == std::string::npos)
+	size_t endPoint = strText->find_last_of(">");
+	if (endPoint == std::string::npos)
 		return false;
 
 	if (strText->find_first_of("<c:0x") != std::string::npos)
 	{
-		size_t szPos = strText->find_first_not_of("<c:0x");
-		std::string strTempString;
-		strTempString.append(*strText, szPos, szEndPoint - szPos);
+		size_t pos = strText->find_first_not_of("<c:0x");
+		std::string tempString;
+		tempString.append(*strText, pos, endPoint - pos);
 
-		std::stringstream StrStream;
-		Uint32 uiHexValue = 0;
-		StrStream << std::hex << strTempString;
-		StrStream >> uiHexValue;
+		std::stringstream strStream;
+		Uint32 hexValue = 0;
+		strStream << std::hex << tempString;
+		strStream >> hexValue;
 
-		outResult->b = uiHexValue & 0xff; uiHexValue >>= 8;
-		outResult->g = uiHexValue & 0xff; uiHexValue >>= 8;
-		outResult->r = uiHexValue & 0xff; uiHexValue >>= 8;
-		outResult->a = uiHexValue & 0xff;
+		outResult->b = hexValue & 0xff; hexValue >>= 8;
+		outResult->g = hexValue & 0xff; hexValue >>= 8;
+		outResult->r = hexValue & 0xff; hexValue >>= 8;
+		outResult->a = hexValue & 0xff;
 
 		return true;
 	}

@@ -49,7 +49,7 @@ std::string IECore::m_pendingIMEComposition;
 bool IECore::m_imeCompositionDirty = false;
 
 
-void IECore::mainThread()
+void IECore::MainThread()
 {
 	auto tickCycle = std::chrono::milliseconds(m_tickRate);
 	auto lastTime  = std::chrono::steady_clock::now();
@@ -68,13 +68,13 @@ void IECore::mainThread()
 		NextTime += tickCycle;			//다음 목표틱
 
 		m_operatePhase = EnginePhase::OperateEvent;
-		operateEvent();
+		OperateEvent();
 
 		m_operatePhase = EnginePhase::Update;
-		update(m_deltaTime);
+		Update(m_deltaTime);
 
 		m_operatePhase = EnginePhase::Draw;
-		draw();
+		Draw();
 
 		m_operatePhase = EnginePhase::Complete;
 
@@ -91,15 +91,15 @@ void IECore::mainThread()
 	return;
 }
 
-void IECore::operateEvent()
+void IECore::OperateEvent()
 {
 	//큐에서 이벤트 가져옴 + pending IME composition 수거
-	std::deque<SDL_Event> dqEventQueue;
+	std::deque<SDL_Event> eventQueue;
 	std::string pendingIME;
 	bool imeDirty = false;
 	{
 		std::lock_guard<std::mutex> lock(m_eventMutex);
-		std::swap(dqEventQueue, m_eventQueue);
+		std::swap(eventQueue, m_eventQueue);
 		if (m_imeCompositionDirty)
 		{
 			pendingIME = std::move(m_pendingIMEComposition);
@@ -110,12 +110,12 @@ void IECore::operateEvent()
 	}
 
 	//이벤트 처리 (TEXT_INPUT 커밋이 먼저 반영돼야 pendingIME가 올바르게 이어짐)
-	while (!dqEventQueue.empty())
+	while (!eventQueue.empty())
 	{
-		SDL_Event Event = dqEventQueue.front();
-		dqEventQueue.pop_front();
+		SDL_Event Event = eventQueue.front();
+		eventQueue.pop_front();
 
-		if (operateTextEdit(&Event))
+		if (OperateTextEdit(&Event))
 			continue;
 
 		switch (Event.type)
@@ -128,10 +128,10 @@ void IECore::operateEvent()
 			m_textEdit = true;
 			if (m_focusedTextBox != nullptr)
 			{
-				m_textEditPosition.x = m_focusedTextBox->getCursurScreenPos().x;
-				m_textEditPosition.y = m_focusedTextBox->getCursurScreenPos().y;
+				m_textEditPosition.x = m_focusedTextBox->GetCursorScreenPos().x;
+				m_textEditPosition.y = m_focusedTextBox->GetCursorScreenPos().y;
 				m_textEditPosition.w = 0;
-				m_textEditPosition.h = m_focusedTextBox->getFontHeight();
+				m_textEditPosition.h = m_focusedTextBox->GetFontHeight();
 			}
 			m_textEditMutex.unlock();
 		}
@@ -139,21 +139,21 @@ void IECore::operateEvent()
 		case SDL_EVENT_KEY_DOWN:
 		case SDL_EVENT_KEY_UP:
 		{
-			m_Input.setKeyState(Event.key.scancode, Event.key.down);
+			m_Input.SetKeyState(Event.key.scancode, Event.key.down);
 		}
 		break;
 		case SDL_EVENT_WINDOW_RESIZED:
 		{
-			IEWindow* lpWindow = getWindowByID(Event.window.windowID);
-			if (lpWindow != nullptr)
-				lpWindow->resizeRenderer();
+			IEWindow* window = GetWindowByID(Event.window.windowID);
+			if (window != nullptr)
+				window->ResizeRenderer();
 		}
 		break;
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
 		{
-			IEWindow* lpWindow = getWindowByID(Event.window.windowID);
-			if (lpWindow != nullptr)
-				lpWindow->callXButton();
+			IEWindow* window = GetWindowByID(Event.window.windowID);
+			if (window != nullptr)
+				window->CallXButton();
 		}
 		break;
 		}
@@ -166,35 +166,35 @@ void IECore::operateEvent()
 		{
 			if (m_useIME)
 			{
-				m_focusedTextBox->removeIMEInput();
+				m_focusedTextBox->RemoveIMEInput();
 				m_useIME = false;
 			}
 		}
 		else
 		{
 			if (m_useIME)
-				m_focusedTextBox->removeIMEInput();
-			m_focusedTextBox->insertCusorPos(pendingIME.c_str());
-			m_focusedTextBox->setIMELength(pendingIME.size());
+				m_focusedTextBox->RemoveIMEInput();
+			m_focusedTextBox->InsertCursorPos(pendingIME.c_str());
+			m_focusedTextBox->SetIMELength(pendingIME.size());
 			m_useIME = true;
 		}
 	}
 
 	//마우스 위치 갱신
 	{
-		float fMouseX = 0.0f;
-		float fMouseY = 0.0f;
-		SDL_GetMouseState(&fMouseX, &fMouseY);
-		int32_t iMouseX = static_cast<int32_t>(fMouseX);
-		int32_t iMouseY = static_cast<int32_t>(fMouseY);
-		m_Input.updateMousePos(iMouseX, iMouseY);
+		float mouseX = 0.0f;
+		float mouseY = 0.0f;
+		SDL_GetMouseState(&mouseX, &mouseY);
+		int32_t mouseXInt = static_cast<int32_t>(mouseX);
+		int32_t mouseYInt = static_cast<int32_t>(mouseY);
+		m_Input.UpdateMousePos(mouseXInt, mouseYInt);
 
 		//마우스가 올라와있는 윈도우
-		SDL_Window* lpWindow = SDL_GetMouseFocus();
-		if (lpWindow)
+		SDL_Window* sdlWindow = SDL_GetMouseFocus();
+		if (sdlWindow != nullptr)
 		{
-			Uint32 uiWindowID = SDL_GetWindowID(lpWindow);
-			m_mouseOnWindow = getWindowByID(uiWindowID);
+			Uint32 windowID = SDL_GetWindowID(sdlWindow);
+			m_mouseOnWindow = GetWindowByID(windowID);
 		}
 		else
 		{
@@ -204,13 +204,13 @@ void IECore::operateEvent()
 }
 
 
-void IECore::update(float deltaTime)
+void IECore::Update(float deltaTime)
 {
 	for (auto& [_, window] : m_windows)
-		window->update(deltaTime);
+		window->Update(deltaTime);
 }
 
-void IECore::draw()
+void IECore::Draw()
 {
 	auto ite = m_windows.begin();
 	//그릴게 없다
@@ -220,7 +220,7 @@ void IECore::draw()
 	//드로우 한 기록 초기화
 	m_drawCompleteCounter.store(0);
 	for (; ite != m_windows.end(); ++ite)
-		ite->second->resetDrawed();
+		ite->second->ResetDrawed();
 
 	//각 창 스레드에 그리라고 전달
 	m_drawThreadWaiter.notify_all();
@@ -230,44 +230,43 @@ void IECore::draw()
 
 	//그리기 완료 때 까지 대기 / 엔진이 멈추면 얘도 멈춰줘야된다
 	m_drawCompleteWaiter.wait(lkWaiter, [&] {
-		return isDrawComplete() || !isRunning();
+		return IsDrawComplete() || !IsRunning();
 		});
 }
 
-bool IECore::beginEngine()
+bool IECore::BeginEngine()
 {
-	if (m_mainThread)
+	if (m_mainThread != nullptr)
 		return false;
 
 	m_isRunning = true;
 
-	m_mainThread = std::make_unique<std::thread>([&]() { mainThread(); });
+	m_mainThread = std::make_unique<std::thread>([&]() { MainThread(); });
 
 	//스레드를 각자 파서 각자 그리도록
 	for (auto& [_, window] : m_windows)
-		window->beginDrawThread();
+		window->BeginDrawThread();
 
 	return true;
 }
 
-bool IECore::endEngine()
+bool IECore::EndEngine()
 {
-	if (m_mainThread)
+	if (m_mainThread != nullptr)
 	{
 		m_mainThread->join();
 		m_mainThread.reset();
 	}
 
 	for (auto& [_, window] : m_windows)//각 창 삭제
-		window->close();
+		window->Close();
 
 	SDL_Quit();
 	return true;
 }
 
-bool IECore::operateTextEdit(SDL_Event* event)
+bool IECore::OperateTextEdit(SDL_Event* event)
 {
-	printf("textedit : %d\n", event->type);
 	if (m_focusedTextBox == nullptr
 		|| !m_textEdit)
 		return false;
@@ -280,23 +279,23 @@ bool IECore::operateTextEdit(SDL_Event* event)
 		{
 			//텍스트 지우기
 			if (event->key.key == SDLK_BACKSPACE
-				&& m_focusedTextBox->getTextLength() > 0)
-				m_focusedTextBox->removeByBackspace();
+				&& m_focusedTextBox->GetTextLength() > 0)
+				m_focusedTextBox->RemoveByBackspace();
 
 			if (event->key.key == SDLK_DELETE
-				&& m_focusedTextBox->getTextLength() > 0)
-				m_focusedTextBox->removeByDelete();
+				&& m_focusedTextBox->GetTextLength() > 0)
+				m_focusedTextBox->RemoveByDelete();
 
 			//커서 좌우로 이동
 			if (event->key.key == SDLK_RIGHT)
-				m_focusedTextBox->cusorMoveNext();
+				m_focusedTextBox->CursorMoveNext();
 			if (event->key.key == SDLK_LEFT)
-				m_focusedTextBox->cusorMovePrevious();
+				m_focusedTextBox->CursorMovePrevious();
 
 			//엔터
 			if (event->key.key == SDLK_RETURN
 				|| event->key.key == SDLK_KP_ENTER)
-				m_focusedTextBox->insertCusorPos("\n");
+				m_focusedTextBox->InsertCursorPos("\n");
 		}
 	}
 	break;
@@ -306,26 +305,26 @@ bool IECore::operateTextEdit(SDL_Event* event)
 		if (editText == nullptr || strlen(editText) == 0)
 		{
 			if (m_useIME)
-				m_focusedTextBox->removeIMEInput();
+				m_focusedTextBox->RemoveIMEInput();
 			m_useIME = false;
 			break;
 		}
 
 		if (m_useIME)
-			m_focusedTextBox->removeIMEInput();
+			m_focusedTextBox->RemoveIMEInput();
 
-		m_focusedTextBox->insertCusorPos(editText);
-		m_focusedTextBox->setIMELength(strlen(editText));
+		m_focusedTextBox->InsertCursorPos(editText);
+		m_focusedTextBox->SetIMELength(strlen(editText));
 		m_useIME = true;
 	}
 	break;
 	case SDL_EVENT_TEXT_INPUT:
 	{//입력
 		if (m_useIME)
-			m_focusedTextBox->removeIMEInput();
+			m_focusedTextBox->RemoveIMEInput();
 
 		m_useIME = false;
-		m_focusedTextBox->insertCusorPos(event->text.text);
+		m_focusedTextBox->InsertCursorPos(event->text.text);
 	}
 	break;
 	default:
@@ -336,7 +335,7 @@ bool IECore::operateTextEdit(SDL_Event* event)
 	return true;
 }
 
-std::optional<SDL_Rect> IECore::getTextEditPosition()
+std::optional<SDL_Rect> IECore::GetTextEditPosition()
 {
 	std::lock_guard lockGuard(m_textEditMutex);
 	if (!m_textEdit)
@@ -345,7 +344,7 @@ std::optional<SDL_Rect> IECore::getTextEditPosition()
 	return m_textEditPosition;
 }
 
-void IECore::pollPlatformIME(SDL_Window* focusWin)
+void IECore::PollPlatformIME(SDL_Window* focusWin)
 {
 #if defined(_WIN32) && defined(_CUSTOM_IME)
 	static std::string s_lastComposition;

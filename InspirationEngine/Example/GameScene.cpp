@@ -6,11 +6,11 @@
 void GameScene::OnEnter()
 {
 	SDL_Renderer* sdl =
-		IECore::getMainWindow()->getRenderer(1)->getSDLRenderer();
+		IECore::GetMainWindow()->GetRenderer(1)->GetSDLRenderer();
 
-	IECore::GetAtlas().Load("floors", "../Data/floors.json", sdl);
+	IECore::GetAtlas().Load("floors", "Data/floors.json", sdl);
 
-	std::ifstream f("../Data/world_test.json");
+	std::ifstream f("Data/world_test.json");
 	if (!f.is_open())
 		return;
 
