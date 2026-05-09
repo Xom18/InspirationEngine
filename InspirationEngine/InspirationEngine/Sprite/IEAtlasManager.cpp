@@ -32,6 +32,7 @@ bool IEAtlasManager::Load(const std::string& name, const std::string& jsonPath, 
 	if (atlas->m_texture == nullptr)
 		return false;
 
+	SDL_SetTextureScaleMode(atlas->m_texture, SDL_SCALEMODE_PIXELART);
 	SDL_SetTextureBlendMode(atlas->m_texture, SDL_BLENDMODE_BLEND);
 
 	if (j.contains("tileStep") && j["tileStep"].is_object())
