@@ -53,6 +53,7 @@ CodeAnalysisResultManifest.txt
 */binary/*
 
 #resources
+*/data/*
 *.png
 
 #font
