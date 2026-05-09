@@ -2,7 +2,6 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
-#include <SDL/SDL.h>
 
 struct IETileRect {
 	int32_t x = 0, y = 0, w = 0, h = 0;

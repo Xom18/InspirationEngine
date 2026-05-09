@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 enum class EnginePhase : int32_t
 {
@@ -298,12 +298,6 @@ private:
 	/// 이벤트 처리 함수
 	/// </summary>
 	static void operateEvent();
-
-	/// <summary>
-	/// 윈도우 이벤트 처리
-	/// </summary>
-	/// <param name="event">처리할 SDL 이벤트</param>
-	static void operateWindowEvent(const SDL_Event* event);
 
 	/// <summary>
 	/// 업데이트용

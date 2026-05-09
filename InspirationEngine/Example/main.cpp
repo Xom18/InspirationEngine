@@ -8,12 +8,6 @@
 #include "Test/TestStrUTF8.h"
 
 #ifdef _DEBUG
-#pragma comment(lib, "../x64/Debug/InspirationEngine.lib")
-#else
-#pragma comment(lib, "../x64/Release/InspirationEngine.lib")
-#endif
-
-#ifdef _DEBUG
 #pragma comment(linker, "/SUBSYSTEM:CONSOLE")
 #endif
 
@@ -29,11 +23,11 @@ int main(int argc, char* argv[])
 
 	// exe 위치(x64/Debug/) 기준으로 Example/ 폴더를 워킹 디렉토리로 고정
 	// → "../Data/" 등 상대 경로가 항상 올바르게 해석됨
-	if (char* bp = SDL_GetBasePath())
+	if (const char* bp = SDL_GetBasePath())
 	{
 		std::string wd = std::string(bp) + "..\\..\\Example";
 		SetCurrentDirectoryA(wd.c_str());
-		SDL_free(bp);
+		SDL_free(const_cast<char*>(bp));
 	}
 
 	TestStrUTF8().run();
@@ -45,9 +39,6 @@ int main(int argc, char* argv[])
 	int32_t iY = 0;
 	int32_t iW = 0;
 	int32_t iH = 0;
-
-	//IME출력설정, 기본 텍스트 인풋모드인거 off
-	SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
 
 	//주 게임 창 생성
 	{
@@ -125,14 +116,19 @@ int main(int argc, char* argv[])
 		//메인스레드에서 호출해야 IME 창 위치 설정하는게 먹음
 		//스톱 시키고 바로 스타트 시키는걸 해야 IME 입력박스 위치를 갱신가능
 		auto rect = IECore::getTextEditPosition();
+		SDL_Window* focusWin = SDL_GetKeyboardFocus();
 		if (rect.has_value())
 		{
-			SDL_SetTextInputRect(&rect.value());
+			if (focusWin)
+				SDL_SetTextInputArea(focusWin, &rect.value(), 0);
 			if (!useIME)
 			{
 				useIME = true;
-				SDL_StopTextInput();
-				SDL_StartTextInput();
+				if (focusWin)
+				{
+					SDL_StopTextInput(focusWin);
+					SDL_StartTextInput(focusWin);
+				}
 			}
 		}
 		else
@@ -140,8 +136,11 @@ int main(int argc, char* argv[])
 			if (useIME)
 			{
 				useIME = false;
-				SDL_StopTextInput();
-				SDL_StartTextInput();
+				if (focusWin)
+				{
+					SDL_StopTextInput(focusWin);
+					SDL_StartTextInput(focusWin);
+				}
 			}
 		}
 	}

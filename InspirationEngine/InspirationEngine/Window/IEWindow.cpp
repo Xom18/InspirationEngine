@@ -2,7 +2,6 @@
 #include <vector>
 #include <deque>
 #include <thread>
-#include <SDL/SDL.h>
 #include "InspirationEngine.h"
 
 IEWindow::IEWindow()
@@ -21,54 +20,73 @@ void IEWindow::close()
 
 void IEWindow::resizeRenderer()
 {
-	//실제 사용하는 랜더러 생성(UI스크린하고 게임스크린이 해상도가 다른경우가 있기때문에 여러개일 수 있다)
-	SDL_Surface* lpSurface = SDL_GetWindowSurface(m_sdlWindow);
+	int32_t w = 0, h = 0;
+	SDL_GetWindowSize(m_sdlWindow, &w, &h);
 
-	if (lpSurface == nullptr)
+	// 크기 변화 없고 렌더러가 이미 있으면 재생성 방지 (텍스처 무효화 방지)
+	if (w == m_width && h == m_height
+		&& !m_renderers.empty() && m_renderers[0].m_renderer != nullptr)
 		return;
 
-	//창 크기 다시 설정
-	m_width = lpSurface->w;
-	m_height = lpSurface->h;
+	m_width  = w;
+	m_height = h;
 
-	for (size_t i = 0; i < m_renderers.size(); ++i)
+	// 기존 렌더러 파괴 (모든 슬롯이 같은 포인터를 공유하므로 첫 번째만 파괴)
+	if (!m_renderers.empty() && m_renderers[0].m_renderer != nullptr)
 	{
-		if (m_renderers[i].m_renderer != nullptr)
-			SDL_DestroyRenderer(m_renderers[i].m_renderer);
-		m_renderers[i].m_renderer = SDL_CreateSoftwareRenderer(lpSurface);
-		m_renderers[i].m_window = this;
-		m_renderers[i].m_w = m_width;
-		m_renderers[i].m_h = m_height;
-		SDL_SetRenderDrawColor(m_renderers[i].m_renderer, 0, 0, 0, 0xFF);
+		SDL_DestroyRenderer(m_renderers[0].m_renderer);
+		for (auto& r : m_renderers)
+			r.m_renderer = nullptr;
+	}
+
+	SDL_Renderer* sdlRenderer = SDL_CreateRenderer(m_sdlWindow, "software");
+	if (sdlRenderer == nullptr)
+		return;
+
+	SDL_SetRenderDrawColor(sdlRenderer, 0, 0, 0, 0xFF);
+
+	// 모든 슬롯이 같은 SDL_Renderer를 공유 (소프트웨어 렌더러는 창당 하나)
+	for (auto& r : m_renderers)
+	{
+		r.m_renderer = sdlRenderer;
+		r.m_window   = this;
+		r.m_w        = m_width;
+		r.m_h        = m_height;
 	}
 }
 
 void IEWindow::reset()
 {
-	if (m_drawThread)
+	if (m_drawThread != nullptr)
 	{
 		m_drawThread->join();
 		m_drawThread.reset();
 	}
 
+	// 렌더러 먼저 파괴 (슬롯이 모두 같은 포인터이므로 첫 번째만)
+	if (!m_renderers.empty() && m_renderers[0].m_renderer != nullptr)
+		SDL_DestroyRenderer(m_renderers[0].m_renderer);
+	m_renderers.clear();
+
 	if (m_sdlWindow != nullptr)
 		SDL_DestroyWindow(m_sdlWindow);
 
-	m_sdlWindow = nullptr;
-	m_width = 0;
-	m_height = 0;
+	m_sdlWindow     = nullptr;
+	m_width         = 0;
+	m_height        = 0;
 	m_rendererCount = 0;
-	m_renderers.clear();
 }
 
-bool IEWindow::createWindow(const char* title, int32_t width, int32_t height, int32_t x, int32_t y, int32_t windowFlag, int32_t rendererCount)
+bool IEWindow::createWindow(const char* title, int32_t width, int32_t height, int32_t x, int32_t y, SDL_WindowFlags windowFlag, int32_t rendererCount)
 {
 	//이미 창이 있다
 	if (m_sdlWindow != nullptr)
 		return false;
 
 	//창 생성, 랜더러 생성
-	m_sdlWindow = SDL_CreateWindow(title, x, y, width, height, windowFlag);
+	m_sdlWindow = SDL_CreateWindow(title, width, height, static_cast<SDL_WindowFlags>(windowFlag));
+	if (m_sdlWindow && (x != SDL_WINDOWPOS_CENTERED || y != SDL_WINDOWPOS_CENTERED))
+		SDL_SetWindowPosition(m_sdlWindow, x, y);
 
 	if (m_sdlWindow == nullptr)
 		return false;
@@ -84,11 +102,13 @@ bool IEWindow::createWindow(const char* title, int32_t width, int32_t height, in
 
 void IEWindow::render()
 {
-	SDL_UpdateWindowSurface(m_sdlWindow);
+	if (m_renderers.empty() || m_renderers[0].m_renderer == nullptr)
+		return;
 
-	//그렸으니 싹 지워준다
-	for (size_t i = 0; i < m_renderers.size(); ++i)
-		SDL_RenderClear(m_renderers[i].m_renderer);
+	SDL_RenderPresent(m_renderers[0].m_renderer);
+
+	//그렸으니 싹 지워준다 (슬롯이 모두 같은 렌더러이므로 한 번만)
+	SDL_RenderClear(m_renderers[0].m_renderer);
 }
 
 bool IEWindow::closed()

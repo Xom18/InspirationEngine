@@ -48,7 +48,7 @@ public:
 	/// <param name="y">창 위치 Y (기본값: 화면 중앙)</param>
 	/// <param name="windowFlag">SDL 창 플래그</param>
 	/// <param name="rendererCount">소프트웨어 렌더러 개수</param>
-	bool createWindow(const char* title, int32_t width, int32_t height, int32_t x = SDL_WINDOWPOS_CENTERED, int32_t y = SDL_WINDOWPOS_CENTERED, int32_t windowFlag = 0, int32_t rendererCount = 1);
+	bool createWindow(const char* title, int32_t width, int32_t height, int32_t x = SDL_WINDOWPOS_CENTERED, int32_t y = SDL_WINDOWPOS_CENTERED, SDL_WindowFlags windowFlag = 0, int32_t rendererCount = 1);
 
 	/// <summary>
 	/// 창이 닫혀있는지 여부

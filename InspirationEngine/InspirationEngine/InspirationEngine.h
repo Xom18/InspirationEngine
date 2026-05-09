@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 #include <algorithm>
 #include <thread>
 #include <vector>

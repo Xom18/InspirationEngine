@@ -2,13 +2,11 @@
 
 IESpriteManager::IESpriteManager()
 {
-	IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
 }
 
 IESpriteManager::~IESpriteManager()
 {
 	unloadAll();
-	IMG_Quit();
 }
 
 bool IESpriteManager::addNewSprite(int32_t id, const char* path, IERenderer* renderer)
@@ -18,7 +16,7 @@ bool IESpriteManager::addNewSprite(int32_t id, const char* path, IERenderer* ren
 		return false;
 
 	SDL_Texture* pTexture = SDL_CreateTextureFromSurface(renderer->getSDLRenderer(), pSurface);
-	SDL_FreeSurface(pSurface);
+	SDL_DestroySurface(pSurface);
 
 	if (pTexture == nullptr)
 		return false;
@@ -79,14 +77,14 @@ void IESprite::setTexture(SDL_Texture* texture)
 	m_hasClip = false;
 	if (texture != nullptr)
 	{
-		int32_t w = 0, h = 0;
-		SDL_QueryTexture(texture, nullptr, nullptr, &w, &h);
-		m_srcRect = { 0, 0, w, h };
+		float fw = 0.0f, fh = 0.0f;
+		SDL_GetTextureSize(texture, &fw, &fh);
+		m_srcRect = { 0.0f, 0.0f, fw, fh };
 	}
 }
 
 void IESprite::draw(IERenderer* renderer, int32_t x, int32_t y,
-	double scaleX, double scaleY, double angle, SDL_Point* pivot, SDL_RendererFlip flip)
+	double scaleX, double scaleY, double angle, SDL_FPoint* pivot, SDL_FlipMode flip)
 {
 	if (m_texture == nullptr || renderer == nullptr)
 		return;

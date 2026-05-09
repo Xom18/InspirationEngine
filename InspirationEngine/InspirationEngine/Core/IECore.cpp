@@ -1,4 +1,4 @@
-﻿#include <future>
+#include <future>
 #include <iostream>
 #include "InspirationEngine.h"
 //public
@@ -98,8 +98,8 @@ void IECore::operateEvent()
 
 		switch (Event.type)
 		{
-		case SDL_EventType::SDL_MOUSEBUTTONDOWN:
-		case SDL_EventType::SDL_MOUSEBUTTONUP:
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
 		{
 			//테스트용 코드
 			m_textEditMutex.lock();
@@ -114,15 +114,24 @@ void IECore::operateEvent()
 			m_textEditMutex.unlock();
 		}
 		break;
-		case SDL_EventType::SDL_KEYDOWN:
-		case SDL_EventType::SDL_KEYUP:
+		case SDL_EVENT_KEY_DOWN:
+		case SDL_EVENT_KEY_UP:
 		{
-			m_Input.setKeyState(Event.key.keysym.scancode, Event.key.state);
+			m_Input.setKeyState(Event.key.scancode, Event.key.down);
 		}
 		break;
-		case SDL_EventType::SDL_WINDOWEVENT:
+		case SDL_EVENT_WINDOW_RESIZED:
 		{
-			operateWindowEvent(&Event);
+			IEWindow* lpWindow = getWindowByID(Event.window.windowID);
+			if (lpWindow != nullptr)
+				lpWindow->resizeRenderer();
+		}
+		break;
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+		{
+			IEWindow* lpWindow = getWindowByID(Event.window.windowID);
+			if (lpWindow != nullptr)
+				lpWindow->callXButton();
 		}
 		break;
 		}
@@ -130,9 +139,11 @@ void IECore::operateEvent()
 
 	//마우스 위치 갱신
 	{
-		int32_t iMouseX = 0;
-		int32_t iMouseY = 0;
-		SDL_GetMouseState(&iMouseX, &iMouseY);
+		float fMouseX = 0.0f;
+		float fMouseY = 0.0f;
+		SDL_GetMouseState(&fMouseX, &fMouseY);
+		int32_t iMouseX = static_cast<int32_t>(fMouseX);
+		int32_t iMouseY = static_cast<int32_t>(fMouseY);
 		m_Input.updateMousePos(iMouseX, iMouseY);
 
 		//마우스가 올라와있는 윈도우
@@ -149,27 +160,6 @@ void IECore::operateEvent()
 	}
 }
 
-void IECore::operateWindowEvent(const SDL_Event* event)
-{
-	//이벤트에 해당하는 창 가져오고 없으면 반환
-	IEWindow* lpWindow = getWindowByID(event->window.windowID);
-	if (lpWindow == nullptr)
-		return;
-
-	switch (event->window.event)
-	{
-	case SDL_WindowEventID::SDL_WINDOWEVENT_RESIZED:
-	{
-		lpWindow->resizeRenderer();
-	}
-	break;
-	case SDL_WindowEventID::SDL_WINDOWEVENT_CLOSE:
-	{
-		lpWindow->callXButton();
-	}
-	break;
-	}
-}
 
 void IECore::update(float deltaTime)
 {
@@ -240,33 +230,33 @@ bool IECore::operateTextEdit(SDL_Event* event)
 
 	switch (event->type)
 	{
-	case SDL_EventType::SDL_KEYDOWN:
+	case SDL_EVENT_KEY_DOWN:
 	{
 		if (!m_useIME)
 		{
 			//텍스트 지우기
-			if (event->key.keysym.sym == SDLK_BACKSPACE
+			if (event->key.key == SDLK_BACKSPACE
 				&& m_focusedTextBox->getTextLength() > 0)
 				m_focusedTextBox->removeByBackspace();
 
-			if (event->key.keysym.sym == SDLK_DELETE
+			if (event->key.key == SDLK_DELETE
 				&& m_focusedTextBox->getTextLength() > 0)
 				m_focusedTextBox->removeByDelete();
 
 			//커서 좌우로 이동
-			if (event->key.keysym.sym == SDLK_RIGHT)
+			if (event->key.key == SDLK_RIGHT)
 				m_focusedTextBox->cusorMoveNext();
-			if (event->key.keysym.sym == SDLK_LEFT)
+			if (event->key.key == SDLK_LEFT)
 				m_focusedTextBox->cusorMovePrevious();
 
 			//엔터
-			if (event->key.keysym.sym == SDLK_RETURN
-				|| event->key.keysym.sym == SDLK_KP_ENTER)
+			if (event->key.key == SDLK_RETURN
+				|| event->key.key == SDLK_KP_ENTER)
 				m_focusedTextBox->insertCusorPos("\n");
 		}
 	}
 	break;
-	case SDL_EventType::SDL_TEXTEDITING:
+	case SDL_EVENT_TEXT_EDITING:
 	{//조합형 입력중
 		if (strlen(event->text.text) == 0)
 		{
@@ -284,7 +274,7 @@ bool IECore::operateTextEdit(SDL_Event* event)
 		m_useIME = true;
 	}
 	break;
-	case SDL_EventType::SDL_TEXTINPUT:
+	case SDL_EVENT_TEXT_INPUT:
 	{//입력
 		if (m_useIME)
 			m_focusedTextBox->removeIMEInput();
