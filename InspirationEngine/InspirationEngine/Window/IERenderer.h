@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 class IEWindow;
 class IERenderer
@@ -114,7 +114,7 @@ public:
 	/// <param name="angle">회전 각도 (도)</param>
 	/// <param name="pivot">회전 기준점 (nullptr이면 중앙)</param>
 	/// <param name="flip">반전 플래그</param>
-	void drawText(Font* font, const char* text, SDL_Color color, int32_t x, int32_t y, double widthPercent = 100, double heightPercent = 100, double angle = 0, SDL_Point* pivot = nullptr, SDL_RendererFlip flip = SDL_FLIP_NONE);
+	void drawText(IEFont* font, const char* text, SDL_Color color, int32_t x, int32_t y, double widthPercent = 100, double heightPercent = 100, double angle = 0, SDL_Point* pivot = nullptr, SDL_RendererFlip flip = SDL_FLIP_NONE);
 
 	/// <summary>
 	/// 선 그리기

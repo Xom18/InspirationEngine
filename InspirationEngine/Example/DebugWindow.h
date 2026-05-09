@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 class DebugWindow : public IEWindow
 {
@@ -9,5 +9,5 @@ public:
 	void initWindow();
 
 private:
-	TextBox m_DebugText;
+	IETextBox m_DebugText;
 };

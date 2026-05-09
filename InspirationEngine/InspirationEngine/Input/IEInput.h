@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 /// <summary>
 /// 모든 입력관련 이벤트 처리하는곳
@@ -17,8 +17,8 @@ private:
 	std::mutex m_operateEventMutex;
 
 	Uint32 m_mouseStatus = 0;
-	IVector2 m_mousePos;
-	IVector2 m_mouseDelta;
+	IEVector2 m_mousePos;
+	IEVector2 m_mouseDelta;
 
 public:
 	IEInput() {}
@@ -59,7 +59,7 @@ public:
 	/// <summary>
 	/// 마우스 현재 위치 반환
 	/// </summary>
-	IVector2 getMousePos()
+	IEVector2 getMousePos()
 	{
 		return m_mousePos;
 	}
@@ -67,7 +67,7 @@ public:
 	/// <summary>
 	/// 마우스 이동량 반환 (직전 프레임 대비 델타)
 	/// </summary>
-	IVector2 getMouseDelta()
+	IEVector2 getMouseDelta()
 	{
 		return m_mouseDelta;
 	}

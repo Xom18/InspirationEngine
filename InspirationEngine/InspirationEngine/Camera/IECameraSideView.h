@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "IECamera.h"
 
@@ -22,17 +22,17 @@ public:
 	IECameraSideView() = default;
 	explicit IECameraSideView(float heightFactor) : m_heightFactor(heightFactor) {}
 
-	IVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const override
+	IEVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const override
 	{
-		IVector2 result;
+		IEVector2 result;
 		result.m_x = std::lround((wx - m_x) * m_zoom + m_viewportWidth  * 0.5f);
 		result.m_y = std::lround(((wy - m_y) - (wz - m_z) * m_heightFactor) * m_zoom + m_viewportHeight * 0.5f);
 		return result;
 	}
 
-	IVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
+	IEVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
 	{
-		IVector2 result;
+		IEVector2 result;
 		result.m_x = std::lround((sx - m_viewportWidth  * 0.5f) / m_zoom + m_x);
 		result.m_y = std::lround((sy - m_viewportHeight * 0.5f) / m_zoom + m_y);
 		return result;

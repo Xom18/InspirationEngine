@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 enum class EnginePhase : int32_t
 {
@@ -14,7 +14,7 @@ class IECore
 {
 private:
 	static IEInput          m_Input;
-	static DebugInfo        m_DebugInfo;
+	static IEDebugInfo        m_DebugInfo;
 	static IEFontManager    m_Font;
 	static IESpriteManager  m_Sprite;
 	static IEAtlasManager   m_Atlas;
@@ -24,7 +24,7 @@ private:
 	static IEWindow*        m_mainWindow;
 	static IEWindow*        m_mouseOnWindow;
 	static IEWindow*        m_focusedWindow;
-	static TextBox*         m_focusedTextBox;
+	static IETextBox*         m_focusedTextBox;
 
 	static EnginePhase		m_operatePhase;		//현재 어느걸 처리중인지
 	static std::mutex m_eventMutex;			//이벤트 뮤텍스
@@ -62,7 +62,7 @@ public:
 	}
 
 	static IEInput&          GetInput()     { return m_Input; }
-	static DebugInfo&        GetDebugInfo() { return m_DebugInfo; }
+	static IEDebugInfo&        GetDebugInfo() { return m_DebugInfo; }
 	static IEFontManager&    GetFont()      { return m_Font; }
 	static IESpriteManager&  GetSprite()    { return m_Sprite; }
 	static IEAtlasManager&   GetAtlas()     { return m_Atlas; }
@@ -70,10 +70,10 @@ public:
 
 	static IEWindow*  GetMouseOnWindow()  { return m_mouseOnWindow; }
 	static IEWindow*  GetFocusedWindow()  { return m_focusedWindow; }
-	static TextBox*   GetFocusedTextBox() { return m_focusedTextBox; }
+	static IETextBox*   GetFocusedTextBox() { return m_focusedTextBox; }
 	static void SetMouseOnWindow(IEWindow* window)  { m_mouseOnWindow = window; }
 	static void SetFocusedWindow(IEWindow* window)  { m_focusedWindow = window; }
-	static void SetFocusedTextBox(TextBox* textBox) { m_focusedTextBox = textBox; }
+	static void SetFocusedTextBox(IETextBox* textBox) { m_focusedTextBox = textBox; }
 
 	/// <summary>
 	/// 엔진 시작

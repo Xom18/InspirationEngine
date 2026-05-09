@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "IECamera.h"
 
@@ -26,7 +26,7 @@ public:
 	IECameraIsometric(int32_t tileW, int32_t tileH, float heightFactor = 16.0f)
 		: m_tileWidth(tileW), m_tileHeight(tileH), m_heightFactor(heightFactor) {}
 
-	IVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const override
+	IEVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const override
 	{
 		float hw = m_tileWidth  * 0.5f;
 		float hh = m_tileHeight * 0.5f;
@@ -37,13 +37,13 @@ public:
 		float camIsoX = (m_x - m_y) * hw;
 		float camIsoY = (m_x + m_y) * hh - m_z * m_heightFactor;
 
-		IVector2 result;
+		IEVector2 result;
 		result.m_x = std::lround((isoX - camIsoX) * m_zoom + m_viewportWidth  * 0.5f);
 		result.m_y = std::lround((isoY - camIsoY) * m_zoom + m_viewportHeight * 0.5f);
 		return result;
 	}
 
-	IVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
+	IEVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
 	{
 		float hw = m_tileWidth  * 0.5f;
 		float hh = m_tileHeight * 0.5f;
@@ -57,7 +57,7 @@ public:
 		float diff = localX / hw;
 		float sum  = localY / hh;
 
-		IVector2 result;
+		IEVector2 result;
 		result.m_x = static_cast<int32_t>((sum + diff) * 0.5f);
 		result.m_y = static_cast<int32_t>((sum - diff) * 0.5f);
 		return result;

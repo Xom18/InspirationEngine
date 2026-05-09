@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -13,19 +13,19 @@
   <ItemGroup>
     <ClInclude Include="InspirationEngine.h" />
     <ClInclude Include="Core\IECore.h" />
-    <ClInclude Include="Core\DebugInfo.h" />
+    <ClInclude Include="Core\IEDebugInfo.h" />
     <ClInclude Include="Core\MacroDefine.h" />
     <ClInclude Include="Window\IEWindow.h" />
     <ClInclude Include="Window\IERenderer.h" />
     <ClInclude Include="Input\IEInput.h" />
     <ClInclude Include="Input\MouseCusor.h" />
     <ClInclude Include="UI\Interface.h" />
-    <ClInclude Include="UI\Menu.h" />
-    <ClInclude Include="UI\TextBox.h" />
-    <ClInclude Include="Text\Font.h" />
+    <ClInclude Include="UI\IEMenu.h" />
+    <ClInclude Include="UI\IETextBox.h" />
+    <ClInclude Include="Text\IEFont.h" />
     <ClInclude Include="Text\IETextRenderer.h" />
-    <ClInclude Include="Util\StrUTF8.h" />
-    <ClInclude Include="Util\File.h" />
+    <ClInclude Include="Util\IEStrUTF8.h" />
+    <ClInclude Include="Util\IEFile.h" />
     <ClInclude Include="Sprite\IESpriteManager.h" />
     <ClInclude Include="Sprite\IEAtlasManager.h" />
     <ClInclude Include="GameObject\IEComponent.h" />
@@ -42,20 +42,20 @@
     <ClInclude Include="Scene\IESceneManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="utf8proc\utf8proc.c" />
+    <ClCompile Include="..\ThirdParty\utf8proc\utf8proc.c" />
     <ClCompile Include="Core\IECore.cpp" />
-    <ClCompile Include="Core\DebugInfo.cpp" />
+    <ClCompile Include="Core\IEDebugInfo.cpp" />
     <ClCompile Include="Window\IEWindow.cpp" />
     <ClCompile Include="Window\IERenderer.cpp" />
     <ClCompile Include="Input\IEInput.cpp" />
     <ClCompile Include="Input\MouseCusor.cpp" />
     <ClCompile Include="UI\Interface.cpp" />
     <ClCompile Include="UI\Menu.cpp" />
-    <ClCompile Include="UI\TextBox.cpp" />
-    <ClCompile Include="Text\Font.cpp" />
+    <ClCompile Include="UI\IETextBox.cpp" />
+    <ClCompile Include="Text\IEFont.cpp" />
     <ClCompile Include="Text\IETextRenderer.cpp" />
-    <ClCompile Include="Util\StrUTF8.cpp" />
-    <ClCompile Include="Util\File.cpp" />
+    <ClCompile Include="Util\IEStrUTF8.cpp" />
+    <ClCompile Include="Util\IEFile.cpp" />
     <ClCompile Include="Sprite\IESpriteManager.cpp" />
     <ClCompile Include="Sprite\IEAtlasManager.cpp" />
     <ClCompile Include="GameObject\IEStaticObject.cpp" />
@@ -74,6 +74,9 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <OutDir>$(SolutionDir)Binary\</OutDir>
+    <IntDir>$(SolutionDir)Build\InspirationEngine_$(Configuration)\</IntDir>
+    <TargetName>InspirationEngine_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -81,6 +84,9 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <OutDir>$(SolutionDir)Binary\</OutDir>
+    <IntDir>$(SolutionDir)Build\InspirationEngine_$(Configuration)\</IntDir>
+    <TargetName>InspirationEngine_$(Configuration)</TargetName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -99,21 +105,21 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.;.\include;.\include\freetype2;.\include\harfbuzz;.\utf8proc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\ThirdParty\SDL\include;..\ThirdParty\freetype\include;..\ThirdParty\harfbuzz\include;..\ThirdParty\nlohmann\include;..\ThirdParty\utf8proc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819;26812</DisableSpecificWarnings>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PreprocessorDefinitions>UTF8PROC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>.\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\ThirdParty\SDL\lib\x64;..\ThirdParty\freetype\lib\x64;..\ThirdParty\harfbuzz\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Windows</SubSystem>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>.\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\ThirdParty\SDL\lib\x64;..\ThirdParty\freetype\lib\x64;..\ThirdParty\harfbuzz\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -123,7 +129,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.;.\include;.\include\freetype2;.\include\harfbuzz;.\utf8proc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\ThirdParty\SDL\include;..\ThirdParty\freetype\include;..\ThirdParty\harfbuzz\include;..\ThirdParty\nlohmann\include;..\ThirdParty\utf8proc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819;26812</DisableSpecificWarnings>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PreprocessorDefinitions>UTF8PROC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -132,13 +138,13 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>.\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\ThirdParty\SDL\lib\x64;..\ThirdParty\freetype\lib\x64;..\ThirdParty\harfbuzz\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>.\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\ThirdParty\SDL\lib\x64;..\ThirdParty\freetype\lib\x64;..\ThirdParty\harfbuzz\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

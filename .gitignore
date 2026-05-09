@@ -49,6 +49,8 @@ InspirationEngine/Release/*
 */enc_temp_folder/*
 CodeAnalysisResultManifest.txt
 *.enc
+*/build/*
+*/binary/*
 
 #resources
 *.png

@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 #include "Test.h"
 
 class TestStrUTF8 : public Test
 {
 public:
-	TestStrUTF8() { m_name = "StrUTF8"; }
+	TestStrUTF8() { m_name = "IEStrUTF8"; }
 	void run() override;
 
 private:

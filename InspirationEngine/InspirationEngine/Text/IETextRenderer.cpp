@@ -1,11 +1,11 @@
-#include "InspirationEngine.h"
+﻿#include "InspirationEngine.h"
 
 #ifndef IE_LEGACY_TTF
 // ──────────────────────────────────────────────
 //  IETextRenderer
 // ──────────────────────────────────────────────
 
-std::vector<ShapedGlyph> IETextRenderer::shape(
+std::vector<IEShapedGlyph> IETextRenderer::shape(
 	hb_font_t*     hbFont,
 	const char*    utf8Text,
 	int32_t        byteLen,
@@ -27,7 +27,7 @@ std::vector<ShapedGlyph> IETextRenderer::shape(
 	hb_glyph_info_t*     info      = hb_buffer_get_glyph_infos(buf, &count);
 	hb_glyph_position_t* positions = hb_buffer_get_glyph_positions(buf, &count);
 
-	std::vector<ShapedGlyph> result(count);
+	std::vector<IEShapedGlyph> result(count);
 	for (uint32_t i = 0; i < count; ++i)
 	{
 		result[i].glyphIndex = info[i].codepoint;
@@ -42,7 +42,7 @@ std::vector<ShapedGlyph> IETextRenderer::shape(
 	return result;
 }
 
-TextMeasure IETextRenderer::measure(FT_Face face, const std::vector<ShapedGlyph>& glyphs)
+IETextMeasure IETextRenderer::measure(FT_Face face, const std::vector<IEShapedGlyph>& glyphs)
 {
 	int32_t width = 0;
 	for (const auto& g : glyphs)
@@ -57,7 +57,7 @@ TextMeasure IETextRenderer::measure(FT_Face face, const std::vector<ShapedGlyph>
 SDL_Texture* IETextRenderer::renderToTexture(
 	SDL_Renderer*                    renderer,
 	FT_Face                          face,
-	const std::vector<ShapedGlyph>&  glyphs,
+	const std::vector<IEShapedGlyph>&  glyphs,
 	SDL_Color                        color,
 	int32_t                          w,
 	int32_t                          h,

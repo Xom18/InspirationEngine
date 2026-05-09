@@ -1,4 +1,4 @@
-#include "InspirationEngine.h"
+﻿#include "InspirationEngine.h"
 
 void IERenderer::drawRect(SDL_Color color, int32_t x, int32_t y, int32_t width, int32_t height, SDL_BlendMode blendMode, double angle, SDL_Point* pivot)
 {
@@ -105,10 +105,10 @@ bool IERenderer::saveScreenshot(const char* path)
 	return ok;
 }
 
-void IERenderer::drawText(Font* font, const char* text, SDL_Color color, int32_t x, int32_t y, double widthPercent, double heightPercent, double angle, SDL_Point* pivot, SDL_RendererFlip flip)
+void IERenderer::drawText(IEFont* font, const char* text, SDL_Color color, int32_t x, int32_t y, double widthPercent, double heightPercent, double angle, SDL_Point* pivot, SDL_RendererFlip flip)
 {
 	if (font == nullptr) return;
-	FontFace* pFace = font->get();
+	IEFontFace* pFace = font->get();
 	if (pFace == nullptr || pFace->m_ftFace == nullptr) return;
 
 	auto glyphs = IETextRenderer::shape(pFace->m_hbFont, text, static_cast<int32_t>(std::strlen(text)));

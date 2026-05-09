@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "../Core/MacroDefine.h"
 
@@ -23,12 +23,12 @@ public:
 	/// <summary>
 	/// 월드 좌표 → 스크린 픽셀 좌표
 	/// </summary>
-	virtual IVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const = 0;
+	virtual IEVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const = 0;
 
 	/// <summary>
 	/// 스크린 픽셀 좌표 → 월드 좌표 (z = 0 가정)
 	/// </summary>
-	virtual IVector2 ScreenToWorld(int32_t sx, int32_t sy) const = 0;
+	virtual IEVector2 ScreenToWorld(int32_t sx, int32_t sy) const = 0;
 
 	/// <summary>
 	/// 드로우 정렬 키 — 낮을수록 먼저(뒤에) 그려짐.

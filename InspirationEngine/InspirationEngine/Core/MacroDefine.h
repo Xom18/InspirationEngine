@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 //어디 한곳에 놓기 애매한 매크로
 
@@ -8,7 +8,7 @@
 /// <summary>
 /// 정수형 X, Y있는 변수
 /// </summary>
-class IVector2
+class IEVector2
 {
 public:
 	int32_t m_x;
@@ -19,7 +19,7 @@ private:
 
 public:
 
-	IVector2()
+	IEVector2()
 	{
 		reset();
 	}

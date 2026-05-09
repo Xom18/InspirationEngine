@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifndef IE_LEGACY_TTF
 // ──────────────────────────────────────────────
@@ -8,7 +8,7 @@
 #include <vector>
 #include <unordered_map>
 
-struct ShapedGlyph
+struct IEShapedGlyph
 {
 	uint32_t glyphIndex;
 	int32_t  xAdvance;   // 26.6 fixed-point
@@ -18,7 +18,7 @@ struct ShapedGlyph
 	uint32_t cluster;    // 소스 UTF-8 바이트 오프셋
 };
 
-struct TextMeasure
+struct IETextMeasure
 {
 	int32_t width;
 	int32_t height;
@@ -38,7 +38,7 @@ public:
 	/// <param name="byteLen">바이트 길이</param>
 	/// <param name="script">스크립트 (기본값: 자동 감지)</param>
 	/// <param name="direction">텍스트 방향</param>
-	static std::vector<ShapedGlyph> shape(
+	static std::vector<IEShapedGlyph> shape(
 		hb_font_t*      hbFont,
 		const char*     utf8Text,
 		int32_t         byteLen,
@@ -50,7 +50,7 @@ public:
 	/// </summary>
 	/// <param name="face">FreeType 폰트 페이스</param>
 	/// <param name="glyphs">쉐이핑된 글리프 목록</param>
-	static TextMeasure measure(FT_Face face, const std::vector<ShapedGlyph>& glyphs);
+	static IETextMeasure measure(FT_Face face, const std::vector<IEShapedGlyph>& glyphs);
 
 	/// <summary>
 	/// 쉐이핑된 글리프를 SDL_Texture로 렌더링 — 호출자가 SDL_DestroyTexture 해야 함
@@ -66,7 +66,7 @@ public:
 	static SDL_Texture* renderToTexture(
 		SDL_Renderer*                      renderer,
 		FT_Face                            face,
-		const std::vector<ShapedGlyph>&    glyphs,
+		const std::vector<IEShapedGlyph>&    glyphs,
 		SDL_Color                          color,
 		int32_t                            w,
 		int32_t                            h,

@@ -45,9 +45,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)Binary\</OutDir>
+    <IntDir>$(SolutionDir)Build\Example_$(Configuration)\</IntDir>
+    <TargetName>Example_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)Binary\</OutDir>
+    <IntDir>$(SolutionDir)Build\Example_$(Configuration)\</IntDir>
+    <TargetName>Example_$(Configuration)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Manifest>
@@ -58,7 +64,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>UTF8PROC_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\include;..\InspirationEngine\include;..\InspirationEngine\include\harfbuzz;..\InspirationEngine\utf8proc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\ThirdParty\SDL\include;..\ThirdParty\freetype\include;..\ThirdParty\harfbuzz\include;..\ThirdParty\nlohmann\include;..\ThirdParty\utf8proc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819;26812;</DisableSpecificWarnings>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -66,9 +72,12 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;freetype.lib;harfbuzz.lib;InspirationEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>.\lib\x64;..\InspirationEngine\lib\x64;..\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;freetype.lib;harfbuzz.lib;InspirationEngine_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\ThirdParty\SDL\lib\x64;..\ThirdParty\freetype\lib\x64;..\ThirdParty\harfbuzz\lib\x64;$(SolutionDir)Binary\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /I "..\ThirdParty\SDL\dll\x64\*.dll" "$(OutDir)" &amp;&amp; xcopy /Y /I "..\ThirdParty\harfbuzz\dll\x64\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Manifest>
@@ -81,7 +90,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>UTF8PROC_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\include;..\InspirationEngine\include;..\InspirationEngine\include\harfbuzz;..\InspirationEngine\utf8proc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\ThirdParty\SDL\include;..\ThirdParty\freetype\include;..\ThirdParty\harfbuzz\include;..\ThirdParty\nlohmann\include;..\ThirdParty\utf8proc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819;26812;</DisableSpecificWarnings>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -91,9 +100,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;freetype.lib;harfbuzz.lib;InspirationEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>.\lib\x64;..\InspirationEngine\lib\x64;..\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;freetype.lib;harfbuzz.lib;InspirationEngine_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\ThirdParty\SDL\lib\x64;..\ThirdParty\freetype\lib\x64;..\ThirdParty\harfbuzz\lib\x64;$(SolutionDir)Binary\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /I "..\ThirdParty\SDL\dll\x64\*.dll" "$(OutDir)" &amp;&amp; xcopy /Y /I "..\ThirdParty\harfbuzz\dll\x64\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DebugWindow.cpp" />

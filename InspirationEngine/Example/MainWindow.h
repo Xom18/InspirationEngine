@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 class MainWindow : public IEWindow
 {
@@ -8,5 +8,5 @@ public:
 	virtual void callXButton() override;
 
 private:
-	DebugInfo m_debug;
+	IEDebugInfo m_debug;
 };
