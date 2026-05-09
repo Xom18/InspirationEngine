@@ -45,6 +45,9 @@ private:
 	static bool m_textEdit;						// IME 사용중인지
 	static SDL_Rect m_textEditPosition;			// IME 사용중일때 IME의 위치
 
+	static std::string m_pendingIMEComposition;	// Windows IME 폴링 결과 (메인스레드 → 엔진스레드)
+	static bool m_imeCompositionDirty;			// 새 composition 대기중
+
 public:
 
 	IECore()
@@ -73,7 +76,12 @@ public:
 	static IETextBox*   GetFocusedTextBox() { return m_focusedTextBox; }
 	static void SetMouseOnWindow(IEWindow* window)  { m_mouseOnWindow = window; }
 	static void SetFocusedWindow(IEWindow* window)  { m_focusedWindow = window; }
-	static void SetFocusedTextBox(IETextBox* textBox) { m_focusedTextBox = textBox; }
+	static void SetFocusedTextBox(IETextBox* textBox)
+	{
+		m_focusedTextBox = textBox;
+		if (textBox != nullptr)
+			m_textEdit = true;
+	}
 
 	/// <summary>
 	/// 엔진 시작
@@ -214,6 +222,17 @@ public:
 	static std::optional<SDL_Rect> getTextEditPosition();
 
 	/// <summary>
+	/// Windows IME 폴링 결과를 엔진스레드로 전달 (메인스레드에서 호출)
+	/// </summary>
+	/// <param name="comp">현재 composition 문자열 (확정 전). 빈 문자열 = 종료</param>
+	static void SetIMEComposition(const std::string& comp)
+	{
+		std::lock_guard<std::mutex> lock(m_eventMutex);
+		m_pendingIMEComposition = comp;
+		m_imeCompositionDirty   = true;
+	}
+
+	/// <summary>
 	/// 텍스트 편집 커서 위치 갱신
 	/// </summary>
 	/// <param name="rect">커서 위치 Rect</param>
@@ -281,6 +300,13 @@ public:
 	{
 		return m_operatePhase;
 	}
+
+	/// <summary>
+	/// 플랫폼별 IME composition 폴링 (SDL3가 TEXT_EDITING 미지원 플랫폼용).
+	/// 메인 스레드에서 매 프레임 호출.
+	/// </summary>
+	/// <param name="focusWin">현재 키보드 포커스 창 (nullptr 가능)</param>
+	static void pollPlatformIME(SDL_Window* focusWin);
 
 	/// <summary>
 	/// 텍스트 편집 이벤트 처리 — 처리했으면 true 반환

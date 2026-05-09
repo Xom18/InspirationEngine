@@ -284,8 +284,8 @@ void IETextBox::transToTexture()
 			m_cursorScreenPos.y = m_rect.y + iYOffset;
 
 			SDL_Rect rect{
-				.x = m_rect.x + m_cursorScreenPos.x,
-				.y = m_rect.y + m_cursorScreenPos.y,
+				.x = m_cursorScreenPos.x,
+				.y = m_cursorScreenPos.y,
 				.w = 0,
 				.h = iTextHeight,
 			};
