@@ -8,7 +8,7 @@ void IEDebugInfo::DrawOverlay(IERenderer* renderer, IEScene* scene, IEFont* font
 	IECamera* camera = scene ? scene->GetCamera() : nullptr;
 
 	DrawGrid(renderer, camera);
-	if (scene)
+	if (scene != nullptr)
 		DrawObjectMarkers(renderer, scene, camera, font);
 	DrawCameraInfo(renderer, camera, font);
 }
@@ -23,9 +23,9 @@ void IEDebugInfo::DrawGrid(IERenderer* renderer, IECamera* camera)
 	if (camera == nullptr)
 	{
 		for (int32_t x = 0; x < vw; x += 64)
-			renderer->drawLine(gridColor, x, 0, x, vh);
+			renderer->DrawLine(gridColor, x, 0, x, vh);
 		for (int32_t y = 0; y < vh; y += 64)
-			renderer->drawLine(gridColor, 0, y, vw, y);
+			renderer->DrawLine(gridColor, 0, y, vw, y);
 		return;
 	}
 
@@ -43,13 +43,13 @@ void IEDebugInfo::DrawGrid(IERenderer* renderer, IECamera* camera)
 	{
 		auto p0 = camera->WorldToScreen(static_cast<float>(wx), static_cast<float>(startY));
 		auto p1 = camera->WorldToScreen(static_cast<float>(wx), static_cast<float>(endY));
-		renderer->drawLine(gridColor, p0.m_x, p0.m_y, p1.m_x, p1.m_y);
+		renderer->DrawLine(gridColor, p0.m_x, p0.m_y, p1.m_x, p1.m_y);
 	}
 	for (int32_t wy = startY; wy <= endY; wy += STEP)
 	{
 		auto p0 = camera->WorldToScreen(static_cast<float>(startX), static_cast<float>(wy));
 		auto p1 = camera->WorldToScreen(static_cast<float>(endX), static_cast<float>(wy));
-		renderer->drawLine(gridColor, p0.m_x, p0.m_y, p1.m_x, p1.m_y);
+		renderer->DrawLine(gridColor, p0.m_x, p0.m_y, p1.m_x, p1.m_y);
 	}
 }
 
@@ -81,14 +81,14 @@ void IEDebugInfo::DrawObjectMarkers(IERenderer* renderer, IEScene* scene, IECame
 			sy = static_cast<int32_t>(t->GetY());
 		}
 
-		renderer->drawLine(markerColor, sx - CROSS, sy, sx + CROSS, sy);
-		renderer->drawLine(markerColor, sx, sy - CROSS, sx, sy + CROSS);
+		renderer->DrawLine(markerColor, sx - CROSS, sy, sx + CROSS, sy);
+		renderer->DrawLine(markerColor, sx, sy - CROSS, sx, sy + CROSS);
 
 		if (font != nullptr)
 		{
 			char buf[64];
 			snprintf(buf, sizeof(buf), "(%.0f,%.0f,%.0f)", t->GetX(), t->GetY(), t->GetZ());
-			renderer->drawText(font, buf, textColor, sx + CROSS + 2, sy - 8);
+			renderer->DrawText(font, buf, textColor, sx + CROSS + 2, sy - 8);
 		}
 	}
 }
@@ -113,5 +113,5 @@ void IEDebugInfo::DrawCameraInfo(IERenderer* renderer, IECamera* camera, IEFont*
 		snprintf(buf, sizeof(buf), "CAM: none");
 	}
 
-	renderer->drawText(font, buf, textColor, 4, 4);
+	renderer->DrawText(font, buf, textColor, 4, 4);
 }

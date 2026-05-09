@@ -1,12 +1,12 @@
-﻿#pragma once
+#pragma once
 
 class DebugWindow : public IEWindow
 {
 public:
-	virtual void draw() override;
-	virtual void callXButton() override;
+	virtual void Draw() override;
+	virtual void CallXButton() override;
 
-	void initWindow();
+	void InitWindow();
 
 private:
 	IETextBox m_DebugText;

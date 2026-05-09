@@ -21,7 +21,7 @@ void IEEntity::Draw(IERenderer* renderer, int32_t screenX, int32_t screenY, floa
 	if (t == nullptr)
 		return;
 
-	m_sprite->draw(
+	m_sprite->Draw(
 		renderer,
 		screenX,
 		screenY,
