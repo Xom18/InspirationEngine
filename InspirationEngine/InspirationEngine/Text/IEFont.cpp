@@ -1,18 +1,18 @@
-﻿#include "InspirationEngine.h"
+#include "InspirationEngine.h"
 
 // ──────────────────────────────────────────────
 //  FreeType + HarfBuzz
 // ──────────────────────────────────────────────
 
-bool IEFontManager::addNewFont(int32_t fontID, const char* fontDir, int32_t fontSize, bool makeOnlyDefault)
+bool IEFontManager::AddNewFont(int32_t fontID, const char* fontDir, int32_t fontSize, bool makeOnlyDefault)
 {
-	int32_t iMakeFontCount = makeOnlyDefault ? 1 : 0x10;
+	int32_t makeFontCount = makeOnlyDefault ? 1 : 0x10;
 
-	IEFont* pFont = getFont(fontID);
+	IEFont* pFont = GetFont(fontID);
 	if (pFont == nullptr)
 		pFont = new IEFont();
 
-	for (int32_t i = 0; i < iMakeFontCount; ++i)
+	for (int32_t i = 0; i < makeFontCount; ++i)
 	{
 		FT_Face face = nullptr;
 		if (FT_New_Face(m_ftLib, fontDir, 0, &face) != 0)
@@ -42,9 +42,9 @@ bool IEFontManager::addNewFont(int32_t fontID, const char* fontDir, int32_t font
 			static_cast<int32_t>(face->size->metrics.x_ppem) * 64,
 			static_cast<int32_t>(face->size->metrics.y_ppem) * 64);
 
-		pFont->setFace(i, pFace);
+		pFont->SetFace(i, pFace);
 	}
-	setFont(fontID, pFont);
+	SetFont(fontID, pFont);
 
 	return true;
 }

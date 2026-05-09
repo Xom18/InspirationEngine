@@ -6,7 +6,7 @@
 void GameScene::OnEnter()
 {
 	SDL_Renderer* sdl =
-		IECore::getMainWindow()->getRenderer(1)->getSDLRenderer();
+		IECore::GetMainWindow()->GetRenderer(1)->GetSDLRenderer();
 
 	IECore::GetAtlas().Load("floors", "Data/floors.json", sdl);
 

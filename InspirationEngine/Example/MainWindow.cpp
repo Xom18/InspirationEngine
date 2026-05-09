@@ -2,7 +2,7 @@
 #include "../InspirationEngine/InspirationEngine.h"
 #include "MainWindow.h"
 
-void MainWindow::update(float deltaTime)
+void MainWindow::Update(float deltaTime)
 {
 	const bool* keys = SDL_GetKeyboardState(nullptr);
 
@@ -16,16 +16,16 @@ void MainWindow::update(float deltaTime)
 	bool f2Now = keys[SDL_SCANCODE_F2] != 0;
 	if (f2Now && !f2Prev)
 	{
-		IERenderer* pRenderer = getRenderer(1);
-		if (pRenderer)
-			pRenderer->saveScreenshot("debug_shot.png");
+		IERenderer* pRenderer = GetRenderer(1);
+		if (pRenderer != nullptr)
+			pRenderer->SaveScreenshot("debug_shot.png");
 	}
 	f2Prev = f2Now;
 }
 
-void MainWindow::draw()
+void MainWindow::Draw()
 {
-	IERenderer* pRenderer = getRenderer(1);
+	IERenderer* pRenderer = GetRenderer(1);
 	if (pRenderer == nullptr)
 		return;
 
@@ -34,10 +34,10 @@ void MainWindow::draw()
 		pScene->Draw(pRenderer);
 
 	if (m_debug.IsVisible())
-		m_debug.DrawOverlay(pRenderer, pScene, IECore::GetFont().getFont(0));
+		m_debug.DrawOverlay(pRenderer, pScene, IECore::GetFont().GetFont(0));
 }
 
-void MainWindow::callXButton()
+void MainWindow::CallXButton()
 {
-	IECore::stopEngine();
+	IECore::StopEngine();
 }

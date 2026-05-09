@@ -1,25 +1,10 @@
-﻿#pragma once
+#pragma once
 
 /// <summary>
 /// 모든 입력관련 이벤트 처리하는곳
 /// </summary>
 class IEInput
 {
-public:
-
-private:
-	/// <summary>
-	/// 안눌려있으면 false
-	/// 눌려있으면 true
-	/// </summary>
-	bool m_keyInput[SDL_SCANCODE_COUNT] = { false, };
-	bool m_isTextEditting = false;	//텍스트 입력중
-	std::mutex m_operateEventMutex;
-
-	Uint32 m_mouseStatus = 0;
-	IEVector2 m_mousePos;
-	IEVector2 m_mouseDelta;
-
 public:
 	IEInput() {}
 	~IEInput() {}
@@ -28,8 +13,8 @@ public:
 	/// 키 입력 상태 설정
 	/// </summary>
 	/// <param name="scanCode">대상 키 스캔코드</param>
-	/// <param name="state">눌림: 1, 뗌: 0</param>
-	void setKeyState(SDL_Scancode scanCode, bool down)
+	/// <param name="down">눌림: true, 뗌: false</param>
+	void SetKeyState(SDL_Scancode scanCode, bool down)
 	{
 		m_keyInput[scanCode] = down;
 	}
@@ -38,7 +23,7 @@ public:
 	/// 키 입력 상태 반환 — 눌려있으면 true
 	/// </summary>
 	/// <param name="scanCode">확인할 키 스캔코드</param>
-	bool getKeyState(SDL_Scancode scanCode)
+	bool GetKeyState(SDL_Scancode scanCode)
 	{
 		return m_keyInput[scanCode];
 	}
@@ -48,7 +33,7 @@ public:
 	/// </summary>
 	/// <param name="x">마우스 X 좌표</param>
 	/// <param name="y">마우스 Y 좌표</param>
-	void updateMousePos(int32_t x, int32_t y)
+	void UpdateMousePos(int32_t x, int32_t y)
 	{
 		m_mouseDelta.m_x = x - m_mousePos.m_x;
 		m_mouseDelta.m_y = y - m_mousePos.m_y;
@@ -59,7 +44,7 @@ public:
 	/// <summary>
 	/// 마우스 현재 위치 반환
 	/// </summary>
-	IEVector2 getMousePos()
+	IEVector2 GetMousePos()
 	{
 		return m_mousePos;
 	}
@@ -67,11 +52,16 @@ public:
 	/// <summary>
 	/// 마우스 이동량 반환 (직전 프레임 대비 델타)
 	/// </summary>
-	IEVector2 getMouseDelta()
+	IEVector2 GetMouseDelta()
 	{
 		return m_mouseDelta;
 	}
 
 private:
-
+	bool      m_keyInput[SDL_SCANCODE_COUNT] = { false, };
+	bool      m_isTextEditting               = false;
+	std::mutex m_operateEventMutex;
+	Uint32    m_mouseStatus                  = 0;
+	IEVector2 m_mousePos;
+	IEVector2 m_mouseDelta;
 };

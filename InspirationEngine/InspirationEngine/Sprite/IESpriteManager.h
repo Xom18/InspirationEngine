@@ -7,17 +7,12 @@ class IERenderer;
 /// </summary>
 class IESprite
 {
-	SDL_Texture* m_texture = nullptr;	// non-owning (IESpriteManager 소유)
-	SDL_FRect m_srcRect = { 0.0f, 0.0f, 0.0f, 0.0f };
-	bool m_hasClip = false;
-
 public:
-
 	/// <summary>
 	/// 텍스쳐 설정 — 전체 크기로 srcRect 초기화
 	/// </summary>
 	/// <param name="texture">연결할 텍스쳐 (소유권 이전 없음)</param>
-	void setTexture(SDL_Texture* texture);
+	void SetTexture(SDL_Texture* texture);
 
 	/// <summary>
 	/// 스프라이트 시트 클리핑 영역 설정
@@ -26,7 +21,7 @@ public:
 	/// <param name="y">클리핑 Y</param>
 	/// <param name="w">클리핑 너비</param>
 	/// <param name="h">클리핑 높이</param>
-	void setClip(int32_t x, int32_t y, int32_t w, int32_t h)
+	void SetClip(int32_t x, int32_t y, int32_t w, int32_t h)
 	{
 		m_srcRect = { static_cast<float>(x), static_cast<float>(y), static_cast<float>(w), static_cast<float>(h) };
 		m_hasClip = true;
@@ -35,7 +30,7 @@ public:
 	/// <summary>
 	/// 클리핑 해제 — 전체 텍스쳐 사용
 	/// </summary>
-	void clearClip()
+	void ClearClip()
 	{
 		m_hasClip = false;
 	}
@@ -43,7 +38,7 @@ public:
 	/// <summary>
 	/// 텍스쳐 반환
 	/// </summary>
-	SDL_Texture* getTexture() const
+	SDL_Texture* GetTexture() const
 	{
 		return m_texture;
 	}
@@ -51,7 +46,7 @@ public:
 	/// <summary>
 	/// 클리핑 Rect 반환 — clip 없으면 nullptr
 	/// </summary>
-	const SDL_FRect* getSrcRect() const
+	const SDL_FRect* GetSrcRect() const
 	{
 		return m_hasClip ? &m_srcRect : nullptr;
 	}
@@ -67,10 +62,15 @@ public:
 	/// <param name="angle">회전 각도 (도)</param>
 	/// <param name="pivot">회전 기준점 (nullptr이면 중앙)</param>
 	/// <param name="flip">반전 플래그</param>
-	void draw(IERenderer* renderer, int32_t x, int32_t y,
+	void Draw(IERenderer* renderer, int32_t x, int32_t y,
 		double scaleX = 1.0, double scaleY = 1.0,
 		double angle = 0, SDL_FPoint* pivot = nullptr,
 		SDL_FlipMode flip = SDL_FLIP_NONE);
+
+private:
+	SDL_Texture* m_texture = nullptr;
+	SDL_FRect    m_srcRect = { 0.0f, 0.0f, 0.0f, 0.0f };
+	bool         m_hasClip = false;
 };
 
 /// <summary>
@@ -78,9 +78,6 @@ public:
 /// </summary>
 class IESpriteManager
 {
-	std::map<int32_t, SDL_Texture*> m_textures;				// 텍스쳐 소유
-	std::map<int32_t, std::unique_ptr<IESprite>> m_sprites;	// IESprite 소유
-
 public:
 	IESpriteManager();
 	~IESpriteManager();
@@ -91,13 +88,13 @@ public:
 	/// <param name="id">스프라이트 ID</param>
 	/// <param name="path">이미지 파일 경로</param>
 	/// <param name="renderer">텍스쳐 생성에 사용할 렌더러</param>
-	bool addNewSprite(int32_t id, const char* path, IERenderer* renderer);
+	bool AddNewSprite(int32_t id, const char* path, IERenderer* renderer);
 
 	/// <summary>
 	/// ID로 IESprite 반환 — 없으면 nullptr
 	/// </summary>
 	/// <param name="id">스프라이트 ID</param>
-	IESprite* getSprite(int32_t id)
+	IESprite* GetSprite(int32_t id)
 	{
 		auto ite = m_sprites.find(id);
 		if (ite == m_sprites.end())
@@ -109,10 +106,14 @@ public:
 	/// 해당 ID의 텍스쳐 및 스프라이트 해제
 	/// </summary>
 	/// <param name="id">해제할 스프라이트 ID</param>
-	void unload(int32_t id);
+	void Unload(int32_t id);
 
 	/// <summary>
 	/// 모든 텍스쳐 및 스프라이트 해제
 	/// </summary>
-	void unloadAll();
+	void UnloadAll();
+
+private:
+	std::map<int32_t, SDL_Texture*>            m_textures;
+	std::map<int32_t, std::unique_ptr<IESprite>> m_sprites;
 };

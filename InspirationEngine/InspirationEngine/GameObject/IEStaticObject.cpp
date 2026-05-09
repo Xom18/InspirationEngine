@@ -19,7 +19,7 @@ void IEStaticObject::Draw(IERenderer* renderer, int32_t screenX, int32_t screenY
 		int32_t dy = screenY - std::lround(def->pivotY * zoom);
 
 		SDL_FRect topR = { static_cast<float>(def->top.x), static_cast<float>(def->top.y), static_cast<float>(def->top.w), static_cast<float>(def->top.h) };
-		renderer->drawTexture(tex, dx, dy, 100.0 * zoom, 100.0 * zoom, 0, nullptr, SDL_FLIP_NONE, &topR);
+		renderer->DrawTexture(tex, dx, dy, 100.0 * zoom, 100.0 * zoom, 0, nullptr, SDL_FLIP_NONE, &topR);
 
 		if (def->hasSide)
 		{
@@ -28,7 +28,7 @@ void IEStaticObject::Draw(IERenderer* renderer, int32_t screenX, int32_t screenY
 			int32_t sdx = screenX - sdw / 2;
 			int32_t sdy = dy + dh;
 			SDL_FRect sideR = { static_cast<float>(def->side.x), static_cast<float>(def->side.y), static_cast<float>(def->side.w), static_cast<float>(def->side.h) };
-			renderer->drawTexture(tex, sdx, sdy, 100.0 * zoom, 100.0 * zoom, 0, nullptr, SDL_FLIP_NONE, &sideR);
+			renderer->DrawTexture(tex, sdx, sdy, 100.0 * zoom, 100.0 * zoom, 0, nullptr, SDL_FLIP_NONE, &sideR);
 		}
 		return;
 	}
@@ -40,7 +40,7 @@ void IEStaticObject::Draw(IERenderer* renderer, int32_t screenX, int32_t screenY
 	if (t == nullptr)
 		return;
 
-	m_sprite->draw(
+	m_sprite->Draw(
 		renderer,
 		screenX,
 		screenY,

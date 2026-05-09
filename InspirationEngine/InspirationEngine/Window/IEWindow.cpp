@@ -6,19 +6,19 @@
 
 IEWindow::IEWindow()
 {
-	reset();
+	Reset();
 };
 IEWindow::~IEWindow()
 {
-	reset();
+	Reset();
 }
 
-void IEWindow::close()
+void IEWindow::Close()
 {
-	reset();
+	Reset();
 }
 
-void IEWindow::resizeRenderer()
+void IEWindow::ResizeRenderer()
 {
 	int32_t w = 0, h = 0;
 	SDL_GetWindowSize(m_sdlWindow, &w, &h);
@@ -55,7 +55,7 @@ void IEWindow::resizeRenderer()
 	}
 }
 
-void IEWindow::reset()
+void IEWindow::Reset()
 {
 	if (m_drawThread != nullptr)
 	{
@@ -77,7 +77,7 @@ void IEWindow::reset()
 	m_rendererCount = 0;
 }
 
-bool IEWindow::createWindow(const char* title, int32_t width, int32_t height, int32_t x, int32_t y, SDL_WindowFlags windowFlag, int32_t rendererCount)
+bool IEWindow::CreateWindow(const char* title, int32_t width, int32_t height, int32_t x, int32_t y, SDL_WindowFlags windowFlag, int32_t rendererCount)
 {
 	//이미 창이 있다
 	if (m_sdlWindow != nullptr)
@@ -85,7 +85,7 @@ bool IEWindow::createWindow(const char* title, int32_t width, int32_t height, in
 
 	//창 생성, 랜더러 생성
 	m_sdlWindow = SDL_CreateWindow(title, width, height, static_cast<SDL_WindowFlags>(windowFlag));
-	if (m_sdlWindow && (x != SDL_WINDOWPOS_CENTERED || y != SDL_WINDOWPOS_CENTERED))
+	if (m_sdlWindow != nullptr && (x != SDL_WINDOWPOS_CENTERED || y != SDL_WINDOWPOS_CENTERED))
 		SDL_SetWindowPosition(m_sdlWindow, x, y);
 
 	if (m_sdlWindow == nullptr)
@@ -95,12 +95,12 @@ bool IEWindow::createWindow(const char* title, int32_t width, int32_t height, in
 	m_height = height;
 	m_rendererCount = rendererCount;
 	m_renderers.resize(m_rendererCount);
-	resizeRenderer();
+	ResizeRenderer();
 
 	return true;
 }
 
-void IEWindow::render()
+void IEWindow::Render()
 {
 	if (m_renderers.empty() || m_renderers[0].m_renderer == nullptr)
 		return;
@@ -111,7 +111,7 @@ void IEWindow::render()
 	SDL_RenderClear(m_renderers[0].m_renderer);
 }
 
-bool IEWindow::closed()
+bool IEWindow::Closed()
 {
 	if (m_sdlWindow == nullptr)
 		return true;
@@ -119,42 +119,42 @@ bool IEWindow::closed()
 		return false;
 }
 
-void IEWindow::drawThread()
+void IEWindow::DrawThread()
 {
-	std::condition_variable* lpWaiter = IECore::getDrawWaiter();
+	std::condition_variable* waiter = IECore::GetDrawWaiter();
 	while (true)
 	{
 		std::mutex mtxWaiter;
 		std::unique_lock<std::mutex> lkWaiter(mtxWaiter);
 
 		//그릴 때 까지 대기
-		lpWaiter->wait(lkWaiter, [&] {
-			return m_isDrawed == false || !IECore::isRunning();
+		waiter->wait(lkWaiter, [&] {
+			return m_isDrawed == false || !IECore::IsRunning();
 			});
 
 		//엔진이 멈췄다
-		if (!IECore::isRunning())
+		if (!IECore::IsRunning())
 			return;
 
 		//창이 숨겨져있다
-		if (isWindowHide())
+		if (IsWindowHide())
 		{
-			IECore::increaseDrawCompleteCount();
+			IECore::IncreaseDrawCompleteCount();
 			m_isDrawed = true;
 			continue;
 		}
 
-		draw();
-		render();
+		Draw();
+		Render();
 		m_isDrawed = true;
-		IECore::increaseDrawCompleteCount();
+		IECore::IncreaseDrawCompleteCount();
 	}
 }
 
-void IEWindow::beginDrawThread()
+void IEWindow::BeginDrawThread()
 {
 	if (m_drawThread != nullptr)
 		return;
 
-	m_drawThread = std::make_unique<std::thread>([&]() { drawThread(); });
+	m_drawThread = std::make_unique<std::thread>([&]() { DrawThread(); });
 }
