@@ -3,6 +3,7 @@
 void IERenderer::drawRect(SDL_Color color, int32_t x, int32_t y, int32_t width, int32_t height, SDL_BlendMode blendMode, double angle, SDL_FPoint* pivot)
 {
 	SDL_Texture* pTexture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, 1, 1);
+	SDL_SetTextureScaleMode(pTexture, SDL_SCALEMODE_NEAREST);
 	SDL_SetTextureBlendMode(pTexture, blendMode);
 
 	Uint32 uiColor = 0;
@@ -38,6 +39,7 @@ void IERenderer::drawRect(SDL_Color color, int32_t x, int32_t y, int32_t width, 
 void IERenderer::drawBuffer(int32_t* buffer, int32_t bufferWidth, int32_t bufferHeight, int32_t x, int32_t y, SDL_BlendMode blendMode, double widthPercent, double heightPercent, double angle, SDL_FPoint* pivot, SDL_FlipMode flip)
 {
 	SDL_Texture* pTexture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, bufferWidth, bufferHeight);
+	SDL_SetTextureScaleMode(pTexture, SDL_SCALEMODE_PIXELART);
 	SDL_SetTextureBlendMode(pTexture, blendMode);
 	SDL_UpdateTexture(pTexture, NULL, buffer, bufferWidth * sizeof(Uint32));
 	drawTexture(pTexture, x, y, widthPercent, heightPercent, angle, pivot, flip);
@@ -85,6 +87,7 @@ void IERenderer::drawTexture(SDL_Texture* texture, int32_t x, int32_t y, double 
 void IERenderer::drawSurface(SDL_Surface* surface, int32_t x, int32_t y, double widthPercent, double heightPercent, double angle, SDL_FPoint* pivot, SDL_FlipMode flip)
 {
 	SDL_Texture* pTexture = SDL_CreateTextureFromSurface(m_renderer, surface);
+	SDL_SetTextureScaleMode(pTexture, SDL_SCALEMODE_PIXELART);
 	drawTexture(pTexture, x, y, widthPercent, heightPercent, angle, pivot, flip);
 	SDL_DestroyTexture(pTexture);
 }
