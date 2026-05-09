@@ -8,7 +8,7 @@ class IERenderer;
 class IESprite
 {
 	SDL_Texture* m_texture = nullptr;	// non-owning (IESpriteManager 소유)
-	SDL_Rect m_srcRect = { 0, 0, 0, 0 };
+	SDL_FRect m_srcRect = { 0.0f, 0.0f, 0.0f, 0.0f };
 	bool m_hasClip = false;
 
 public:
@@ -28,7 +28,7 @@ public:
 	/// <param name="h">클리핑 높이</param>
 	void setClip(int32_t x, int32_t y, int32_t w, int32_t h)
 	{
-		m_srcRect = { x, y, w, h };
+		m_srcRect = { static_cast<float>(x), static_cast<float>(y), static_cast<float>(w), static_cast<float>(h) };
 		m_hasClip = true;
 	}
 
@@ -51,7 +51,7 @@ public:
 	/// <summary>
 	/// 클리핑 Rect 반환 — clip 없으면 nullptr
 	/// </summary>
-	const SDL_Rect* getSrcRect() const
+	const SDL_FRect* getSrcRect() const
 	{
 		return m_hasClip ? &m_srcRect : nullptr;
 	}
@@ -69,8 +69,8 @@ public:
 	/// <param name="flip">반전 플래그</param>
 	void draw(IERenderer* renderer, int32_t x, int32_t y,
 		double scaleX = 1.0, double scaleY = 1.0,
-		double angle = 0, SDL_Point* pivot = nullptr,
-		SDL_RendererFlip flip = SDL_FLIP_NONE);
+		double angle = 0, SDL_FPoint* pivot = nullptr,
+		SDL_FlipMode flip = SDL_FLIP_NONE);
 };
 
 /// <summary>

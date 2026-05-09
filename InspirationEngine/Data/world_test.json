@@ -1,5 +1,5 @@
 {
-  "camera": { "tileWidth": 32, "tileHeight": 16, "zoom": 16.0, "x": 0.0, "y": 0.0 },
+  "camera": { "tileWidth": 32, "tileHeight": 16, "zoom": 1.0, "x": 0.0, "y": 0.0 },
   "objects": [
     { "x": 0, "y": 0, "z":3, "tile": { "atlas": "floors", "tile": "grass" } },
     { "x": 1, "y": 0, "tile": { "atlas": "floors", "tile": "grass" } },

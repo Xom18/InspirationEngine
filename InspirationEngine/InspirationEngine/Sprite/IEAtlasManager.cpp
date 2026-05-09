@@ -28,9 +28,11 @@ bool IEAtlasManager::Load(const std::string& name, const std::string& jsonPath, 
 
 	auto atlas = std::make_unique<IEAtlas>();
 	atlas->m_texture = SDL_CreateTextureFromSurface(renderer, surf);
-	SDL_FreeSurface(surf);
+	SDL_DestroySurface(surf);
 	if (atlas->m_texture == nullptr)
 		return false;
+
+	SDL_SetTextureBlendMode(atlas->m_texture, SDL_BLENDMODE_BLEND);
 
 	if (j.contains("tileStep") && j["tileStep"].is_object())
 	{
