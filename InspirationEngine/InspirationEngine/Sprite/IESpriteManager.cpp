@@ -21,6 +21,8 @@ bool IESpriteManager::addNewSprite(int32_t id, const char* path, IERenderer* ren
 	if (pTexture == nullptr)
 		return false;
 
+	SDL_SetTextureScaleMode(pTexture, SDL_SCALEMODE_PIXELART);
+
 	// 기존 ID 덮어쓰기
 	auto iteT = m_textures.find(id);
 	if (iteT != m_textures.end())

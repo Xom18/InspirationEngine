@@ -1,4 +1,4 @@
-﻿#include "InspirationEngine.h"
+#include "InspirationEngine.h"
 
 #ifndef IE_LEGACY_TTF
 // ──────────────────────────────────────────────
@@ -124,6 +124,7 @@ SDL_Texture* IETextRenderer::renderToTexture(
 		return nullptr;
 
 	SDL_UpdateTexture(tex, nullptr, pixels.data(), w * 4);
+	SDL_SetTextureScaleMode(tex, SDL_SCALEMODE_PIXELART);
 	SDL_SetTextureBlendMode(tex, SDL_BLENDMODE_BLEND);
 	return tex;
 }
