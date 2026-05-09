@@ -30,12 +30,12 @@ void MainWindow::draw()
 	if (pRenderer == nullptr)
 		return;
 
-	IEScene* pScene = IECore::m_Scene.GetCurrentScene();
+	IEScene* pScene = IECore::GetScene().GetCurrentScene();
 	if (pScene != nullptr)
 		pScene->Draw(pRenderer);
 
 	if (m_debug.IsVisible())
-		m_debug.DrawOverlay(pRenderer, pScene, IECore::m_Font.getFont(0));
+		m_debug.DrawOverlay(pRenderer, pScene, IECore::GetFont().getFont(0));
 }
 
 void MainWindow::callXButton()

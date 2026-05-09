@@ -96,14 +96,14 @@ int main(int argc, char* argv[])
 	IECore::setTickRate(iTickRate);
 
 	//폰트 추가
-	IECore::m_Font.addNewFont(0, "../data/H2PORL.ttf", 20);
+	IECore::GetFont().addNewFont(0, "../data/H2PORL.ttf", 20);
 
 	//디버그 창 설정
 	DebugWindow* lpDebugWindow = dynamic_cast<DebugWindow*>(IECore::getWindow("Debug"));
 	lpDebugWindow->initWindow();
 
 	//테스트 씬 푸시
-	IECore::m_Scene.Push(new GameScene());
+	IECore::GetScene().Push(new GameScene());
 
 	//엔진 시작
 	IECore::beginEngine();

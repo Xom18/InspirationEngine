@@ -12,20 +12,19 @@ enum class EnginePhase : int32_t
 //얘는 스태틱이다
 class IECore
 {
-public:
-	static IEInput			m_Input;			//입력, 클릭이나 창 내부 처리도 여기서 받은다음 각 창으로 보냄
-	static DebugInfo		m_DebugInfo;		//디버그 툴
-	static IEFontManager	m_Font;				//폰트 관리하는곳
-	static IESpriteManager	m_Sprite;			//스프라이트 관리하는곳
-	static IEAtlasManager	m_Atlas;			//타일 아틀라스 관리하는곳
-	static IESceneManager	m_Scene;			//씬 관리하는곳
-	static float			m_deltaTime;		//직전 프레임 경과 시간 (초)
-	static uint64_t			m_deltaTimeMs;		//직전 프레임 경과 시간 (ms)
-	static IEWindow* m_mainWindow;			//메인 윈도우
-	static IEWindow* m_mouseOnWindow;		//마우스가 올라가 있는 윈도우
-	static IEWindow* m_focusedWindow;		//선택 되있는 윈도우
-	static TextBox* m_focusedTextBox;		//선택 되 있는 텍스트 박스
 private:
+	static IEInput          m_Input;
+	static DebugInfo        m_DebugInfo;
+	static IEFontManager    m_Font;
+	static IESpriteManager  m_Sprite;
+	static IEAtlasManager   m_Atlas;
+	static IESceneManager   m_Scene;
+	static float            m_deltaTime;
+	static uint64_t         m_deltaTimeMs;
+	static IEWindow*        m_mainWindow;
+	static IEWindow*        m_mouseOnWindow;
+	static IEWindow*        m_focusedWindow;
+	static TextBox*         m_focusedTextBox;
 
 	static EnginePhase		m_operatePhase;		//현재 어느걸 처리중인지
 	static std::mutex m_eventMutex;			//이벤트 뮤텍스
@@ -61,6 +60,20 @@ public:
 		if (m_mainThread)
 			m_mainThread->join();
 	}
+
+	static IEInput&          GetInput()     { return m_Input; }
+	static DebugInfo&        GetDebugInfo() { return m_DebugInfo; }
+	static IEFontManager&    GetFont()      { return m_Font; }
+	static IESpriteManager&  GetSprite()    { return m_Sprite; }
+	static IEAtlasManager&   GetAtlas()     { return m_Atlas; }
+	static IESceneManager&   GetScene()     { return m_Scene; }
+
+	static IEWindow*  GetMouseOnWindow()  { return m_mouseOnWindow; }
+	static IEWindow*  GetFocusedWindow()  { return m_focusedWindow; }
+	static TextBox*   GetFocusedTextBox() { return m_focusedTextBox; }
+	static void SetMouseOnWindow(IEWindow* window)  { m_mouseOnWindow = window; }
+	static void SetFocusedWindow(IEWindow* window)  { m_focusedWindow = window; }
+	static void SetFocusedTextBox(TextBox* textBox) { m_focusedTextBox = textBox; }
 
 	/// <summary>
 	/// 엔진 시작

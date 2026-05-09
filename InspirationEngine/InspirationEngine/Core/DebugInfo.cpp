@@ -17,8 +17,8 @@ void DebugInfo::DrawGrid(IERenderer* renderer, IECamera* camera)
 {
 	SDL_Color gridColor = { 80, 80, 80, 128 };
 
-	int32_t vw = renderer->m_w;
-	int32_t vh = renderer->m_h;
+	int32_t vw = renderer->GetW();
+	int32_t vh = renderer->GetH();
 
 	if (camera == nullptr)
 	{

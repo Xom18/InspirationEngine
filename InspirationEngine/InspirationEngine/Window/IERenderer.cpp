@@ -109,16 +109,16 @@ void IERenderer::drawText(Font* font, const char* text, SDL_Color color, int32_t
 {
 	if (font == nullptr) return;
 	FontFace* pFace = font->get();
-	if (pFace == nullptr || pFace->ftFace == nullptr) return;
+	if (pFace == nullptr || pFace->m_ftFace == nullptr) return;
 
-	auto glyphs = IETextRenderer::shape(pFace->hbFont, text, static_cast<int32_t>(std::strlen(text)));
-	auto ms     = IETextRenderer::measure(pFace->ftFace, glyphs);
+	auto glyphs = IETextRenderer::shape(pFace->m_hbFont, text, static_cast<int32_t>(std::strlen(text)));
+	auto ms     = IETextRenderer::measure(pFace->m_ftFace, glyphs);
 
 	if (ms.width <= 0 || ms.height <= 0) return;
 
 	SDL_Texture* pTex = IETextRenderer::renderToTexture(
-		m_renderer, pFace->ftFace, glyphs, color,
-		ms.width, ms.height, ms.ascent, pFace->bBold);
+		m_renderer, pFace->m_ftFace, glyphs, color,
+		ms.width, ms.height, ms.ascent, pFace->m_bold);
 
 	if (pTex)
 	{

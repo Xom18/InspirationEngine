@@ -257,7 +257,37 @@ constexpr int32_t g_screenHeight = 720;
 class와 그 내부 함수에는 반드시 주석으로 <summary>와 <param>에 대한 코멘트를 남겨준다
 
 ### 클래스 멤버 변수
-멤버 변수는 private을 원칙으로 한다. 파생 클래스에서 직접 접근이 필요한 경우에만 protected 허용. public 멤버 변수 금지.
+멤버 변수는 private을 원칙으로 한다. 파생 클래스에서 직접 접근이 필요한 경우에도 getter/setter를 사용한다. public·protected 멤버 변수 금지.
+
+### 클래스 내부 선언 순서
+클래스 내부의 선언 순서는 아래를 따른다. `private:` 섹션은 클래스 기본 접근이 private이더라도 반드시 명시한다.
+
+```cpp
+class ClassName
+{
+    friend class OtherClass;  // friend 관계 (가급적 사용 금지)
+
+public:
+    ClassName();              // 생성자 / 소멸자
+    ~ClassName();
+
+    void PublicFunction();    // public 함수
+
+protected:
+    void ProtectedFunction(); // protected 함수
+
+private:
+    void PrivateFunction();   // private 함수
+
+private:
+    int32_t m_member = 0;    // private 멤버 변수 (항상 맨 아래)
+};
+```
+
+- `friend` 선언은 클래스 최상단에 위치시키되, 가급적 사용하지 않는다.
+- 생성자·소멸자는 public 함수 블록 최상단에 배치한다.
+- 멤버 변수는 항상 `private:` 아래 맨 마지막 섹션에 모아서 배치한다.
+- 비어있는 접근 지정자 섹션은 작성하지 않는다.
 
 ---
 

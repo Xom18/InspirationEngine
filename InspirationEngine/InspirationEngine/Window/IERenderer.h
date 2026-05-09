@@ -3,23 +3,11 @@
 class IEWindow;
 class IERenderer
 {
-public:
-	IEWindow* m_window;			//얘가 종속되있는 윈도우
-	SDL_Renderer* m_renderer;	//랜더러
-	int32_t m_w;				//창에서 랜더러 너비
-	int32_t m_h;				//창에서 랜더러 높이
-
-private:
+	friend class IEWindow;
 
 public:
 
-	IERenderer()
-	{
-		m_window = nullptr;
-		m_renderer = nullptr;
-		m_w = 0;
-		m_h = 0;
-	}
+	IERenderer() = default;
 
 	~IERenderer()
 	{
@@ -91,6 +79,16 @@ public:
 	}
 
 	/// <summary>
+	/// 렌더러 너비 반환 (px)
+	/// </summary>
+	int32_t GetW() const { return m_w; }
+
+	/// <summary>
+	/// 렌더러 높이 반환 (px)
+	/// </summary>
+	int32_t GetH() const { return m_h; }
+
+	/// <summary>
 	/// 서페이스 그리기
 	/// </summary>
 	/// <param name="surface">그릴 서페이스</param>
@@ -130,5 +128,8 @@ public:
 	bool saveScreenshot(const char* path);
 
 private:
-
+	IEWindow*     m_window   = nullptr;
+	SDL_Renderer* m_renderer = nullptr;
+	int32_t       m_w        = 0;
+	int32_t       m_h        = 0;
 };

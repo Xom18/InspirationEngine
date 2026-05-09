@@ -8,7 +8,7 @@ void TextBox::transToTexture()
 		return;
 
 	FontFace* pFontFace = m_font->get();
-	if (pFontFace == nullptr || pFontFace->ftFace == nullptr)
+	if (pFontFace == nullptr || pFontFace->m_ftFace == nullptr)
 		return;
 
 	m_textChanged = false;
@@ -30,7 +30,7 @@ void TextBox::transToTexture()
 	if (szTextLength == 0)
 		return;
 
-	FT_Face ftFace = pFontFace->ftFace;
+	FT_Face ftFace = pFontFace->m_ftFace;
 	int32_t iAscent = m_font->getAscent();
 
 	size_t szBegPoint = 0;
@@ -126,8 +126,8 @@ void TextBox::transToTexture()
 		// 현재 스타일의 폰트 페이스 가져오기
 		FontFace* pCurFace = m_font->get(stkStyle.top());
 		if (pCurFace == nullptr) pCurFace = pFontFace;
-		FT_Face curFTFace = pCurFace->ftFace;
-		hb_font_t* curHBFont = pCurFace->hbFont;
+		FT_Face curFTFace = pCurFace->m_ftFace;
+		hb_font_t* curHBFont = pCurFace->m_hbFont;
 
 		// 너비 제한 처리
 		if (m_rect.w != 0 && m_rect.h != 0 && (m_textBoxStyle & dTEXT_BOX_AUTO_NEXTLINE))
@@ -247,14 +247,14 @@ void TextBox::transToTexture()
 			auto ms     = IETextRenderer::measure(curFTFace, shaped);
 
 			SDL_Texture* pTex = IETextRenderer::renderToTexture(
-				m_renderer->m_renderer,
+				m_renderer->getSDLRenderer(),
 				curFTFace,
 				shaped,
 				stkColor.top(),
 				ms.width  > 0 ? ms.width  : 1,
 				ms.height > 0 ? ms.height : 1,
 				iAscent,
-				pCurFace->bBold);
+				pCurFace->m_bold);
 
 			if (pTex)
 			{

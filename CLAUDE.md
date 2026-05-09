@@ -74,7 +74,8 @@ cIECore::draw()           ← cvDrawCompleteWaiter 대기 후 SDL_RenderPresent 
 | 단일행 if | 본문은 반드시 다음 줄에 | `if (cond)\n    return;` |
 | try/catch | 여러 줄 블록 형식 | `try { } catch (...) { }` 금지 |
 | 문서 주석 | `/// <summary>` + `/// <param>` 유지 | 메서드 선언부에 필수 |
-| 멤버 변수 접근 제어 | **`private` 원칙**, 파생 클래스 공유 시 `protected` | public 멤버 변수 금지 |
+| 멤버 변수 접근 제어 | **`private` 원칙**, getter/setter 사용 | public·protected 멤버 변수 금지 |
+| 클래스 선언 순서 | friend → 생성자 → public함수 → protected함수 → private함수 → private변수 | `private:` 섹션은 기본값이어도 명시 |
 | 포인터 스마트 포인터 | 소유 시 `unique_ptr`/`shared_ptr` | raw `new` 직접 멤버 보유 금지 |
 | 캐스팅 | C++ 캐스트 연산자만 | `static_cast<int32_t>(x)` |
 | try-catch | 네트워크·외부 파싱 등 불가피한 경계 외 금지 | 반환값 + 로그로 대체 |

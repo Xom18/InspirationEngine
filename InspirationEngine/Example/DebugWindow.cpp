@@ -14,9 +14,9 @@ void DebugWindow::callXButton()
 void DebugWindow::initWindow()
 {
 	//임시로 포커스 가있는 텍스트박스를 디버그용 텍스트박스에 줌
-	IECore::m_focusedTextBox = &m_DebugText;
+	IECore::SetFocusedTextBox(&m_DebugText);
 
-	Font* lpFont = IECore::m_Font.getFont(0);
+	Font* lpFont = IECore::GetFont().getFont(0);
 	//폰트랑 렌더러 설정
 	m_DebugText.setFont(lpFont);
 	m_DebugText.setRenderer(getRenderer(0));

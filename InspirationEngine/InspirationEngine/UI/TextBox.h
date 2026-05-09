@@ -16,28 +16,28 @@
 
 class TextTexture
 {
-public:
-	SDL_Texture* m_texture = nullptr;	//텍스트 텍스쳐
-	int32_t m_bufferPos = 0;		//이 텍스쳐의 텍스트가 버퍼의 어디부터인지
-	SDL_Rect m_rect;				//텍스쳐 Rect
+	friend class TextBox;
 
-	TextTexture()
-	{
-		memset(&m_rect, 0, sizeof(m_rect));
-	}
+public:
+	TextTexture() = default;
 
 	~TextTexture()
 	{
-		if (m_texture)
+		if (m_texture != nullptr)
 			SDL_DestroyTexture(m_texture);
 	}
 
 	void reset()
 	{
-		memset(&m_rect, 0, sizeof(m_rect));
-		if (m_texture)
+		m_rect = {};
+		if (m_texture != nullptr)
 			SDL_DestroyTexture(m_texture);
 	}
+
+private:
+	SDL_Texture* m_texture   = nullptr;
+	int32_t      m_bufferPos = 0;
+	SDL_Rect     m_rect      = {};
 };
 
 //포커스 와있나 등 처리 필요할듯

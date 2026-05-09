@@ -28,17 +28,17 @@ bool IEFontManager::addNewFont(int32_t fontID, const char* fontDir, int32_t font
 		}
 
 		FontFace* pFace = new FontFace();
-		pFace->ftFace = face;
-		pFace->bBold  = (i & IE_FONT_STYLE_BOLD) != 0;
+		pFace->m_ftFace = face;
+		pFace->m_bold   = (i & IE_FONT_STYLE_BOLD) != 0;
 
 		// hb_ft_font_create 미사용 — blob 경로로 face/font 생성
 		hb_blob_t* hbBlob = hb_blob_create_from_file(fontDir);
 		hb_face_t* hbFace = hb_face_create(hbBlob, 0);
 		hb_blob_destroy(hbBlob);
-		pFace->hbFont = hb_font_create(hbFace);
+		pFace->m_hbFont = hb_font_create(hbFace);
 		hb_face_destroy(hbFace);
 		// 26.6 픽셀 단위 advance 반환하도록 스케일 설정
-		hb_font_set_scale(pFace->hbFont,
+		hb_font_set_scale(pFace->m_hbFont,
 			static_cast<int32_t>(face->size->metrics.x_ppem) * 64,
 			static_cast<int32_t>(face->size->metrics.y_ppem) * 64);
 

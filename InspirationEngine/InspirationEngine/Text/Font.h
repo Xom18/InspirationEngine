@@ -12,14 +12,14 @@
 
 struct FontFace
 {
-	FT_Face    ftFace = nullptr;
-	hb_font_t* hbFont = nullptr;
-	bool       bBold  = false;
+	FT_Face    m_ftFace = nullptr;
+	hb_font_t* m_hbFont = nullptr;
+	bool       m_bold   = false;
 
 	~FontFace()
 	{
-		if (hbFont) { hb_font_destroy(hbFont); hbFont = nullptr; }
-		if (ftFace) { FT_Done_Face(ftFace);    ftFace = nullptr; }
+		if (m_hbFont) { hb_font_destroy(m_hbFont); m_hbFont = nullptr; }
+		if (m_ftFace) { FT_Done_Face(m_ftFace);    m_ftFace = nullptr; }
 	}
 };
 
@@ -70,8 +70,8 @@ public:
 	int32_t getHeight() const
 	{
 		auto ite = m_faces.find(IE_FONT_STYLE_NORMAL);
-		if (ite == m_faces.end() || !ite->second->ftFace) return 0;
-		return static_cast<int32_t>(ite->second->ftFace->size->metrics.height >> 6);
+		if (ite == m_faces.end() || !ite->second->m_ftFace) return 0;
+		return static_cast<int32_t>(ite->second->m_ftFace->size->metrics.height >> 6);
 	}
 
 	/// <summary>
@@ -80,8 +80,8 @@ public:
 	int32_t getAscent() const
 	{
 		auto ite = m_faces.find(IE_FONT_STYLE_NORMAL);
-		if (ite == m_faces.end() || !ite->second->ftFace) return 0;
-		return static_cast<int32_t>(ite->second->ftFace->size->metrics.ascender >> 6);
+		if (ite == m_faces.end() || !ite->second->m_ftFace) return 0;
+		return static_cast<int32_t>(ite->second->m_ftFace->size->metrics.ascender >> 6);
 	}
 
 	/// <summary>
@@ -90,8 +90,8 @@ public:
 	int32_t getDescent() const
 	{
 		auto ite = m_faces.find(IE_FONT_STYLE_NORMAL);
-		if (ite == m_faces.end() || !ite->second->ftFace) return 0;
-		return -static_cast<int32_t>(ite->second->ftFace->size->metrics.descender >> 6);
+		if (ite == m_faces.end() || !ite->second->m_ftFace) return 0;
+		return -static_cast<int32_t>(ite->second->m_ftFace->size->metrics.descender >> 6);
 	}
 };
 

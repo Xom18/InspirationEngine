@@ -8,8 +8,8 @@ void IEStaticObject::Draw(IERenderer* renderer, int32_t screenX, int32_t screenY
 	auto* tc = GetComponent<IETileComponent>();
 	if (tc != nullptr)
 	{
-		const IETileDef* def = IECore::m_Atlas.GetTile(tc->GetAtlas(), tc->GetTile());
-		SDL_Texture*     tex = IECore::m_Atlas.GetTexture(tc->GetAtlas());
+		const IETileDef* def = IECore::GetAtlas().GetTile(tc->GetAtlas(), tc->GetTile());
+		SDL_Texture*     tex = IECore::GetAtlas().GetTexture(tc->GetAtlas());
 		if (def == nullptr || tex == nullptr)
 			return;
 

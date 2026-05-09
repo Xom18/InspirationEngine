@@ -6,13 +6,6 @@
 class File
 {
 public:
-	char* m_data;		//데이터 버퍼
-	std::streamsize	m_size;		//데이터 크기
-
-private:
-	int32_t		m_cursor;	//읽을 때 쓰려고 만든 커서
-
-public:
 	File();
 	~File();
 
@@ -28,5 +21,7 @@ public:
 	void reset();
 
 private:
-
+	char*           m_data   = nullptr;
+	std::streamsize m_size   = 0;
+	int32_t         m_cursor = 0;
 };

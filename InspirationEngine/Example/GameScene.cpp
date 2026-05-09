@@ -8,7 +8,7 @@ void GameScene::OnEnter()
 	SDL_Renderer* sdl =
 		IECore::getMainWindow()->getRenderer(1)->getSDLRenderer();
 
-	IECore::m_Atlas.Load("floors", "../Data/floors.json", sdl);
+	IECore::GetAtlas().Load("floors", "../Data/floors.json", sdl);
 
 	std::ifstream f("../Data/world_test.json");
 	if (!f.is_open())
@@ -24,7 +24,7 @@ void GameScene::OnEnter()
 	float cy   = camJson.value("y", 0.0f);
 	float cz   = camJson.value("z", 0.0f);
 
-	auto [stepX, stepY] = IECore::m_Atlas.GetTileStep("floors");
+	auto [stepX, stepY] = IECore::GetAtlas().GetTileStep("floors");
 	int32_t tileW = camJson.value("tileWidth",  stepX > 0 ? stepX : 32);
 	int32_t tileH = camJson.value("tileHeight", stepY > 0 ? stepY : 16);
 
@@ -53,5 +53,5 @@ void GameScene::OnEnter()
 
 void GameScene::OnExit()
 {
-	IECore::m_Atlas.Unload("floors");
+	IECore::GetAtlas().Unload("floors");
 }
