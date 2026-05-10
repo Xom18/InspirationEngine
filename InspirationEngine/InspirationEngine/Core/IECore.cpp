@@ -261,6 +261,7 @@ bool IECore::EndEngine()
 	for (auto& [_, window] : m_windows)//각 창 삭제
 		window->Close();
 
+	//종료시 크래시 발생 원인으로 추정
 	//SDL_Quit();
 	return true;
 }
