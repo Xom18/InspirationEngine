@@ -12,10 +12,6 @@ class IERenderer;
 /// </summary>
 class IEScene
 {
-protected:
-	std::vector<std::unique_ptr<IEGameObject>> m_objects;
-	std::unique_ptr<IECamera>                  m_camera;
-
 public:
 	virtual ~IEScene();
 
@@ -61,4 +57,8 @@ public:
 	void RemoveObject(IEGameObject* obj);
 
 	const std::vector<std::unique_ptr<IEGameObject>>& GetObjects() const { return m_objects; }
+
+private:
+	std::vector<std::unique_ptr<IEGameObject>> m_objects;
+	std::unique_ptr<IECamera>                  m_camera;
 };

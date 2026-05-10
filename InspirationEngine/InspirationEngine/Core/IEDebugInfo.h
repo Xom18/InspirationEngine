@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 class IERenderer;
 class IEScene;
@@ -11,9 +11,6 @@ class IEFont;
 /// </summary>
 class IEDebugInfo
 {
-	std::string m_log;
-	bool        m_visible = false;
-
 public:
 	/// <summary>
 	/// 렌더러 위에 그리드·오브젝트 마커·카메라 HUD 오버레이
@@ -49,4 +46,8 @@ private:
 	void DrawGrid(IERenderer* renderer, IECamera* camera);
 	void DrawObjectMarkers(IERenderer* renderer, IEScene* scene, IECamera* camera, IEFont* font);
 	void DrawCameraInfo(IERenderer* renderer, IECamera* camera, IEFont* font);
+
+private:
+	std::string m_log;
+	bool        m_visible = false;
 };

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "IECamera.h"
 
@@ -17,10 +17,6 @@
 /// </summary>
 class IECameraIsometric : public IECamera
 {
-	int32_t m_tileWidth    = 64;    // 타일 화면 너비 (px)
-	int32_t m_tileHeight   = 32;    // 타일 화면 높이 (px)
-	float   m_heightFactor = 16.0f; // z 1단위 → 화면 픽셀 높이
-
 public:
 	IECameraIsometric() = default;
 	IECameraIsometric(int32_t tileW, int32_t tileH, float heightFactor = 16.0f)
@@ -34,12 +30,12 @@ public:
 		float isoX = (wx - wy) * hw;
 		float isoY = (wx + wy) * hh - wz * m_heightFactor;
 
-		float camIsoX = (m_x - m_y) * hw;
-		float camIsoY = (m_x + m_y) * hh - m_z * m_heightFactor;
+		float camIsoX = (GetX() - GetY()) * hw;
+		float camIsoY = (GetX() + GetY()) * hh - GetZ() * m_heightFactor;
 
 		IEVector2 result;
-		result.m_x = std::lround((isoX - camIsoX) * m_zoom + m_viewportWidth  * 0.5f);
-		result.m_y = std::lround((isoY - camIsoY) * m_zoom + m_viewportHeight * 0.5f);
+		result.SetX(static_cast<int32_t>(std::lround((isoX - camIsoX) * GetZoom() + GetViewportWidth()  * 0.5f)));
+		result.SetY(static_cast<int32_t>(std::lround((isoY - camIsoY) * GetZoom() + GetViewportHeight() * 0.5f)));
 		return result;
 	}
 
@@ -48,18 +44,18 @@ public:
 		float hw = m_tileWidth  * 0.5f;
 		float hh = m_tileHeight * 0.5f;
 
-		float camIsoX = (m_x - m_y) * hw;
-		float camIsoY = (m_x + m_y) * hh;
+		float camIsoX = (GetX() - GetY()) * hw;
+		float camIsoY = (GetX() + GetY()) * hh;
 
-		float localX = (sx - m_viewportWidth  * 0.5f) / m_zoom + camIsoX;
-		float localY = (sy - m_viewportHeight * 0.5f) / m_zoom + camIsoY;
+		float localX = (sx - GetViewportWidth()  * 0.5f) / GetZoom() + camIsoX;
+		float localY = (sy - GetViewportHeight() * 0.5f) / GetZoom() + camIsoY;
 
 		float diff = localX / hw;
 		float sum  = localY / hh;
 
 		IEVector2 result;
-		result.m_x = static_cast<int32_t>((sum + diff) * 0.5f);
-		result.m_y = static_cast<int32_t>((sum - diff) * 0.5f);
+		result.SetX(static_cast<int32_t>((sum + diff) * 0.5f));
+		result.SetY(static_cast<int32_t>((sum - diff) * 0.5f));
 		return result;
 	}
 
@@ -70,7 +66,12 @@ public:
 
 	void    SetTileSize(int32_t w, int32_t h) { m_tileWidth = w; m_tileHeight = h; }
 	void    SetHeightFactor(float f)          { m_heightFactor = f; }
-	int32_t GetTileWidth()     const          { return m_tileWidth; }
-	int32_t GetTileHeight()    const          { return m_tileHeight; }
-	float   GetHeightFactor()  const          { return m_heightFactor; }
+	int32_t GetTileWidth()    const           { return m_tileWidth; }
+	int32_t GetTileHeight()   const           { return m_tileHeight; }
+	float   GetHeightFactor() const           { return m_heightFactor; }
+
+private:
+	int32_t m_tileWidth    = 64;
+	int32_t m_tileHeight   = 32;
+	float   m_heightFactor = 16.0f;
 };

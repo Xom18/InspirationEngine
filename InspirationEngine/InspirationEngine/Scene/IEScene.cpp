@@ -55,8 +55,8 @@ void IEScene::Draw(IERenderer* renderer)
 		if (m_camera != nullptr && t != nullptr)
 		{
 			auto pos = m_camera->WorldToScreen(t->GetX(), t->GetY(), t->GetZ());
-			sx = pos.m_x;
-			sy = pos.m_y;
+			sx = pos.GetX();
+			sy = pos.GetY();
 		}
 		else
 		{

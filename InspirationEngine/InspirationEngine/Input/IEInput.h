@@ -35,10 +35,10 @@ public:
 	/// <param name="y">마우스 Y 좌표</param>
 	void UpdateMousePos(int32_t x, int32_t y)
 	{
-		m_mouseDelta.m_x = x - m_mousePos.m_x;
-		m_mouseDelta.m_y = y - m_mousePos.m_y;
-		m_mousePos.m_x = x;
-		m_mousePos.m_y = y;
+		m_mouseDelta.SetX(x - m_mousePos.GetX());
+		m_mouseDelta.SetY(y - m_mousePos.GetY());
+		m_mousePos.SetX(x);
+		m_mousePos.SetY(y);
 	}
 
 	/// <summary>

@@ -4,15 +4,15 @@
 
 IEFile::IEFile()
 {
-	reset();
+	Reset();
 }
 
 IEFile::~IEFile()
 {
-	reset();
+	Reset();
 }
 
-void IEFile::reset()
+void IEFile::Reset()
 {
 	pKILL(m_data);
 	m_size = 0;
@@ -21,7 +21,7 @@ void IEFile::reset()
 
 bool IEFile::ReadFile(const char* filename)
 {
-	reset();
+	Reset();
 	//파일을 읽어들인다, (파일명, 파일형식)
 	std::ifstream in(filename, std::ifstream::binary | std::ios::in);
 

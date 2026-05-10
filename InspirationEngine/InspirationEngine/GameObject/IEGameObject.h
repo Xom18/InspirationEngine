@@ -11,12 +11,6 @@ class IESprite;
 /// </summary>
 class IEGameObject
 {
-	std::vector<std::unique_ptr<IEComponent>> m_components;
-
-protected:
-	IESprite* m_sprite = nullptr;
-	bool m_active = true;
-
 public:
 	virtual ~IEGameObject() = default;
 
@@ -91,4 +85,9 @@ public:
 	/// 활성화 여부 반환
 	/// </summary>
 	bool IsActive() const { return m_active; }
+
+private:
+	std::vector<std::unique_ptr<IEComponent>> m_components;
+	IESprite* m_sprite = nullptr;
+	bool      m_active = true;
 };

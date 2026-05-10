@@ -18,7 +18,7 @@ public:
 	/// <summary>
 	/// m_data 해제 및 크기/커서 초기화
 	/// </summary>
-	void reset();
+	void Reset();
 
 private:
 	char*           m_data   = nullptr;

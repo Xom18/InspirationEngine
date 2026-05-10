@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "IECamera.h"
 
@@ -16,8 +16,6 @@
 /// </summary>
 class IECameraOverheadOblique : public IECamera
 {
-	float m_heightFactor = 1.0f;
-
 public:
 	IECameraOverheadOblique() = default;
 	explicit IECameraOverheadOblique(float heightFactor) : m_heightFactor(heightFactor) {}
@@ -25,16 +23,16 @@ public:
 	IEVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const override
 	{
 		IEVector2 result;
-		result.m_x = std::lround((wx - m_x) * m_zoom + m_viewportWidth  * 0.5f);
-		result.m_y = std::lround(((wy - m_y) - (wz - m_z) * m_heightFactor) * m_zoom + m_viewportHeight * 0.5f);
+		result.SetX(static_cast<int32_t>(std::lround((wx - GetX()) * GetZoom() + GetViewportWidth()  * 0.5f)));
+		result.SetY(static_cast<int32_t>(std::lround(((wy - GetY()) - (wz - GetZ()) * m_heightFactor) * GetZoom() + GetViewportHeight() * 0.5f)));
 		return result;
 	}
 
 	IEVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
 	{
 		IEVector2 result;
-		result.m_x = std::lround((sx - m_viewportWidth  * 0.5f) / m_zoom + m_x);
-		result.m_y = std::lround((sy - m_viewportHeight * 0.5f) / m_zoom + m_y);
+		result.SetX(static_cast<int32_t>(std::lround((sx - GetViewportWidth()  * 0.5f) / GetZoom() + GetX())));
+		result.SetY(static_cast<int32_t>(std::lround((sy - GetViewportHeight() * 0.5f) / GetZoom() + GetY())));
 		return result;
 	}
 
@@ -45,4 +43,7 @@ public:
 
 	void  SetHeightFactor(float f) { m_heightFactor = f; }
 	float GetHeightFactor() const  { return m_heightFactor; }
+
+private:
+	float m_heightFactor = 1.0f;
 };

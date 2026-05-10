@@ -14,14 +14,14 @@ void IEEntity::Update(float deltaTime)
 
 void IEEntity::Draw(IERenderer* renderer, int32_t screenX, int32_t screenY, float zoom)
 {
-	if (!m_active || m_sprite == nullptr || renderer == nullptr)
+	if (!IsActive() || GetSprite() == nullptr || renderer == nullptr)
 		return;
 
 	auto* t = GetComponent<IETransformComponent>();
 	if (t == nullptr)
 		return;
 
-	m_sprite->Draw(
+	GetSprite()->Draw(
 		renderer,
 		screenX,
 		screenY,

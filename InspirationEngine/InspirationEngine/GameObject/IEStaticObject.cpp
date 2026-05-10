@@ -2,7 +2,7 @@
 
 void IEStaticObject::Draw(IERenderer* renderer, int32_t screenX, int32_t screenY, float zoom)
 {
-	if (!m_active || renderer == nullptr)
+	if (!IsActive() || renderer == nullptr)
 		return;
 
 	auto* tc = GetComponent<IETileComponent>();
@@ -33,14 +33,14 @@ void IEStaticObject::Draw(IERenderer* renderer, int32_t screenX, int32_t screenY
 		return;
 	}
 
-	if (m_sprite == nullptr)
+	if (GetSprite() == nullptr)
 		return;
 
 	auto* t = GetComponent<IETransformComponent>();
 	if (t == nullptr)
 		return;
 
-	m_sprite->Draw(
+	GetSprite()->Draw(
 		renderer,
 		screenX,
 		screenY,

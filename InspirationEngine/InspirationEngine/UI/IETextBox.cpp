@@ -219,7 +219,7 @@ void IETextBox::TransToTexture()
 					}
 					else
 					{
-						size_t secondPos = IEStrUTF8::getMemoryPoint(targetText, 1);
+						size_t secondPos = IEStrUTF8::GetMemoryPoint(targetText, 1);
 						size_t resultLength = resultText.length();
 						resultText.append(targetText, 0, secondPos);
 
