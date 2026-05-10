@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Skill(update-config)",
-      "Skill(update-config:*)"
+      "Skill(update-config:*)",
+      "Bash(powershell -Command \"New-Item -ItemType Directory -Path 'd:\\\\Project\\\\Github\\\\InspirationEngine\\\\InspirationEngine\\\\InspirationEditor' -Force | Out-Null; Write-Host 'done'\")"
     ]
   }
 }
