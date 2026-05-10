@@ -261,7 +261,7 @@ bool IECore::EndEngine()
 	for (auto& [_, window] : m_windows)//각 창 삭제
 		window->Close();
 
-	SDL_Quit();
+	//SDL_Quit();
 	return true;
 }
 
