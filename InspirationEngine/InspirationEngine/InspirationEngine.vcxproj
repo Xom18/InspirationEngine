@@ -25,6 +25,10 @@
     <ClInclude Include="UI\IETextBox.h" />
     <ClInclude Include="UI\IEButton.h" />
     <ClInclude Include="UI\IEScrollView.h" />
+    <ClInclude Include="UI\IETreeNode.h" />
+    <ClInclude Include="UI\IETreeView.h" />
+    <ClInclude Include="UI\IESlider.h" />
+    <ClInclude Include="UI\IEFileBrowser.h" />
     <ClInclude Include="Text\IEFont.h" />
     <ClInclude Include="Text\IETextRenderer.h" />
     <ClInclude Include="Util\IEStrUTF8.h" />
@@ -58,6 +62,9 @@
     <ClCompile Include="UI\IETextBox.cpp" />
     <ClCompile Include="UI\IEButton.cpp" />
     <ClCompile Include="UI\IEScrollView.cpp" />
+    <ClCompile Include="UI\IETreeView.cpp" />
+    <ClCompile Include="UI\IESlider.cpp" />
+    <ClCompile Include="UI\IEFileBrowser.cpp" />
     <ClCompile Include="Text\IEFont.cpp" />
     <ClCompile Include="Text\IETextRenderer.cpp" />
     <ClCompile Include="Util\IEStrUTF8.cpp" />

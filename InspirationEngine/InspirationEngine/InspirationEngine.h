@@ -25,6 +25,10 @@
 #include "UI/IETextBox.h"			//UI-텍스트박스
 #include "UI/IEButton.h"			//UI-버튼
 #include "UI/IEScrollView.h"		//UI-스크롤뷰
+#include "UI/IETreeNode.h"			//UI-트리노드
+#include "UI/IETreeView.h"			//UI-트리뷰
+#include "UI/IESlider.h"			//UI-슬라이더
+#include "UI/IEFileBrowser.h"		//UI-파일브라우저
 #include "Input/MouseCusor.h"	//마우스 커서
 #include "Window/IERenderer.h"	//렌더러
 #include "Window/IEWindow.h"	//창

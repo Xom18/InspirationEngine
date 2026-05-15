@@ -1,0 +1,160 @@
+#include "../InspirationEngine.h"
+
+IETreeNode* IETreeView::AddRootNode(const char* label)
+{
+    m_roots.push_back(std::make_unique<IETreeNode>(label));
+    return m_roots.back().get();
+}
+
+void IETreeView::Clear()
+{
+    m_roots.clear();
+    m_selectedNode = nullptr;
+    m_scroll.ResetScroll();
+}
+
+void IETreeView::BuildFlatListRecursive(IETreeNode* node, int32_t depth, int32_t& y, std::vector<FlatEntry>& flat) const
+{
+    flat.push_back({ node, depth, y });
+    y += kRowH;
+    if (node->IsExpanded())
+        for (const auto& child : node->GetChildren())
+            BuildFlatListRecursive(child.get(), depth + 1, y, flat);
+}
+
+void IETreeView::BuildFlatList(std::vector<FlatEntry>& flat) const
+{
+    int32_t y = 0;
+    for (const auto& root : m_roots)
+        BuildFlatListRecursive(root.get(), 0, y, flat);
+}
+
+void IETreeView::DrawArrow(IERenderer* r, int32_t x, int32_t y, bool expanded) const
+{
+    SDL_Color col = { 180, 180, 180, 255 };
+    int32_t cx = x + kArrowW / 2;
+    int32_t cy = y + kRowH / 2;
+    constexpr int32_t s = 4;
+
+    if (expanded)
+    {
+        // ▼ 아래쪽 삼각형
+        r->DrawLine(col, cx - s, cy - s / 2, cx + s, cy - s / 2);
+        r->DrawLine(col, cx + s, cy - s / 2, cx,     cy + s);
+        r->DrawLine(col, cx,     cy + s,     cx - s, cy - s / 2);
+    }
+    else
+    {
+        // ▶ 오른쪽 삼각형
+        r->DrawLine(col, cx - s / 2, cy - s, cx - s / 2, cy + s);
+        r->DrawLine(col, cx - s / 2, cy - s, cx + s,     cy);
+        r->DrawLine(col, cx + s,     cy,     cx - s / 2, cy + s);
+    }
+}
+
+void IETreeView::Update()
+{
+    m_scroll.Update();
+
+    if (m_ownerWindow == nullptr || IECore::GetMouseOnWindow() != m_ownerWindow)
+    {
+        m_prevLMB = false;
+        return;
+    }
+
+    float gx = 0.0f, gy = 0.0f;
+    SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
+
+    int32_t winX = 0, winY = 0;
+    SDL_GetWindowPosition(m_ownerWindow->GetSDLWindow(), &winX, &winY);
+
+    int32_t mx = static_cast<int32_t>(gx) - winX;
+    int32_t my = static_cast<int32_t>(gy) - winY;
+
+    bool lmb     = (btn & SDL_BUTTON_LMASK) != 0;
+    bool clicked = lmb && !m_prevLMB;
+    m_prevLMB = lmb;
+
+    if (!clicked)
+        return;
+
+    if (mx < m_rect.x || mx >= m_rect.x + m_rect.w ||
+        my < m_rect.y || my >= m_rect.y + m_rect.h)
+        return;
+
+    std::vector<FlatEntry> flat;
+    BuildFlatList(flat);
+
+    int32_t scrollY = m_scroll.GetScrollOffsetY();
+
+    for (auto& entry : flat)
+    {
+        int32_t rowY = m_rect.y + entry.contentY - scrollY;
+        if (my < rowY || my >= rowY + kRowH)
+            continue;
+
+        int32_t indentX = m_rect.x + kPadX + entry.depth * kIndentW;
+
+        // 화살표 클릭 → 펼치기/접기
+        if (entry.node->HasChildren() && mx >= indentX && mx < indentX + kArrowW)
+        {
+            entry.node->SetExpanded(!entry.node->IsExpanded());
+            std::vector<FlatEntry> rebuilt;
+            BuildFlatList(rebuilt);
+            m_scroll.SetContentHeight(static_cast<int32_t>(rebuilt.size()) * kRowH);
+            return;
+        }
+
+        // 라벨 클릭 → 선택
+        int32_t labelX = indentX + kArrowW + 2;
+        if (mx >= labelX)
+        {
+            if (m_selectedNode != nullptr)
+                m_selectedNode->SetSelected(false);
+            m_selectedNode = entry.node;
+            entry.node->SetSelected(true);
+            if (m_callback)
+                m_callback(entry.node);
+        }
+        return;
+    }
+}
+
+void IETreeView::Draw()
+{
+    IERenderer* r = GetRenderer();
+    if (r == nullptr || m_font == nullptr)
+        return;
+
+    std::vector<FlatEntry> flat;
+    BuildFlatList(flat);
+
+    m_scroll.SetContentHeight(static_cast<int32_t>(flat.size()) * kRowH);
+
+    int32_t scrollY = m_scroll.GetScrollOffsetY();
+
+    m_scroll.BeginDraw();
+
+    for (const auto& entry : flat)
+    {
+        int32_t rowY = m_rect.y + entry.contentY - scrollY;
+
+        if (rowY + kRowH <= m_rect.y || rowY >= m_rect.y + m_rect.h)
+            continue;
+
+        int32_t indentX = m_rect.x + kPadX + entry.depth * kIndentW;
+
+        if (entry.node->IsSelected())
+            r->DrawRect({ 70, 130, 180, 120 }, m_rect.x, rowY, m_rect.w, kRowH, SDL_BLENDMODE_BLEND);
+
+        if (entry.node->HasChildren())
+            DrawArrow(r, indentX, rowY, entry.node->IsExpanded());
+
+        int32_t labelX = indentX + kArrowW + 2;
+        int32_t labelY = rowY + (kRowH - m_font->GetHeight()) / 2;
+        r->DrawText(m_font, entry.node->GetLabel().c_str(), { 220, 220, 220, 255 }, labelX, labelY);
+    }
+
+    m_scroll.EndDraw();
+    m_scroll.Draw();
+}
