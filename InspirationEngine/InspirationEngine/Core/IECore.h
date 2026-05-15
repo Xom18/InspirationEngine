@@ -166,6 +166,21 @@ public:
 	}
 
 	/// <summary>
+	/// 엔진 루프 안전 지점(다음 틱 시작)에서 창을 등록하고 드로우 스레드를 시작.
+	/// 엔진 구동 중 동적 창 생성 시 사용.
+	/// </summary>
+	/// <param name="id">창 식별 ID</param>
+	/// <param name="window">등록할 창 (소유권 이전)</param>
+	static void RequestAddWindow(const char* id, IEWindow* window);
+
+	/// <summary>
+	/// 엔진 루프 안전 지점(다음 틱 시작)에서 창을 드로우 스레드 종료 후 제거.
+	/// 엔진 구동 중 동적 창 제거 시 사용.
+	/// </summary>
+	/// <param name="id">제거할 창 ID</param>
+	static void RequestRemoveWindow(const char* id);
+
+	/// <summary>
 	/// 이벤트 처리 큐에 넣기
 	/// </summary>
 	/// <param name="event">추가할 SDL 이벤트</param>
@@ -279,6 +294,7 @@ private:
 	static void OperateEvent();
 	static void Update(float deltaTime);
 	static void Draw();
+	static void ProcessPendingWindows();
 
 private:
 	static IEInput          m_Input;
@@ -314,4 +330,8 @@ private:
 
 	static std::string      m_pendingIMEComposition;
 	static bool             m_imeCompositionDirty;
+
+	static std::mutex                                           m_pendingWindowsMutex;
+	static std::vector<std::pair<std::string, IEWindow*>>       m_pendingWindowsToAdd;
+	static std::vector<std::string>                             m_pendingWindowsToRemove;
 };

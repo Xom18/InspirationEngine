@@ -1,22 +1,7 @@
 #include "IEMainEditorWindow.h"
 #include "IEAtlasEditorWindow.h"
-#include <filesystem>
-#include <algorithm>
-#include <cctype>
+#include "IEFloatingPanelWindow.h"
 #include <cstdio>
-#include <cmath>
-
-namespace fs = std::filesystem;
-
-static SDL_Color kColBg      = {  30,  30,  30, 255 };
-static SDL_Color kColMenu    = {  45,  45,  50, 255 };
-static SDL_Color kColBrowser = {  40,  40,  45, 255 };
-static SDL_Color kColVp      = {  25,  25,  28, 255 };
-static SDL_Color kColSep     = {  65,  65,  70, 255 };
-static SDL_Color kColText    = { 200, 200, 200, 255 };
-static SDL_Color kColGrid    = {  48,  48,  52, 255 };
-static SDL_Color kColOrigin  = {  60, 100,  60, 255 };
-static SDL_Color kColSel     = { 255, 200,  50, 255 };
 
 // ─────────────────────────────────────────
 // Init
@@ -39,22 +24,82 @@ void IEMainEditorWindow::InitWindow(IEFont* font, IEAtlasEditorWindow* atlasEdit
             m_atlasEditor->ShowWindow();
     });
 
-    constexpr int32_t kLabelH = 24;
-    m_fileBrowser.SetRenderer(r);
-    m_fileBrowser.SetFont(font);
-    m_fileBrowser.SetOwnerWindow(this);
-    m_fileBrowser.SetRect(0, kMenuH + kLabelH, kBrowserW, GetHeight() - kMenuH - kLabelH);
-    m_fileBrowser.SetCallback([this](const std::string& path) { OnFileBrowserSelect(path); });
-
-    InitScene();
+    InitPanels(font, atlasEditor);
+    LayoutPanels();
 }
 
-void IEMainEditorWindow::InitScene()
+void IEMainEditorWindow::InitPanels(IEFont* font, IEAtlasEditorWindow* atlasEditor)
 {
-    auto* cam = new IECameraTopView();
-    cam->SetViewport(ViewportW(), ViewportH());
-    m_camera = cam;
-    m_scene.SetCamera(cam);
+    IERenderer* r = GetRenderer(0);
+
+    // ── Viewport ──────────────────────────────
+    auto vpPtr  = std::make_unique<IEViewportPanel>();
+    m_vpPanel   = vpPtr.get();
+
+    auto vpDoc = IEDockedPanel(std::move(vpPtr));
+    vpDoc.SetFont(font);
+    vpDoc.SetOwnerWindow(this);
+    vpDoc.SetRenderer(r);
+    m_panels.push_back(std::move(vpDoc));
+
+    // ── FileBrowser ───────────────────────────
+    auto fbPtr = std::make_unique<IEFileBrowserPanel>();
+    fbPtr->SetAtlasEditor(atlasEditor);
+
+    auto fbDoc = IEDockedPanel(std::move(fbPtr));
+    fbDoc.SetFont(font);
+    fbDoc.SetOwnerWindow(this);
+    fbDoc.SetRenderer(r);
+    m_panels.push_back(std::move(fbDoc));
+
+    // ── Camera ────────────────────────────────
+    auto camPtr = std::make_unique<IECameraPanel>();
+    m_camPanel  = camPtr.get();
+    camPtr->SetCamera(m_vpPanel->GetCamera());
+
+    auto camDoc = IEDockedPanel(std::move(camPtr));
+    camDoc.SetFont(font);
+    camDoc.SetOwnerWindow(this);
+    camDoc.SetRenderer(r);
+    m_panels.push_back(std::move(camDoc));
+
+    // ── EntityList ────────────────────────────
+    auto elPtr    = std::make_unique<IEEntityListPanel>();
+    m_entityPanel = elPtr.get();
+    elPtr->SetScene(&m_vpPanel->GetScene());
+
+    auto elDoc = IEDockedPanel(std::move(elPtr));
+    elDoc.SetFont(font);
+    elDoc.SetOwnerWindow(this);
+    elDoc.SetRenderer(r);
+    m_panels.push_back(std::move(elDoc));
+}
+
+void IEMainEditorWindow::LayoutPanels()
+{
+    const int32_t winW   = GetWidth();
+    const int32_t winH   = GetHeight();
+    const int32_t bodyH  = winH - kMenuH;
+
+    // 좌측 폭 / 우측 폭 / 중앙 뷰포트 폭
+    constexpr int32_t kLeftW  = 220;
+    constexpr int32_t kRightW = 260;
+    const int32_t     vpW     = winW - kLeftW - kRightW;
+
+    // 좌측: FileBrowser(위) + Camera(아래)
+    const int32_t fbH  = bodyH / 2;
+    const int32_t camH = bodyH - fbH;
+
+    // 우측: EntityList (전체)
+
+    // m_panels 인덱스: 0=Viewport, 1=FileBrowser, 2=Camera, 3=EntityList
+    if (m_panels.size() >= 4)
+    {
+        m_panels[0].SetRect(kLeftW,        kMenuH,          vpW,    bodyH);  // Viewport
+        m_panels[1].SetRect(0,             kMenuH,          kLeftW, fbH);    // FileBrowser
+        m_panels[2].SetRect(0,             kMenuH + fbH,    kLeftW, camH);   // Camera
+        m_panels[3].SetRect(kLeftW + vpW,  kMenuH,          kRightW, bodyH); // EntityList
+    }
 }
 
 // ─────────────────────────────────────────
@@ -63,8 +108,7 @@ void IEMainEditorWindow::InitScene()
 
 void IEMainEditorWindow::OnResize(int32_t w, int32_t h)
 {
-    constexpr int32_t kLabelH = 24;
-    m_fileBrowser.SetRect(0, kMenuH + kLabelH, kBrowserW, h - kMenuH - kLabelH);
+    LayoutPanels();
 }
 
 // ─────────────────────────────────────────
@@ -77,147 +121,70 @@ void IEMainEditorWindow::CallXButton()
 }
 
 // ─────────────────────────────────────────
-// File browser callback
-// ─────────────────────────────────────────
-
-void IEMainEditorWindow::OnFileBrowserSelect(const std::string& path)
-{
-    if (m_atlasEditor == nullptr)
-        return;
-
-    std::string ext = fs::path(path).extension().string();
-    std::transform(ext.begin(), ext.end(), ext.begin(),
-        [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-
-    if (ext == ".png" || ext == ".json")
-        m_atlasEditor->OpenWithFile(path);
-}
-
-// ─────────────────────────────────────────
 // Update
 // ─────────────────────────────────────────
 
 void IEMainEditorWindow::Update(float deltaTime)
 {
     m_btnAtlas.Update();
-    m_fileBrowser.Update();
-    m_scene.Update(deltaTime);
-    UpdateViewport();
-}
 
-void IEMainEditorWindow::UpdateViewport()
-{
-    if (m_camera == nullptr)
-        return;
-    if (IECore::GetMouseOnWindow() != this)
+    // 역순으로 업데이트 (최상위 z-order 패널이 입력 우선)
+    for (int32_t i = static_cast<int32_t>(m_panels.size()) - 1; i >= 0; --i)
     {
-        m_vpPrevLMB  = false;
-        m_vpPrevRMB  = false;
-        m_vpDragging = false;
-        return;
+        if (m_panels[i].IsAlive())
+            m_panels[i].Update(deltaTime);
     }
 
-    const int32_t vpX = ViewportX();
-    const int32_t vpY = ViewportY();
-    const int32_t vpW = ViewportW();
-    const int32_t vpH = ViewportH();
-
-    float gx = 0.0f, gy = 0.0f;
-    SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
-
-    int32_t winX = 0, winY = 0;
-    SDL_GetWindowPosition(GetSDLWindow(), &winX, &winY);
-
-    int32_t mx = static_cast<int32_t>(gx) - winX;
-    int32_t my = static_cast<int32_t>(gy) - winY;
-
-    bool inVp = (mx >= vpX && mx < vpX + vpW &&
-                 my >= vpY && my < vpY + vpH);
-
-    int32_t vx = mx - vpX;
-    int32_t vy = my - vpY;
-
-    bool lmb = (btn & SDL_BUTTON_LMASK) != 0;
-    bool rmb = (btn & SDL_BUTTON_RMASK) != 0;
-    bool lmbClicked = lmb && !m_vpPrevLMB;
-    bool rmbClicked = rmb && !m_vpPrevRMB;
-    m_vpPrevLMB = lmb;
-    m_vpPrevRMB = rmb;
-
-    // Scroll zoom — centered on mouse cursor
-    if (inVp)
+    // 타이틀바 클릭 → z-order 갱신 (back = 최상위)
+    for (int32_t i = 0; i < static_cast<int32_t>(m_panels.size()) - 1; ++i)
     {
-        float wheelY = IECore::GetInput().GetMouseWheelY();
-        if (wheelY != 0.0f)
+        if (m_panels[i].WasTitleClicked())
         {
-            float oldZoom = m_camera->GetZoom();
-            float newZoom = std::clamp(oldZoom * std::pow(1.12f, wheelY), 0.05f, 20.0f);
-
-            // Zoom toward cursor: shift camera so world point under cursor stays fixed
-            m_camera->SetViewport(vpW, vpH);
-            auto wp = m_camera->ScreenToWorld(vx, vy);
-            m_camera->SetZoom(newZoom);
-            m_camera->SetViewport(vpW, vpH);
-            auto wp2 = m_camera->ScreenToWorld(vx, vy);
-            m_camera->SetPosition(
-                m_camera->GetX() + static_cast<float>(wp.GetX() - wp2.GetX()),
-                m_camera->GetY() + static_cast<float>(wp.GetY() - wp2.GetY()));
+            // 클릭된 패널을 맨 뒤(최상위)로 이동
+            for (int32_t j = i; j < static_cast<int32_t>(m_panels.size()) - 1; ++j)
+                std::swap(m_panels[j], m_panels[j + 1]);
+            // raw 포인터 재스캔 (이동 후 인덱스가 바뀔 수 있음)
+            break;
         }
     }
 
-    // RMB drag — pan
-    if (rmbClicked && inVp)
-    {
-        m_vpDragging   = true;
-        m_vpDragStartX = static_cast<float>(vx);
-        m_vpDragStartY = static_cast<float>(vy);
-        m_camStartX    = m_camera->GetX();
-        m_camStartY    = m_camera->GetY();
-    }
-    if (!rmb)
-        m_vpDragging = false;
-
-    if (m_vpDragging)
-    {
-        float zoom = m_camera->GetZoom();
-        float dx   = (static_cast<float>(vx) - m_vpDragStartX) / zoom;
-        float dy   = (static_cast<float>(vy) - m_vpDragStartY) / zoom;
-        m_camera->SetPosition(m_camStartX - dx, m_camStartY - dy);
-    }
-
-    // LMB click — select
-    if (lmbClicked && inVp && !m_vpDragging)
-        SelectAtViewportPos(vx, vy);
+    ProcessUndock();
 }
 
-void IEMainEditorWindow::SelectAtViewportPos(int32_t vx, int32_t vy)
+void IEMainEditorWindow::ProcessUndock()
 {
-    m_camera->SetViewport(ViewportW(), ViewportH());
-    auto wp = m_camera->ScreenToWorld(vx, vy);
-    float wx = static_cast<float>(wp.GetX());
-    float wy = static_cast<float>(wp.GetY());
-
-    float radius = 24.0f / m_camera->GetZoom();
-    IEGameObject* best = nullptr;
-    float bestDist = radius;
-
-    for (const auto& obj : m_scene.GetObjects())
+    for (int32_t i = 0; i < static_cast<int32_t>(m_panels.size()); ++i)
     {
-        if (!obj->IsActive()) continue;
-        auto* t = obj->GetComponent<IETransformComponent>();
-        if (t == nullptr) continue;
+        if (!m_panels[i].ShouldUndock())
+            continue;
 
-        float dx   = t->GetX() - wx;
-        float dy   = t->GetY() - wy;
-        float dist = std::sqrt(dx * dx + dy * dy);
-        if (dist < bestDist)
-        {
-            bestDist = dist;
-            best = obj.get();
-        }
+        m_panels[i].ClearUndockFlag();
+
+        int32_t fx = m_panels[i].GetUndockScreenX();
+        int32_t fy = m_panels[i].GetUndockScreenY();
+        int32_t fw = m_panels[i].GetUndockW();
+        int32_t fh = m_panels[i].GetUndockH();
+
+        auto panelPtr = m_panels[i].ReleasePanel();
+        m_panels.erase(m_panels.begin() + i);
+
+        // raw 포인터 무효화 확인 (소유권 이전된 패널이면 nullptr로)
+        if (m_vpPanel     && m_vpPanel     == dynamic_cast<IEViewportPanel*>(panelPtr.get()))   m_vpPanel     = nullptr;
+        if (m_camPanel    && m_camPanel    == dynamic_cast<IECameraPanel*>(panelPtr.get()))      m_camPanel    = nullptr;
+        if (m_entityPanel && m_entityPanel == dynamic_cast<IEEntityListPanel*>(panelPtr.get())) m_entityPanel = nullptr;
+
+        // 부동 창 생성
+        std::string winId = "float_" + std::to_string(m_floatIdCounter.fetch_add(1));
+        const char* title = panelPtr->GetTitle();
+
+        auto* floatWin = new IEFloatingPanelWindow();
+        floatWin->CreateWindow(title, fw, fh, fx, fy, SDL_WINDOW_RESIZABLE);
+        floatWin->Init(std::move(panelPtr), m_font, winId);
+
+        IECore::RequestAddWindow(winId.c_str(), floatWin);
+
+        break; // 한 프레임에 하나만 처리
     }
-
-    m_selectedObj = best;
 }
 
 // ─────────────────────────────────────────
@@ -233,123 +200,17 @@ void IEMainEditorWindow::Draw()
     const int32_t winW = GetWidth();
     const int32_t winH = GetHeight();
 
-    // Backgrounds
-    r->DrawRect(kColBg,      0,          0,       winW,     winH,             SDL_BLENDMODE_NONE);
-    r->DrawRect(kColMenu,    0,          0,       winW,     kMenuH,           SDL_BLENDMODE_NONE);
-    r->DrawRect(kColBrowser, 0,          kMenuH,  kBrowserW, winH - kMenuH,  SDL_BLENDMODE_NONE);
+    // 배경
+    r->DrawRect(kColBg,   0, 0,      winW, winH,   SDL_BLENDMODE_NONE);
+    r->DrawRect(kColMenu, 0, 0,      winW, kMenuH, SDL_BLENDMODE_NONE);
+    r->DrawLine(kColSep,  0, kMenuH, winW, kMenuH);
 
-    // Separators
-    r->DrawLine(kColSep, kBrowserW, 0,     kBrowserW, winH);
-    r->DrawLine(kColSep, 0,         kMenuH, winW,     kMenuH);
-
-    // Menu bar
     m_btnAtlas.Draw();
 
-    // Resource browser header
-    r->DrawText(m_font, "Resources", kColText, 6, kMenuH + 6);
-    r->DrawLine(kColSep, 0, kMenuH + 22, kBrowserW, kMenuH + 22);
-    m_fileBrowser.Draw();
-
-    // Viewport
-    DrawViewport();
-}
-
-void IEMainEditorWindow::DrawViewport()
-{
-    IERenderer*   r    = GetRenderer(0);
-    SDL_Renderer* sdlR = r->GetSDLRenderer();
-
-    const int32_t vpX = ViewportX();
-    const int32_t vpY = ViewportY();
-    const int32_t vpW = ViewportW();
-    const int32_t vpH = ViewportH();
-
-    SDL_Rect vpRect = { vpX, vpY, vpW, vpH };
-    SDL_SetRenderViewport(sdlR, &vpRect);
-
-    // Viewport background
-    r->DrawRect(kColVp, 0, 0, vpW, vpH, SDL_BLENDMODE_NONE);
-
-    if (m_camera != nullptr)
+    // 패널 (앞 → 뒤 순서로 그림, back이 최상위)
+    for (auto& panel : m_panels)
     {
-        m_camera->SetViewport(vpW, vpH);
-        DrawViewportGrid(r);
-
-        m_scene.SetViewportOverride(vpW, vpH);
-        m_scene.Draw(r);
-
-        // Selection indicator
-        if (m_selectedObj != nullptr)
-        {
-            auto* t = m_selectedObj->GetComponent<IETransformComponent>();
-            if (t != nullptr)
-            {
-                auto sp = m_camera->WorldToScreen(t->GetX(), t->GetY(), t->GetZ());
-                constexpr int32_t kR = 14;
-                int32_t sx = sp.GetX();
-                int32_t sy = sp.GetY();
-                r->DrawLine(kColSel, sx - kR, sy - kR, sx + kR, sy - kR);
-                r->DrawLine(kColSel, sx + kR, sy - kR, sx + kR, sy + kR);
-                r->DrawLine(kColSel, sx + kR, sy + kR, sx - kR, sy + kR);
-                r->DrawLine(kColSel, sx - kR, sy + kR, sx - kR, sy - kR);
-            }
-        }
-
-        // Camera info overlay
-        if (m_font != nullptr)
-        {
-            char buf[64];
-            std::snprintf(buf, sizeof(buf), "cam (%.0f, %.0f)  zoom %.2f",
-                          m_camera->GetX(), m_camera->GetY(), m_camera->GetZoom());
-            r->DrawText(m_font, buf, { 120, 120, 120, 255 }, 6, 6);
-
-            int32_t objCount = static_cast<int32_t>(m_scene.GetObjects().size());
-            std::snprintf(buf, sizeof(buf), "objects: %d", objCount);
-            r->DrawText(m_font, buf, { 120, 120, 120, 255 }, 6, vpH - 20);
-        }
-    }
-
-    SDL_SetRenderViewport(sdlR, nullptr);
-}
-
-void IEMainEditorWindow::DrawViewportGrid(IERenderer* r)
-{
-    const int32_t vpW = ViewportW();
-    const int32_t vpH = ViewportH();
-
-    auto wTL = m_camera->ScreenToWorld(0, 0);
-    auto wBR = m_camera->ScreenToWorld(vpW, vpH);
-
-    float zoom     = m_camera->GetZoom();
-    float gridSize = 64.0f;
-    // Adapt grid spacing to zoom level
-    if (zoom < 0.25f) gridSize = 512.0f;
-    else if (zoom < 0.5f) gridSize = 256.0f;
-    else if (zoom > 4.0f) gridSize = 16.0f;
-    else if (zoom > 2.0f) gridSize = 32.0f;
-
-    float startX = std::floor(static_cast<float>(wTL.GetX()) / gridSize) * gridSize;
-    float startY = std::floor(static_cast<float>(wTL.GetY()) / gridSize) * gridSize;
-
-    for (float wx = startX; wx <= static_cast<float>(wBR.GetX()) + gridSize; wx += gridSize)
-    {
-        auto s1 = m_camera->WorldToScreen(wx, static_cast<float>(wTL.GetY()));
-        auto s2 = m_camera->WorldToScreen(wx, static_cast<float>(wBR.GetY()));
-        r->DrawLine(kColGrid, s1.GetX(), s1.GetY(), s2.GetX(), s2.GetY());
-    }
-    for (float wy = startY; wy <= static_cast<float>(wBR.GetY()) + gridSize; wy += gridSize)
-    {
-        auto s1 = m_camera->WorldToScreen(static_cast<float>(wTL.GetX()), wy);
-        auto s2 = m_camera->WorldToScreen(static_cast<float>(wBR.GetX()), wy);
-        r->DrawLine(kColGrid, s1.GetX(), s1.GetY(), s2.GetX(), s2.GetY());
-    }
-
-    // World origin cross
-    auto orig = m_camera->WorldToScreen(0.0f, 0.0f);
-    if (orig.GetX() >= -4 && orig.GetX() < vpW + 4 &&
-        orig.GetY() >= -4 && orig.GetY() < vpH + 4)
-    {
-        r->DrawLine(kColOrigin, orig.GetX() - 10, orig.GetY(), orig.GetX() + 10, orig.GetY());
-        r->DrawLine(kColOrigin, orig.GetX(), orig.GetY() - 10, orig.GetX(), orig.GetY() + 10);
+        if (panel.IsAlive())
+            panel.Draw();
     }
 }

@@ -55,13 +55,20 @@ void IEWindow::ResizeRenderer()
 	}
 }
 
+void IEWindow::StopDrawThread()
+{
+	if (m_drawThread == nullptr)
+		return;
+	m_shouldStop = true;
+	IECore::GetDrawWaiter()->notify_all();
+	m_drawThread->join();
+	m_drawThread.reset();
+	m_shouldStop = false;
+}
+
 void IEWindow::Reset()
 {
-	if (m_drawThread != nullptr)
-	{
-		m_drawThread->join();
-		m_drawThread.reset();
-	}
+	StopDrawThread();
 
 	// 렌더러 먼저 파괴 (슬롯이 모두 같은 포인터이므로 첫 번째만)
 	if (!m_renderers.empty() && m_renderers[0].m_renderer != nullptr)
@@ -129,11 +136,11 @@ void IEWindow::DrawThread()
 
 		//그릴 때 까지 대기
 		waiter->wait(lkWaiter, [&] {
-			return m_isDrawed == false || !IECore::IsRunning();
+			return m_shouldStop.load() || m_isDrawed == false || !IECore::IsRunning();
 			});
 
-		//엔진이 멈췄다
-		if (!IECore::IsRunning())
+		//스레드 정지 요청 or 엔진 종료
+		if (!IECore::IsRunning() || m_shouldStop.load())
 			return;
 
 		//창이 숨겨져있다

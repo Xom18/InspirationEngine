@@ -48,6 +48,61 @@ SDL_Rect IECore::m_textEditPosition;					// 텍스트 편집 사용중일때 커
 std::string IECore::m_pendingIMEComposition;
 bool IECore::m_imeCompositionDirty = false;
 
+std::mutex                                         IECore::m_pendingWindowsMutex;
+std::vector<std::pair<std::string, IEWindow*>>     IECore::m_pendingWindowsToAdd;
+std::vector<std::string>                           IECore::m_pendingWindowsToRemove;
+
+
+void IECore::ProcessPendingWindows()
+{
+	std::vector<std::pair<std::string, IEWindow*>> toAdd;
+	std::vector<std::string> toRemove;
+	{
+		std::lock_guard<std::mutex> lock(m_pendingWindowsMutex);
+		toAdd.swap(m_pendingWindowsToAdd);
+		toRemove.swap(m_pendingWindowsToRemove);
+	}
+
+	for (auto& [id, win] : toAdd)
+	{
+		if (m_windows.find(id) != m_windows.end())
+			continue;
+		m_windows[id] = std::unique_ptr<IEWindow>(win);
+		AddWindowIndex(win);
+		if (m_isRunning)
+			win->BeginDrawThread();
+	}
+
+	for (const auto& id : toRemove)
+	{
+		auto ite = m_windows.find(id);
+		if (ite == m_windows.end())
+			continue;
+
+		SDL_Window* sdlWin = ite->second->GetSDLWindow();
+		if (sdlWin != nullptr)
+			m_windowsByID.erase(SDL_GetWindowID(sdlWin));
+
+		ite->second->StopDrawThread();
+
+		if (ite->second.get() == m_mainWindow)
+			m_mainWindow = nullptr;
+
+		m_windows.erase(ite);
+	}
+}
+
+void IECore::RequestAddWindow(const char* id, IEWindow* window)
+{
+	std::lock_guard<std::mutex> lock(m_pendingWindowsMutex);
+	m_pendingWindowsToAdd.emplace_back(id, window);
+}
+
+void IECore::RequestRemoveWindow(const char* id)
+{
+	std::lock_guard<std::mutex> lock(m_pendingWindowsMutex);
+	m_pendingWindowsToRemove.emplace_back(id);
+}
 
 void IECore::MainThread()
 {
@@ -58,6 +113,7 @@ void IECore::MainThread()
 
 	while (m_isRunning)
 	{
+		ProcessPendingWindows();
 		auto now     = std::chrono::steady_clock::now();
 		auto elapsed = now - lastTime;
 		m_deltaTime   = std::chrono::duration<float>(elapsed).count();

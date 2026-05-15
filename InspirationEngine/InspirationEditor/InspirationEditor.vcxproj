@@ -45,13 +45,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)InspirationEngine\Binary\</OutDir>
+    <OutDir>$(SolutionDir)Binary\</OutDir>
     <IntDir>$(SolutionDir)Build\InspirationEditor\$(Configuration)\</IntDir>
     <TargetName>InspirationEditor_$(Configuration)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)InspirationEngine\Binary\</OutDir>
+    <OutDir>$(SolutionDir)Binary\</OutDir>
     <IntDir>$(SolutionDir)Build\InspirationEditor\$(Configuration)\</IntDir>
     <TargetName>InspirationEditor_$(Configuration)</TargetName>
   </PropertyGroup>
@@ -70,7 +70,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL3.lib;SDL3_image.lib;SDL3_mixer.lib;freetype.lib;harfbuzz.lib;InspirationEngine_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\ThirdParty\SDL\lib\x64;..\ThirdParty\freetype\lib\x64;..\ThirdParty\harfbuzz\lib\x64;$(SolutionDir)InspirationEngine\Binary\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\ThirdParty\SDL\lib\x64;..\ThirdParty\freetype\lib\x64;..\ThirdParty\harfbuzz\lib\x64;$(SolutionDir)Binary\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /I "..\ThirdParty\SDL\dll\x64\*.dll" "$(OutDir)" &amp;&amp; xcopy /Y /I "..\ThirdParty\harfbuzz\dll\x64\*.dll" "$(OutDir)"</Command>
@@ -95,7 +95,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL3.lib;SDL3_image.lib;SDL3_mixer.lib;freetype.lib;harfbuzz.lib;InspirationEngine_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\ThirdParty\SDL\lib\x64;..\ThirdParty\freetype\lib\x64;..\ThirdParty\harfbuzz\lib\x64;$(SolutionDir)InspirationEngine\Binary\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\ThirdParty\SDL\lib\x64;..\ThirdParty\freetype\lib\x64;..\ThirdParty\harfbuzz\lib\x64;$(SolutionDir)Binary\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /I "..\ThirdParty\SDL\dll\x64\*.dll" "$(OutDir)" &amp;&amp; xcopy /Y /I "..\ThirdParty\harfbuzz\dll\x64\*.dll" "$(OutDir)"</Command>
@@ -103,12 +103,25 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="IEAtlasEditorWindow.cpp" />
+    <ClCompile Include="IECameraPanel.cpp" />
+    <ClCompile Include="IEDockedPanel.cpp" />
+    <ClCompile Include="IEEntityListPanel.cpp" />
+    <ClCompile Include="IEFileBrowserPanel.cpp" />
+    <ClCompile Include="IEFloatingPanelWindow.cpp" />
     <ClCompile Include="IEMainEditorWindow.cpp" />
+    <ClCompile Include="IEViewportPanel.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IEAtlasEditorWindow.h" />
+    <ClInclude Include="IECameraPanel.h" />
+    <ClInclude Include="IEDockedPanel.h" />
+    <ClInclude Include="IEEditorPanel.h" />
+    <ClInclude Include="IEEntityListPanel.h" />
+    <ClInclude Include="IEFileBrowserPanel.h" />
+    <ClInclude Include="IEFloatingPanelWindow.h" />
     <ClInclude Include="IEMainEditorWindow.h" />
+    <ClInclude Include="IEViewportPanel.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

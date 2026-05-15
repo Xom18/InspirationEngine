@@ -122,6 +122,11 @@ public:
 	void BeginDrawThread();
 
 	/// <summary>
+	/// 드로우 스레드에 종료 신호를 보내고 조인. 엔진 구동 중 동적 창 제거 시 사용.
+	/// </summary>
+	void StopDrawThread();
+
+	/// <summary>
 	/// 드로우 스레드 종료 대기
 	/// </summary>
 	void JoinDrawThread()
@@ -176,6 +181,7 @@ private:
 	int32_t                      m_width              = 0;
 	int32_t                      m_height             = 0;
 	std::unique_ptr<std::thread> m_drawThread;
+	std::atomic<bool>            m_shouldStop{false};
 	bool                         m_drawThreadIsRunning = false;
 	bool                         m_isDrawed            = false;
 };

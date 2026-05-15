@@ -1,16 +1,23 @@
 #pragma once
 #include "../InspirationEngine/InspirationEngine.h"
+#include "IEDockedPanel.h"
+#include "IEViewportPanel.h"
+#include "IEFileBrowserPanel.h"
+#include "IEEntityListPanel.h"
+#include "IECameraPanel.h"
+#include <vector>
 #include <string>
+#include <atomic>
 
 class IEAtlasEditorWindow;
 
 class IEMainEditorWindow : public IEWindow
 {
 public:
-    virtual void Draw() override;
-    virtual void Update(float deltaTime) override;
-    virtual void CallXButton() override;
-    virtual void OnResize(int32_t w, int32_t h) override;
+    virtual void Draw()                          override;
+    virtual void Update(float deltaTime)         override;
+    virtual void CallXButton()                   override;
+    virtual void OnResize(int32_t w, int32_t h)  override;
 
     void InitWindow(IEFont* font, IEAtlasEditorWindow* atlasEditor);
 
@@ -18,41 +25,29 @@ public:
     static constexpr int32_t kMinH = 500;
 
 private:
-    void InitScene();
-    void DrawViewport();
-    void DrawViewportGrid(IERenderer* r);
-    void UpdateViewport();
-    void SelectAtViewportPos(int32_t vx, int32_t vy);
-    void OnFileBrowserSelect(const std::string& path);
+    void InitPanels(IEFont* font, IEAtlasEditorWindow* atlasEditor);
+    void LayoutPanels();
+    void ProcessUndock();
 
-    // Fixed layout dimensions
-    static constexpr int32_t kMenuH    = 40;
-    static constexpr int32_t kBrowserW = 220;
-
-    // Dynamic layout — derived from current window size
-    int32_t ViewportX() { return kBrowserW; }
-    int32_t ViewportY() { return kMenuH; }
-    int32_t ViewportW() { return GetWidth() - kBrowserW; }
-    int32_t ViewportH() { return GetHeight() - kMenuH; }
+    static constexpr int32_t  kMenuH    = 40;
+    static constexpr SDL_Color kColBg   = {  30,  30,  30, 255 };
+    static constexpr SDL_Color kColMenu = {  45,  45,  50, 255 };
+    static constexpr SDL_Color kColSep  = {  65,  65,  70, 255 };
+    static constexpr SDL_Color kColText = { 200, 200, 200, 255 };
 
     IEAtlasEditorWindow* m_atlasEditor = nullptr;
     IEFont*              m_font        = nullptr;
 
-    // UI
-    IEFileBrowser m_fileBrowser;
-    IEButton      m_btnAtlas;
+    IEButton m_btnAtlas;
 
-    // Scene / camera
-    IEScene          m_scene;
-    IECameraTopView* m_camera      = nullptr;  // observer, owned by m_scene
-    IEGameObject*    m_selectedObj = nullptr;
+    // 패널 리스트 (back = 최상위 z-order)
+    std::vector<IEDockedPanel> m_panels;
 
-    // Viewport interaction (RMB drag = pan, LMB click = select, scroll = zoom)
-    bool  m_vpDragging   = false;
-    float m_vpDragStartX = 0.0f;
-    float m_vpDragStartY = 0.0f;
-    float m_camStartX    = 0.0f;
-    float m_camStartY    = 0.0f;
-    bool  m_vpPrevLMB    = false;
-    bool  m_vpPrevRMB    = false;
+    // 빠른 접근용 raw 포인터 (소유권은 m_panels 안에 있음)
+    IEViewportPanel*   m_vpPanel     = nullptr;
+    IECameraPanel*     m_camPanel    = nullptr;
+    IEEntityListPanel* m_entityPanel = nullptr;
+
+    // 부동 창 ID 카운터 (스레드 안전)
+    std::atomic<int32_t> m_floatIdCounter{0};
 };
