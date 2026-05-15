@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
     constexpr int32_t kTickRate = 1000 / 60;
 
     auto* mainWin = new IEAtlasEditorWindow();
-    mainWin->CreateWindow("InspirationEditor — Atlas Editor", 1024, 720);
+    mainWin->CreateWindow("InspirationEditor — Atlas Editor", 1280, 720);
     IECore::AddNewWindow("main", mainWin);
     IECore::AddWindowIndex(mainWin);
 

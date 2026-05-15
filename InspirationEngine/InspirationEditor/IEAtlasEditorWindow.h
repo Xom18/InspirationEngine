@@ -25,17 +25,21 @@ private:
         std::string name;
     };
 
-    static constexpr int32_t kWinW    = 1024;
-    static constexpr int32_t kWinH    = 720;
-    static constexpr int32_t kHeaderH = 44;
-    static constexpr int32_t kFooterH = 44;
-    static constexpr int32_t kPanelW  = 260;
-    static constexpr int32_t kCanvasX = 0;
-    static constexpr int32_t kCanvasY = kHeaderH;
-    static constexpr int32_t kCanvasW = kWinW - kPanelW;
-    static constexpr int32_t kCanvasH = kWinH - kHeaderH - kFooterH;
+    static constexpr int32_t kWinW     = 1280;
+    static constexpr int32_t kWinH     = 720;
+    static constexpr int32_t kHeaderH  = 44;
+    static constexpr int32_t kFooterH  = 44;
+    static constexpr int32_t kBrowserW = 200;
+    static constexpr int32_t kPanelW   = 260;
+    static constexpr int32_t kCanvasX  = kBrowserW;
+    static constexpr int32_t kCanvasY  = kHeaderH;
+    static constexpr int32_t kCanvasW  = kWinW - kBrowserW - kPanelW;
+    static constexpr int32_t kCanvasH  = kWinH - kHeaderH - kFooterH;
 
+    bool LoadPNGFromPath(const std::string& path);
     void LoadPNG();
+    void LoadJSON(const std::string& path);
+    void OnFileBrowserSelect(const std::string& path);
     void AutoSplit();
     void SaveJSON();
     void ApplyPanel();
@@ -61,9 +65,17 @@ private:
     std::vector<TileDef> m_tiles;
     int32_t              m_selectedTile = -1;
 
+    // File browser panel
+    IEFileBrowser m_fileBrowser;
+    IETextBox     m_tbBrowserPath;
+    IEButton      m_btnSetPath;
+
+    // Atlas header
     IETextBox m_tbPath;
     IETextBox m_tbTileW;
     IETextBox m_tbTileH;
+
+    // Atlas tile property panel
     IETextBox m_tbName;
     IETextBox m_tbX;
     IETextBox m_tbY;
