@@ -57,6 +57,30 @@ public:
 		return m_mouseDelta;
 	}
 
+	/// <summary>
+	/// 마우스 휠 Y 누적량 추가 (프레임 내 여러 이벤트 합산)
+	/// </summary>
+	void AddMouseWheelY(float y)
+	{
+		m_mouseWheelY += y;
+	}
+
+	/// <summary>
+	/// 마우스 휠 Y 누적량 반환 (양수: 위, 음수: 아래)
+	/// </summary>
+	float GetMouseWheelY() const
+	{
+		return m_mouseWheelY;
+	}
+
+	/// <summary>
+	/// 매 프레임 시작 시 휠 누적량 초기화
+	/// </summary>
+	void ResetWheelY()
+	{
+		m_mouseWheelY = 0.0f;
+	}
+
 private:
 	bool      m_keyInput[SDL_SCANCODE_COUNT] = { false, };
 	bool      m_isTextEditting               = false;
@@ -64,4 +88,5 @@ private:
 	Uint32    m_mouseStatus                  = 0;
 	IEVector2 m_mousePos;
 	IEVector2 m_mouseDelta;
+	float     m_mouseWheelY                  = 0.0f;
 };

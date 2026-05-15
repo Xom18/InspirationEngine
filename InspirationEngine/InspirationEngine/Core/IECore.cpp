@@ -93,6 +93,8 @@ void IECore::MainThread()
 
 void IECore::OperateEvent()
 {
+	m_Input.ResetWheelY();
+
 	//큐에서 이벤트 가져옴 + pending IME composition 수거
 	std::deque<SDL_Event> eventQueue;
 	std::string pendingIME;
@@ -140,6 +142,11 @@ void IECore::OperateEvent()
 		case SDL_EVENT_KEY_UP:
 		{
 			m_Input.SetKeyState(Event.key.scancode, Event.key.down);
+		}
+		break;
+		case SDL_EVENT_MOUSE_WHEEL:
+		{
+			m_Input.AddMouseWheelY(Event.wheel.y);
 		}
 		break;
 		case SDL_EVENT_WINDOW_RESIZED:

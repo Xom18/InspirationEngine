@@ -21,8 +21,10 @@
 #include "Text/IETextRenderer.h"//FreeType+HarfBuzz 렌더링 유틸리티
 #include "Input/IEInput.h"		//입력 처리
 #include "UI/IEUIBase.h"			//UI 위젯 공통 베이스
+#include "UI/IELabel.h"				//UI-레이블
 #include "UI/IETextBox.h"			//UI-텍스트박스
 #include "UI/IEButton.h"			//UI-버튼
+#include "UI/IEScrollView.h"		//UI-스크롤뷰
 #include "Input/MouseCusor.h"	//마우스 커서
 #include "Window/IERenderer.h"	//렌더러
 #include "Window/IEWindow.h"	//창
