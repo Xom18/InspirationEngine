@@ -86,6 +86,31 @@ void IERenderer::DrawSurface(SDL_Surface* surface, int32_t x, int32_t y, double 
 	SDL_DestroyTexture(pTexture);
 }
 
+void IERenderer::DrawTextureRect(SDL_Texture* texture, int32_t x, int32_t y, int32_t w, int32_t h)
+{
+	float texW = 0.0f, texH = 0.0f;
+	if (!SDL_GetTextureSize(texture, &texW, &texH))
+		return;
+
+	SDL_FRect src = { 0.0f, 0.0f, texW, texH };
+	SDL_FRect dst = {
+		static_cast<float>(x), static_cast<float>(y),
+		static_cast<float>(w), static_cast<float>(h)
+	};
+	SDL_RenderTexture(m_renderer, texture, &src, &dst);
+}
+
+void IERenderer::DrawSurfaceRect(SDL_Surface* surface, int32_t x, int32_t y, int32_t w, int32_t h)
+{
+	SDL_Texture* tex = SDL_CreateTextureFromSurface(m_renderer, surface);
+	if (tex == nullptr)
+		return;
+
+	SDL_SetTextureScaleMode(tex, SDL_SCALEMODE_LINEAR);
+	DrawTextureRect(tex, x, y, w, h);
+	SDL_DestroyTexture(tex);
+}
+
 void IERenderer::DrawLine(SDL_Color color, int32_t x1, int32_t y1, int32_t x2, int32_t y2)
 {
 	SDL_SetRenderDrawColor(m_renderer, color.r, color.g, color.b, color.a);

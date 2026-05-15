@@ -117,6 +117,26 @@ public:
 	void DrawText(IEFont* font, const char* text, SDL_Color color, int32_t x, int32_t y, double widthPercent = 100, double heightPercent = 100, double angle = 0, SDL_FPoint* pivot = nullptr, SDL_FlipMode flip = SDL_FLIP_NONE);
 
 	/// <summary>
+	/// 텍스쳐를 픽셀 크기로 그리기
+	/// </summary>
+	/// <param name="texture">그릴 텍스쳐</param>
+	/// <param name="x">화면 X</param>
+	/// <param name="y">화면 Y</param>
+	/// <param name="w">출력 너비 (px)</param>
+	/// <param name="h">출력 높이 (px)</param>
+	void DrawTextureRect(SDL_Texture* texture, int32_t x, int32_t y, int32_t w, int32_t h);
+
+	/// <summary>
+	/// 서페이스를 픽셀 크기로 그리기
+	/// </summary>
+	/// <param name="surface">그릴 서페이스</param>
+	/// <param name="x">화면 X</param>
+	/// <param name="y">화면 Y</param>
+	/// <param name="w">출력 너비 (px)</param>
+	/// <param name="h">출력 높이 (px)</param>
+	void DrawSurfaceRect(SDL_Surface* surface, int32_t x, int32_t y, int32_t w, int32_t h);
+
+	/// <summary>
 	/// 선 그리기
 	/// </summary>
 	void DrawLine(SDL_Color color, int32_t x1, int32_t y1, int32_t x2, int32_t y2);
