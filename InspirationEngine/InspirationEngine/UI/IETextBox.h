@@ -43,7 +43,7 @@ private:
 	SDL_Rect     m_rect      = {};
 };
 
-class IETextBox : public IEMenu
+class IETextBox : public IEUIBase
 {
 public:
 	IETextBox()

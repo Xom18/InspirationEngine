@@ -20,8 +20,9 @@
     <ClInclude Include="Input\IEInput.h" />
     <ClInclude Include="Input\MouseCusor.h" />
     <ClInclude Include="UI\Interface.h" />
-    <ClInclude Include="UI\IEMenu.h" />
+    <ClInclude Include="UI\IEUIBase.h" />
     <ClInclude Include="UI\IETextBox.h" />
+    <ClInclude Include="UI\IEButton.h" />
     <ClInclude Include="Text\IEFont.h" />
     <ClInclude Include="Text\IETextRenderer.h" />
     <ClInclude Include="Util\IEStrUTF8.h" />
@@ -50,8 +51,9 @@
     <ClCompile Include="Input\IEInput.cpp" />
     <ClCompile Include="Input\MouseCusor.cpp" />
     <ClCompile Include="UI\Interface.cpp" />
-    <ClCompile Include="UI\Menu.cpp" />
+    <ClCompile Include="UI\IEUIBase.cpp" />
     <ClCompile Include="UI\IETextBox.cpp" />
+    <ClCompile Include="UI\IEButton.cpp" />
     <ClCompile Include="Text\IEFont.cpp" />
     <ClCompile Include="Text\IETextRenderer.cpp" />
     <ClCompile Include="Util\IEStrUTF8.cpp" />

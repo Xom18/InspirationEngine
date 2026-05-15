@@ -43,7 +43,6 @@ private:
     void FillPanelFromSelected();
     void SetFocus(IETextBox* tb);
     bool HitTest(const SDL_Rect& r, int32_t x, int32_t y) const;
-    void DrawBtn(IERenderer* r, const SDL_Rect& rect, const char* label);
 
     IEFont* m_font = nullptr;
 
@@ -75,11 +74,10 @@ private:
 
     IETextBox* m_focusedBox = nullptr;
 
-    SDL_Rect m_btnLoad  = {};
-    SDL_Rect m_btnApply = {};
-    SDL_Rect m_btnSave  = {};
+    IEButton m_btnLoad;
+    IEButton m_btnApply;
+    IEButton m_btnSave;
 
     bool        m_prevLMB  = false;
-    std::string m_pngDir;
     std::string m_statusMsg;
 };

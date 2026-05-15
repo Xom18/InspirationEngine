@@ -3,27 +3,22 @@
 #include <SDL3_image/SDL_image.h>
 #include <filesystem>
 #include <fstream>
-#include <sstream>
 
 namespace fs = std::filesystem;
 
-static SDL_Color kColBg      = { 40,  40,  40, 255 };
-static SDL_Color kColHeader  = { 55,  55,  60, 255 };
-static SDL_Color kColPanel   = { 50,  50,  55, 255 };
-static SDL_Color kColFooter  = { 55,  55,  60, 255 };
-static SDL_Color kColGrid    = { 80,  80,  80, 255 };
-static SDL_Color kColSel     = { 220,  50,  50, 255 };
-static SDL_Color kColBtn     = { 70,  90, 120, 255 };
-static SDL_Color kColBtnHov  = { 90, 115, 150, 255 };
-static SDL_Color kColText    = { 220, 220, 220, 255 };
-static SDL_Color kColTbBg    = { 30,  30,  35, 255 };
-static SDL_Color kColTbBor   = { 90,  90,  95, 255 };
-static SDL_Color kColTbFoc   = { 70, 130, 180, 255 };
+static SDL_Color kColBg     = {  40,  40,  40, 255 };
+static SDL_Color kColHeader = {  55,  55,  60, 255 };
+static SDL_Color kColPanel  = {  50,  50,  55, 255 };
+static SDL_Color kColFooter = {  55,  55,  60, 255 };
+static SDL_Color kColGrid   = {  80,  80,  80, 255 };
+static SDL_Color kColSel    = { 220,  50,  50, 255 };
+static SDL_Color kColText   = { 220, 220, 220, 255 };
+static SDL_Color kColTbBor  = {  90,  90,  95, 255 };
+static SDL_Color kColTbFoc  = {  70, 130, 180, 255 };
 
 void IEAtlasEditorWindow::InitWindow(IEFont* font)
 {
     m_font = font;
-
     IERenderer* r = GetRenderer(0);
 
     // Header text boxes
@@ -50,11 +45,11 @@ void IEAtlasEditorWindow::InitWindow(IEFont* font)
     m_tbTileH.SetText("16");
     m_tbTileH.SetCursorPos(0);
 
-    // Panel text boxes (x offset = kCanvasW + 8)
-    int32_t px = kCanvasW + 8;
-    int32_t py = kHeaderH + 8;
-    int32_t pw = kPanelW - 16;
-    int32_t ph = 22;
+    // Panel text boxes
+    int32_t px  = kCanvasW + 8;
+    int32_t py  = kHeaderH + 8;
+    int32_t pw  = kPanelW - 16;
+    int32_t ph  = 22;
     int32_t gap = 28;
 
     m_tbName.SetFont(font);
@@ -113,9 +108,26 @@ void IEAtlasEditorWindow::InitWindow(IEFont* font)
     m_tbPivotY.SetCursorPos(0);
 
     // Buttons
-    m_btnLoad  = { 790, 8,  80, 28 };
-    m_btnApply = { kCanvasW + 8, kWinH - kFooterH - 36, kPanelW - 16, 28 };
-    m_btnSave  = { 8, kWinH - kFooterH + 8, 120, 28 };
+    m_btnLoad.SetFont(font);
+    m_btnLoad.SetRenderer(r);
+    m_btnLoad.SetRect(790, 8, 80, 28);
+    m_btnLoad.SetLabel("Load");
+    m_btnLoad.SetOwnerWindow(this);
+    m_btnLoad.SetCallback([this]() { LoadPNG(); });
+
+    m_btnApply.SetFont(font);
+    m_btnApply.SetRenderer(r);
+    m_btnApply.SetRect(kCanvasW + 8, kWinH - kFooterH - 36, kPanelW - 16, 28);
+    m_btnApply.SetLabel("Apply");
+    m_btnApply.SetOwnerWindow(this);
+    m_btnApply.SetCallback([this]() { ApplyPanel(); });
+
+    m_btnSave.SetFont(font);
+    m_btnSave.SetRenderer(r);
+    m_btnSave.SetRect(8, kWinH - kFooterH + 8, 120, 28);
+    m_btnSave.SetLabel("Save JSON");
+    m_btnSave.SetOwnerWindow(this);
+    m_btnSave.SetCallback([this]() { SaveJSON(); });
 }
 
 void IEAtlasEditorWindow::CallXButton()
@@ -126,12 +138,6 @@ void IEAtlasEditorWindow::CallXButton()
 bool IEAtlasEditorWindow::HitTest(const SDL_Rect& r, int32_t x, int32_t y) const
 {
     return x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
-}
-
-void IEAtlasEditorWindow::DrawBtn(IERenderer* r, const SDL_Rect& rect, const char* label)
-{
-    r->DrawRect(kColBtn, rect.x, rect.y, rect.w, rect.h, SDL_BLENDMODE_NONE);
-    r->DrawText(m_font, label, kColText, rect.x + 4, rect.y + 4);
 }
 
 static void DrawTextBoxBg(IERenderer* r, IETextBox* tb, bool focused, SDL_Color colBor)
@@ -154,36 +160,23 @@ void IEAtlasEditorWindow::Draw()
 
     SDL_Renderer* sdlR = r->GetSDLRenderer();
 
-    // Background
-    r->DrawRect(kColBg, 0, 0, kWinW, kWinH, SDL_BLENDMODE_NONE);
+    r->DrawRect(kColBg,     0,        0,        kWinW,   kWinH,        SDL_BLENDMODE_NONE);
+    r->DrawRect(kColHeader, 0,        0,        kWinW,   kHeaderH,     SDL_BLENDMODE_NONE);
+    r->DrawRect(kColPanel,  kCanvasW, 0,        kPanelW, kWinH,        SDL_BLENDMODE_NONE);
+    r->DrawRect(kColFooter, 0,        kWinH - kFooterH, kWinW, kFooterH, SDL_BLENDMODE_NONE);
 
-    // Header
-    r->DrawRect(kColHeader, 0, 0, kWinW, kHeaderH, SDL_BLENDMODE_NONE);
+    r->DrawText(m_font, "PNG:", kColText, 4,   12);
+    r->DrawText(m_font, "W:",   kColText, 594, 12);
+    r->DrawText(m_font, "H:",   kColText, 694, 12);
 
-    // Panel
-    r->DrawRect(kColPanel, kCanvasW, 0, kPanelW, kWinH, SDL_BLENDMODE_NONE);
+    DrawTextBoxBg(r, &m_tbPath,  m_focusedBox == &m_tbPath,  kColTbBor);  m_tbPath.Draw();
+    DrawTextBoxBg(r, &m_tbTileW, m_focusedBox == &m_tbTileW, kColTbBor);  m_tbTileW.Draw();
+    DrawTextBoxBg(r, &m_tbTileH, m_focusedBox == &m_tbTileH, kColTbBor);  m_tbTileH.Draw();
+    m_btnLoad.Draw();
 
-    // Footer
-    r->DrawRect(kColFooter, 0, kWinH - kFooterH, kWinW, kFooterH, SDL_BLENDMODE_NONE);
-
-    // Header labels
-    r->DrawText(m_font, "PNG:", kColText, 4, 12);
-    r->DrawText(m_font, "W:", kColText, 594, 12);
-    r->DrawText(m_font, "H:", kColText, 694, 12);
-
-    // Header text boxes
-    DrawTextBoxBg(r, &m_tbPath, m_focusedBox == &m_tbPath, kColTbBor);
-    m_tbPath.Draw();
-    DrawTextBoxBg(r, &m_tbTileW, m_focusedBox == &m_tbTileW, kColTbBor);
-    m_tbTileW.Draw();
-    DrawTextBoxBg(r, &m_tbTileH, m_focusedBox == &m_tbTileH, kColTbBor);
-    m_tbTileH.Draw();
-    DrawBtn(r, m_btnLoad, "[Load]");
-
-    // Canvas — PNG + grid + selection
+    // Canvas
     if (m_texture != nullptr && m_imgW > 0 && m_imgH > 0)
     {
-        // Fit image into canvas area
         float scaleX = static_cast<float>(kCanvasW) / static_cast<float>(m_imgW);
         float scaleY = static_cast<float>(kCanvasH) / static_cast<float>(m_imgH);
         float scale  = (scaleX < scaleY) ? scaleX : scaleY;
@@ -201,7 +194,6 @@ void IEAtlasEditorWindow::Draw()
         };
         SDL_RenderTexture(sdlR, m_texture, nullptr, &dst);
 
-        // Grid lines
         if (m_tileW > 0 && m_tileH > 0)
         {
             int32_t cols = m_imgW / m_tileW;
@@ -218,7 +210,6 @@ void IEAtlasEditorWindow::Draw()
                 r->DrawLine(kColGrid, m_canvasDrawX, ly, m_canvasDrawX + m_canvasDrawW, ly);
             }
 
-            // Selected tile highlight
             if (m_selectedTile >= 0 && m_selectedTile < static_cast<int32_t>(m_tiles.size()))
             {
                 const TileDef& td = m_tiles[m_selectedTile];
@@ -234,66 +225,62 @@ void IEAtlasEditorWindow::Draw()
         }
     }
 
-    // Panel labels + text boxes
-    int32_t px = kCanvasW + 8;
-    int32_t py = kHeaderH + 8;
+    // Panel
+    int32_t px  = kCanvasW + 8;
+    int32_t py  = kHeaderH + 8;
     int32_t gap = 28;
 
     r->DrawText(m_font, "name:", kColText, px, py + 3);
-    DrawTextBoxBg(r, &m_tbName, m_focusedBox == &m_tbName, kColTbBor);
-    m_tbName.Draw();
+    DrawTextBoxBg(r, &m_tbName,   m_focusedBox == &m_tbName,   kColTbBor);  m_tbName.Draw();
     py += gap;
 
     r->DrawText(m_font, "x:", kColText, px, py + 3);
-    DrawTextBoxBg(r, &m_tbX, m_focusedBox == &m_tbX, kColTbBor);
-    m_tbX.Draw();
+    DrawTextBoxBg(r, &m_tbX,      m_focusedBox == &m_tbX,      kColTbBor);  m_tbX.Draw();
     py += gap;
 
     r->DrawText(m_font, "y:", kColText, px, py + 3);
-    DrawTextBoxBg(r, &m_tbY, m_focusedBox == &m_tbY, kColTbBor);
-    m_tbY.Draw();
+    DrawTextBoxBg(r, &m_tbY,      m_focusedBox == &m_tbY,      kColTbBor);  m_tbY.Draw();
     py += gap;
 
     r->DrawText(m_font, "w:", kColText, px, py + 3);
-    DrawTextBoxBg(r, &m_tbTW, m_focusedBox == &m_tbTW, kColTbBor);
-    m_tbTW.Draw();
+    DrawTextBoxBg(r, &m_tbTW,     m_focusedBox == &m_tbTW,     kColTbBor);  m_tbTW.Draw();
     py += gap;
 
     r->DrawText(m_font, "h:", kColText, px, py + 3);
-    DrawTextBoxBg(r, &m_tbTH, m_focusedBox == &m_tbTH, kColTbBor);
-    m_tbTH.Draw();
+    DrawTextBoxBg(r, &m_tbTH,     m_focusedBox == &m_tbTH,     kColTbBor);  m_tbTH.Draw();
     py += gap;
 
     r->DrawText(m_font, "pivX:", kColText, px, py + 3);
-    DrawTextBoxBg(r, &m_tbPivotX, m_focusedBox == &m_tbPivotX, kColTbBor);
-    m_tbPivotX.Draw();
+    DrawTextBoxBg(r, &m_tbPivotX, m_focusedBox == &m_tbPivotX, kColTbBor);  m_tbPivotX.Draw();
     py += gap;
 
     r->DrawText(m_font, "pivY:", kColText, px, py + 3);
-    DrawTextBoxBg(r, &m_tbPivotY, m_focusedBox == &m_tbPivotY, kColTbBor);
-    m_tbPivotY.Draw();
+    DrawTextBoxBg(r, &m_tbPivotY, m_focusedBox == &m_tbPivotY, kColTbBor);  m_tbPivotY.Draw();
 
-    // Apply button
-    DrawBtn(r, m_btnApply, "[Apply]");
+    m_btnApply.Draw();
 
     // Footer
     r->DrawText(m_font, m_statusMsg.c_str(), kColText, 150, kWinH - kFooterH + 12);
-    DrawBtn(r, m_btnSave, "[Save JSON]");
+    m_btnSave.Draw();
 
-    // Tile count
     std::string tileCount = "tiles: " + std::to_string(m_tiles.size());
     r->DrawText(m_font, tileCount.c_str(), kColText, 400, kWinH - kFooterH + 12);
 }
 
 void IEAtlasEditorWindow::Update(float /*deltaTime*/)
 {
+    // Buttons handle their own hover/click
+    m_btnLoad.Update();
+    m_btnApply.Update();
+    m_btnSave.Update();
+
     if (IECore::GetMouseOnWindow() != this)
     {
         m_prevLMB = false;
         return;
     }
 
-    float gx, gy;
+    float gx = 0.0f, gy = 0.0f;
     SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
 
     int32_t winX = 0, winY = 0;
@@ -302,7 +289,7 @@ void IEAtlasEditorWindow::Update(float /*deltaTime*/)
     int32_t mx = static_cast<int32_t>(gx) - winX;
     int32_t my = static_cast<int32_t>(gy) - winY;
 
-    bool lmb = (btn & SDL_BUTTON_LMASK) != 0;
+    bool lmb     = (btn & SDL_BUTTON_LMASK) != 0;
     bool clicked = lmb && !m_prevLMB;
     m_prevLMB = lmb;
 
@@ -318,42 +305,34 @@ void IEAtlasEditorWindow::SetFocus(IETextBox* tb)
 
 void IEAtlasEditorWindow::OnClick(int32_t mx, int32_t my)
 {
-    // Header text boxes
+    // Buttons are handled by IEButton::Update()
+    // Only handle text box focus and canvas tile selection here
+
     SDL_Rect rect = {};
 
     m_tbPath.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbPath); return; }
+    if (HitTest(rect, mx, my)) { SetFocus(&m_tbPath);   return; }
 
     m_tbTileW.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbTileW); return; }
+    if (HitTest(rect, mx, my)) { SetFocus(&m_tbTileW);  return; }
 
     m_tbTileH.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbTileH); return; }
+    if (HitTest(rect, mx, my)) { SetFocus(&m_tbTileH);  return; }
 
-    // Load button
-    if (HitTest(m_btnLoad, mx, my)) { LoadPNG(); return; }
-
-    // Save button
-    if (HitTest(m_btnSave, mx, my)) { SaveJSON(); return; }
-
-    // Apply button
-    if (HitTest(m_btnApply, mx, my)) { ApplyPanel(); return; }
-
-    // Panel text boxes
     m_tbName.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbName); return; }
+    if (HitTest(rect, mx, my)) { SetFocus(&m_tbName);   return; }
 
     m_tbX.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbX); return; }
+    if (HitTest(rect, mx, my)) { SetFocus(&m_tbX);      return; }
 
     m_tbY.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbY); return; }
+    if (HitTest(rect, mx, my)) { SetFocus(&m_tbY);      return; }
 
     m_tbTW.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbTW); return; }
+    if (HitTest(rect, mx, my)) { SetFocus(&m_tbTW);     return; }
 
     m_tbTH.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbTH); return; }
+    if (HitTest(rect, mx, my)) { SetFocus(&m_tbTH);     return; }
 
     m_tbPivotX.GetRect(rect);
     if (HitTest(rect, mx, my)) { SetFocus(&m_tbPivotX); return; }
@@ -378,7 +357,7 @@ void IEAtlasEditorWindow::OnClick(int32_t mx, int32_t my)
             int32_t col = imgPxX / m_tileW;
             int32_t row = imgPxY / m_tileH;
             int32_t cols = m_imgW / m_tileW;
-            int32_t idx = row * cols + col;
+            int32_t idx  = row * cols + col;
 
             if (idx >= 0 && idx < static_cast<int32_t>(m_tiles.size()))
             {
@@ -447,8 +426,8 @@ void IEAtlasEditorWindow::LoadPNG()
         SDL_DestroyTexture(m_texture);
 
     m_surface = surf;
-    m_imgW = surf->w;
-    m_imgH = surf->h;
+    m_imgW    = surf->w;
+    m_imgH    = surf->h;
 
     SDL_Renderer* sdlR = GetRenderer(0)->GetSDLRenderer();
     m_texture = SDL_CreateTextureFromSurface(sdlR, surf);
@@ -458,11 +437,8 @@ void IEAtlasEditorWindow::LoadPNG()
     if (m_tileW <= 0) m_tileW = 32;
     if (m_tileH <= 0) m_tileH = 16;
 
-    fs::path p(path);
-    m_pngDir = p.parent_path().string();
-
     AutoSplit();
-    m_statusMsg = "Loaded: " + p.filename().string();
+    m_statusMsg = "Loaded: " + fs::path(path).filename().string();
 }
 
 void IEAtlasEditorWindow::AutoSplit()
@@ -473,8 +449,8 @@ void IEAtlasEditorWindow::AutoSplit()
     if (m_tileW <= 0 || m_tileH <= 0 || m_imgW <= 0 || m_imgH <= 0)
         return;
 
-    int32_t cols = m_imgW / m_tileW;
-    int32_t rows = m_imgH / m_tileH;
+    int32_t cols         = m_imgW / m_tileW;
+    int32_t rows         = m_imgH / m_tileH;
     int32_t defaultPivotX = m_tileW / 2;
     int32_t defaultPivotY = m_tileH / 2;
 
@@ -508,16 +484,11 @@ void IEAtlasEditorWindow::SaveJSON()
     std::string outPath = (p.parent_path() / p.stem()).string() + ".json";
 
     nlohmann::json j;
-    j["image"] = p.filename().string();
+    j["image"]    = p.filename().string();
     j["tileStep"] = { {"x", m_tileW}, {"y", m_tileH} };
 
-    int32_t defaultPivotX = m_tileW / 2;
-    int32_t defaultPivotY = m_tileH / 2;
-    if (!m_tiles.empty())
-    {
-        defaultPivotX = m_tiles[0].pivotX;
-        defaultPivotY = m_tiles[0].pivotY;
-    }
+    int32_t defaultPivotX = m_tiles[0].pivotX;
+    int32_t defaultPivotY = m_tiles[0].pivotY;
     j["defaultPivotX"] = defaultPivotX;
     j["defaultPivotY"] = defaultPivotY;
 
