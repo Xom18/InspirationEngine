@@ -15,8 +15,8 @@ void IEScene::Draw(IERenderer* renderer)
 {
 	if (m_camera != nullptr)
 	{
-		int32_t vw = renderer->GetW();
-		int32_t vh = renderer->GetH();
+		int32_t vw = (m_vpOverrideW > 0) ? m_vpOverrideW : renderer->GetW();
+		int32_t vh = (m_vpOverrideH > 0) ? m_vpOverrideH : renderer->GetH();
 		m_camera->SetViewport(vw, vh);
 	}
 

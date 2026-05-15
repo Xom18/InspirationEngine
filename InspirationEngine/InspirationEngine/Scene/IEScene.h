@@ -58,7 +58,16 @@ public:
 
 	const std::vector<std::unique_ptr<IEGameObject>>& GetObjects() const { return m_objects; }
 
+	/// <summary>
+	/// Draw 시 renderer 크기 대신 지정 크기를 카메라 뷰포트로 사용.
+	/// 에디터 서브뷰포트 렌더링용.
+	/// </summary>
+	void SetViewportOverride(int32_t w, int32_t h) { m_vpOverrideW = w; m_vpOverrideH = h; }
+	void ClearViewportOverride()                   { m_vpOverrideW = 0; m_vpOverrideH = 0; }
+
 private:
 	std::vector<std::unique_ptr<IEGameObject>> m_objects;
 	std::unique_ptr<IECamera>                  m_camera;
+	int32_t                                    m_vpOverrideW = 0;
+	int32_t                                    m_vpOverrideH = 0;
 };
