@@ -59,3 +59,5 @@ CodeAnalysisResultManifest.txt
 #font
 *.ttf
 .vs
+.claude/
+*/.claude/*
