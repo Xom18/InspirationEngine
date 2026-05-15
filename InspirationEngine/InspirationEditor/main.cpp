@@ -1,6 +1,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include "IEMainEditorWindow.h"
 #include "IEAtlasEditorWindow.h"
 
 int main(int argc, char* argv[])
@@ -22,17 +23,25 @@ int main(int argc, char* argv[])
 
     constexpr int32_t kTickRate = 1000 / 60;
 
-    auto* mainWin = new IEAtlasEditorWindow();
-    mainWin->CreateWindow("InspirationEditor — Atlas Editor", 1280, 720);
+    auto* mainWin  = new IEMainEditorWindow();
+    auto* atlasWin = new IEAtlasEditorWindow();
+
+    mainWin->CreateWindow("InspirationEditor", 1280, 720);
     IECore::AddNewWindow("main", mainWin);
     IECore::AddWindowIndex(mainWin);
+
+    atlasWin->CreateWindow("InspirationEditor — Atlas Editor", 1280, 720);
+    atlasWin->HideWindow();
+    IECore::AddNewWindow("atlas", atlasWin);
+    IECore::AddWindowIndex(atlasWin);
 
     IECore::SetTickRate(kTickRate);
 
     IECore::GetFont().AddNewFont(0, "Data/H2PORL.TTF", 14);
     IEFont* font = IECore::GetFont().GetFont(0);
 
-    mainWin->InitWindow(font);
+    mainWin->InitWindow(font, atlasWin);
+    atlasWin->InitWindow(font);
 
     IECore::BeginEngine();
 

@@ -535,6 +535,12 @@ void IEAtlasEditorWindow::LoadJSON(const std::string& jsonPath)
                 + " (" + std::to_string(m_tiles.size()) + " tiles)";
 }
 
+void IEAtlasEditorWindow::OpenWithFile(const std::string& path)
+{
+    ShowWindow();
+    OnFileBrowserSelect(path);
+}
+
 void IEAtlasEditorWindow::OnFileBrowserSelect(const std::string& path)
 {
     std::string ext = fs::path(path).extension().string();

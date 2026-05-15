@@ -12,6 +12,7 @@ public:
     virtual void CallXButton() override;
 
     void InitWindow(IEFont* font);
+    void OpenWithFile(const std::string& path);
 
 private:
     struct TileDef
