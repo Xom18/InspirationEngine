@@ -104,10 +104,8 @@
   <ItemGroup>
     <ClCompile Include="IEAtlasEditorWindow.cpp" />
     <ClCompile Include="IECameraPanel.cpp" />
-    <ClCompile Include="IEDockedPanel.cpp" />
     <ClCompile Include="IEEntityListPanel.cpp" />
     <ClCompile Include="IEFileBrowserPanel.cpp" />
-    <ClCompile Include="IEFloatingPanelWindow.cpp" />
     <ClCompile Include="IEMainEditorWindow.cpp" />
     <ClCompile Include="IEViewportPanel.cpp" />
     <ClCompile Include="main.cpp" />
@@ -115,7 +113,6 @@
   <ItemGroup>
     <ClInclude Include="IEAtlasEditorWindow.h" />
     <ClInclude Include="IECameraPanel.h" />
-    <ClInclude Include="IEDockedPanel.h" />
     <ClInclude Include="IEEditorPanel.h" />
     <ClInclude Include="IEEntityListPanel.h" />
     <ClInclude Include="IEFileBrowserPanel.h" />

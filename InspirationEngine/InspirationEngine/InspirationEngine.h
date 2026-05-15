@@ -32,6 +32,9 @@
 #include "Input/MouseCusor.h"	//마우스 커서
 #include "Window/IERenderer.h"	//렌더러
 #include "Window/IEWindow.h"	//창
+#include "UI/IEPanel.h"				//UI-패널 기반
+#include "UI/IEDockedPanel.h"		//UI-도킹패널
+#include "UI/IEFloatingPanel.h"		//UI-플로팅패널
 #include "Sprite/IESpriteManager.h"	//스프라이트 관리
 #include "Sprite/IEAtlasManager.h"	//타일 아틀라스 관리
 #include "GameObject/IEGameObject.h"	//게임 오브젝트 기반

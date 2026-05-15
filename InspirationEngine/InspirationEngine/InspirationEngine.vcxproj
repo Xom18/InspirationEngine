@@ -29,6 +29,9 @@
     <ClInclude Include="UI\IETreeView.h" />
     <ClInclude Include="UI\IESlider.h" />
     <ClInclude Include="UI\IEFileBrowser.h" />
+    <ClInclude Include="UI\IEPanel.h" />
+    <ClInclude Include="UI\IEDockedPanel.h" />
+    <ClInclude Include="UI\IEFloatingPanel.h" />
     <ClInclude Include="Text\IEFont.h" />
     <ClInclude Include="Text\IETextRenderer.h" />
     <ClInclude Include="Util\IEStrUTF8.h" />
@@ -65,6 +68,8 @@
     <ClCompile Include="UI\IETreeView.cpp" />
     <ClCompile Include="UI\IESlider.cpp" />
     <ClCompile Include="UI\IEFileBrowser.cpp" />
+    <ClCompile Include="UI\IEDockedPanel.cpp" />
+    <ClCompile Include="UI\IEFloatingPanel.cpp" />
     <ClCompile Include="Text\IEFont.cpp" />
     <ClCompile Include="Text\IETextRenderer.cpp" />
     <ClCompile Include="Util\IEStrUTF8.cpp" />
