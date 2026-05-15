@@ -153,7 +153,10 @@ void IECore::OperateEvent()
 		{
 			IEWindow* window = GetWindowByID(Event.window.windowID);
 			if (window != nullptr)
+			{
 				window->ResizeRenderer();
+				window->OnResize(Event.window.data1, Event.window.data2);
+			}
 		}
 		break;
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:

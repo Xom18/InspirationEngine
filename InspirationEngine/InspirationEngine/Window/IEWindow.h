@@ -30,6 +30,13 @@ public:
 	virtual void CallXButton() {}
 
 	/// <summary>
+	/// 창 크기가 변경됐을 때 (ResizeRenderer 호출 직후)
+	/// </summary>
+	/// <param name="w">새 너비</param>
+	/// <param name="h">새 높이</param>
+	virtual void OnResize(int32_t w, int32_t h) {}
+
+	/// <summary>
 	/// 창 생성
 	/// </summary>
 	/// <param name="title">창 제목</param>

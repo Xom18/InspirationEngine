@@ -26,7 +26,8 @@ int main(int argc, char* argv[])
     auto* mainWin  = new IEMainEditorWindow();
     auto* atlasWin = new IEAtlasEditorWindow();
 
-    mainWin->CreateWindow("InspirationEditor", 1280, 720);
+    mainWin->CreateWindow("InspirationEditor", 1280, 720, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SDL_WINDOW_RESIZABLE);
+    SDL_SetWindowMinimumSize(mainWin->GetSDLWindow(), IEMainEditorWindow::kMinW, IEMainEditorWindow::kMinH);
     IECore::AddNewWindow("main", mainWin);
     IECore::AddWindowIndex(mainWin);
 

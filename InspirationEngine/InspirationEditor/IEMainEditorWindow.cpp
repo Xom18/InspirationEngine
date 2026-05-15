@@ -14,7 +14,6 @@ static SDL_Color kColBrowser = {  40,  40,  45, 255 };
 static SDL_Color kColVp      = {  25,  25,  28, 255 };
 static SDL_Color kColSep     = {  65,  65,  70, 255 };
 static SDL_Color kColText    = { 200, 200, 200, 255 };
-static SDL_Color kColTbBor   = {  80,  80,  85, 255 };
 static SDL_Color kColGrid    = {  48,  48,  52, 255 };
 static SDL_Color kColOrigin  = {  60, 100,  60, 255 };
 static SDL_Color kColSel     = { 255, 200,  50, 255 };
@@ -44,7 +43,7 @@ void IEMainEditorWindow::InitWindow(IEFont* font, IEAtlasEditorWindow* atlasEdit
     m_fileBrowser.SetRenderer(r);
     m_fileBrowser.SetFont(font);
     m_fileBrowser.SetOwnerWindow(this);
-    m_fileBrowser.SetRect(0, kMenuH + kLabelH, kBrowserW, kWinH - kMenuH - kLabelH);
+    m_fileBrowser.SetRect(0, kMenuH + kLabelH, kBrowserW, GetHeight() - kMenuH - kLabelH);
     m_fileBrowser.SetCallback([this](const std::string& path) { OnFileBrowserSelect(path); });
 
     InitScene();
@@ -53,9 +52,19 @@ void IEMainEditorWindow::InitWindow(IEFont* font, IEAtlasEditorWindow* atlasEdit
 void IEMainEditorWindow::InitScene()
 {
     auto* cam = new IECameraTopView();
-    cam->SetViewport(kViewportW, kViewportH);
+    cam->SetViewport(ViewportW(), ViewportH());
     m_camera = cam;
     m_scene.SetCamera(cam);
+}
+
+// ─────────────────────────────────────────
+// Resize
+// ─────────────────────────────────────────
+
+void IEMainEditorWindow::OnResize(int32_t w, int32_t h)
+{
+    constexpr int32_t kLabelH = 24;
+    m_fileBrowser.SetRect(0, kMenuH + kLabelH, kBrowserW, h - kMenuH - kLabelH);
 }
 
 // ─────────────────────────────────────────
@@ -108,6 +117,11 @@ void IEMainEditorWindow::UpdateViewport()
         return;
     }
 
+    const int32_t vpX = ViewportX();
+    const int32_t vpY = ViewportY();
+    const int32_t vpW = ViewportW();
+    const int32_t vpH = ViewportH();
+
     float gx = 0.0f, gy = 0.0f;
     SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
 
@@ -117,11 +131,11 @@ void IEMainEditorWindow::UpdateViewport()
     int32_t mx = static_cast<int32_t>(gx) - winX;
     int32_t my = static_cast<int32_t>(gy) - winY;
 
-    bool inVp = (mx >= kViewportX && mx < kViewportX + kViewportW &&
-                 my >= kViewportY && my < kViewportY + kViewportH);
+    bool inVp = (mx >= vpX && mx < vpX + vpW &&
+                 my >= vpY && my < vpY + vpH);
 
-    int32_t vx = mx - kViewportX;
-    int32_t vy = my - kViewportY;
+    int32_t vx = mx - vpX;
+    int32_t vy = my - vpY;
 
     bool lmb = (btn & SDL_BUTTON_LMASK) != 0;
     bool rmb = (btn & SDL_BUTTON_RMASK) != 0;
@@ -140,10 +154,10 @@ void IEMainEditorWindow::UpdateViewport()
             float newZoom = std::clamp(oldZoom * std::pow(1.12f, wheelY), 0.05f, 20.0f);
 
             // Zoom toward cursor: shift camera so world point under cursor stays fixed
-            m_camera->SetViewport(kViewportW, kViewportH);
+            m_camera->SetViewport(vpW, vpH);
             auto wp = m_camera->ScreenToWorld(vx, vy);
             m_camera->SetZoom(newZoom);
-            m_camera->SetViewport(kViewportW, kViewportH);
+            m_camera->SetViewport(vpW, vpH);
             auto wp2 = m_camera->ScreenToWorld(vx, vy);
             m_camera->SetPosition(
                 m_camera->GetX() + static_cast<float>(wp.GetX() - wp2.GetX()),
@@ -178,7 +192,7 @@ void IEMainEditorWindow::UpdateViewport()
 
 void IEMainEditorWindow::SelectAtViewportPos(int32_t vx, int32_t vy)
 {
-    m_camera->SetViewport(kViewportW, kViewportH);
+    m_camera->SetViewport(ViewportW(), ViewportH());
     auto wp = m_camera->ScreenToWorld(vx, vy);
     float wx = static_cast<float>(wp.GetX());
     float wy = static_cast<float>(wp.GetY());
@@ -216,14 +230,17 @@ void IEMainEditorWindow::Draw()
     if (r == nullptr)
         return;
 
+    const int32_t winW = GetWidth();
+    const int32_t winH = GetHeight();
+
     // Backgrounds
-    r->DrawRect(kColBg,      0,          0,       kWinW,    kWinH,              SDL_BLENDMODE_NONE);
-    r->DrawRect(kColMenu,    0,          0,       kWinW,    kMenuH,             SDL_BLENDMODE_NONE);
-    r->DrawRect(kColBrowser, 0,          kMenuH,  kBrowserW, kWinH - kMenuH,   SDL_BLENDMODE_NONE);
+    r->DrawRect(kColBg,      0,          0,       winW,     winH,             SDL_BLENDMODE_NONE);
+    r->DrawRect(kColMenu,    0,          0,       winW,     kMenuH,           SDL_BLENDMODE_NONE);
+    r->DrawRect(kColBrowser, 0,          kMenuH,  kBrowserW, winH - kMenuH,  SDL_BLENDMODE_NONE);
 
     // Separators
-    r->DrawLine(kColSep, kBrowserW, 0,     kBrowserW, kWinH);
-    r->DrawLine(kColSep, 0,         kMenuH, kWinW,    kMenuH);
+    r->DrawLine(kColSep, kBrowserW, 0,     kBrowserW, winH);
+    r->DrawLine(kColSep, 0,         kMenuH, winW,     kMenuH);
 
     // Menu bar
     m_btnAtlas.Draw();
@@ -242,18 +259,23 @@ void IEMainEditorWindow::DrawViewport()
     IERenderer*   r    = GetRenderer(0);
     SDL_Renderer* sdlR = r->GetSDLRenderer();
 
-    SDL_Rect vpRect = { kViewportX, kViewportY, kViewportW, kViewportH };
+    const int32_t vpX = ViewportX();
+    const int32_t vpY = ViewportY();
+    const int32_t vpW = ViewportW();
+    const int32_t vpH = ViewportH();
+
+    SDL_Rect vpRect = { vpX, vpY, vpW, vpH };
     SDL_SetRenderViewport(sdlR, &vpRect);
 
     // Viewport background
-    r->DrawRect(kColVp, 0, 0, kViewportW, kViewportH, SDL_BLENDMODE_NONE);
+    r->DrawRect(kColVp, 0, 0, vpW, vpH, SDL_BLENDMODE_NONE);
 
     if (m_camera != nullptr)
     {
-        m_camera->SetViewport(kViewportW, kViewportH);
+        m_camera->SetViewport(vpW, vpH);
         DrawViewportGrid(r);
 
-        m_scene.SetViewportOverride(kViewportW, kViewportH);
+        m_scene.SetViewportOverride(vpW, vpH);
         m_scene.Draw(r);
 
         // Selection indicator
@@ -283,7 +305,7 @@ void IEMainEditorWindow::DrawViewport()
 
             int32_t objCount = static_cast<int32_t>(m_scene.GetObjects().size());
             std::snprintf(buf, sizeof(buf), "objects: %d", objCount);
-            r->DrawText(m_font, buf, { 120, 120, 120, 255 }, 6, kViewportH - 20);
+            r->DrawText(m_font, buf, { 120, 120, 120, 255 }, 6, vpH - 20);
         }
     }
 
@@ -292,8 +314,11 @@ void IEMainEditorWindow::DrawViewport()
 
 void IEMainEditorWindow::DrawViewportGrid(IERenderer* r)
 {
+    const int32_t vpW = ViewportW();
+    const int32_t vpH = ViewportH();
+
     auto wTL = m_camera->ScreenToWorld(0, 0);
-    auto wBR = m_camera->ScreenToWorld(kViewportW, kViewportH);
+    auto wBR = m_camera->ScreenToWorld(vpW, vpH);
 
     float zoom     = m_camera->GetZoom();
     float gridSize = 64.0f;
@@ -321,8 +346,8 @@ void IEMainEditorWindow::DrawViewportGrid(IERenderer* r)
 
     // World origin cross
     auto orig = m_camera->WorldToScreen(0.0f, 0.0f);
-    if (orig.GetX() >= -4 && orig.GetX() < kViewportW + 4 &&
-        orig.GetY() >= -4 && orig.GetY() < kViewportH + 4)
+    if (orig.GetX() >= -4 && orig.GetX() < vpW + 4 &&
+        orig.GetY() >= -4 && orig.GetY() < vpH + 4)
     {
         r->DrawLine(kColOrigin, orig.GetX() - 10, orig.GetY(), orig.GetX() + 10, orig.GetY());
         r->DrawLine(kColOrigin, orig.GetX(), orig.GetY() - 10, orig.GetX(), orig.GetY() + 10);
