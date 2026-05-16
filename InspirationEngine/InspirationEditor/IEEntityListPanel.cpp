@@ -11,16 +11,17 @@ void IEEntityListPanel::SetContentRect(int32_t x, int32_t y, int32_t w, int32_t 
 
 void IEEntityListPanel::Update(float dt)
 {
-    if (m_scene == nullptr || m_ownerWindow == nullptr)
+    IEWindow* ownerWindow = GetOwnerWindow();
+    if (m_scene == nullptr || ownerWindow == nullptr)
         return;
-    if (IECore::GetMouseOnWindow() != m_ownerWindow)
+    if (IECore::GetMouseOnWindow() != ownerWindow)
         return;
 
     float gx = 0.0f, gy = 0.0f;
     SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
 
     int32_t winX = 0, winY = 0;
-    SDL_GetWindowPosition(m_ownerWindow->GetSDLWindow(), &winX, &winY);
+    SDL_GetWindowPosition(ownerWindow->GetSDLWindow(), &winX, &winY);
 
     int32_t mx = static_cast<int32_t>(gx) - winX;
     int32_t my = static_cast<int32_t>(gy) - winY;
@@ -44,7 +45,8 @@ void IEEntityListPanel::Draw(IERenderer* r)
 
     r->DrawRect(kColBg, m_x, m_y, m_w, m_h, SDL_BLENDMODE_NONE);
 
-    if (m_scene == nullptr || m_font == nullptr)
+    IEFont* font = GetFont();
+    if (m_scene == nullptr || font == nullptr)
         return;
 
     const auto& objs = m_scene->GetObjects();
@@ -65,7 +67,7 @@ void IEEntityListPanel::Draw(IERenderer* r)
         else
             std::snprintf(buf, sizeof(buf), "Object %d", i);
 
-        r->DrawText(m_font, buf, kColText, m_x + 6, rowY + 4);
+        r->DrawText(font, buf, kColText, m_x + 6, rowY + 4);
         rowY += kRowH;
     }
 }

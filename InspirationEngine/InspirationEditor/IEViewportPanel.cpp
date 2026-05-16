@@ -33,9 +33,10 @@ void IEViewportPanel::Update(float dt)
 
 void IEViewportPanel::UpdateInput()
 {
-    if (m_camera == nullptr || m_ownerWindow == nullptr)
+    IEWindow* ownerWindow = GetOwnerWindow();
+    if (m_camera == nullptr || ownerWindow == nullptr)
         return;
-    if (IECore::GetMouseOnWindow() != m_ownerWindow)
+    if (IECore::GetMouseOnWindow() != ownerWindow)
     {
         m_vpPrevLMB  = false;
         m_vpPrevRMB  = false;
@@ -47,7 +48,7 @@ void IEViewportPanel::UpdateInput()
     SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
 
     int32_t winX = 0, winY = 0;
-    SDL_GetWindowPosition(m_ownerWindow->GetSDLWindow(), &winX, &winY);
+    SDL_GetWindowPosition(ownerWindow->GetSDLWindow(), &winX, &winY);
 
     int32_t mx = static_cast<int32_t>(gx) - winX;
     int32_t my = static_cast<int32_t>(gy) - winY;
@@ -168,16 +169,17 @@ void IEViewportPanel::Draw(IERenderer* r)
         }
     }
 
-    if (m_font != nullptr)
+    IEFont* font = GetFont();
+    if (font != nullptr)
     {
         char buf[64];
         std::snprintf(buf, sizeof(buf), "cam (%.0f, %.0f)  zoom %.2f",
                       m_camera->GetX(), m_camera->GetY(), m_camera->GetZoom());
-        r->DrawText(m_font, buf, kColText, 6, 6);
+        r->DrawText(font, buf, kColText, 6, 6);
 
         int32_t objCount = static_cast<int32_t>(m_scene.GetObjects().size());
         std::snprintf(buf, sizeof(buf), "objects: %d", objCount);
-        r->DrawText(m_font, buf, kColText, 6, m_h - 20);
+        r->DrawText(font, buf, kColText, 6, m_h - 20);
     }
 
     SDL_SetRenderViewport(sdlR, nullptr);

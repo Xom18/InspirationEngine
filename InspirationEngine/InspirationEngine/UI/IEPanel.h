@@ -22,7 +22,17 @@ public:
     /// </summary>
     virtual void        SetContentRect(int32_t x, int32_t y, int32_t w, int32_t h) = 0;
 
-    virtual void SetFont(IEFont* f)          {}
-    virtual void SetOwnerWindow(IEWindow* w)  {}
-    virtual void SetRenderer(IERenderer* r)   {}
+    virtual void SetFont(IEFont* f)          { m_font = f; }
+    virtual void SetOwnerWindow(IEWindow* w) { m_ownerWindow = w; }
+    virtual void SetRenderer(IERenderer* r)  { m_renderer = r; }
+
+protected:
+    IEFont*     GetFont()        const { return m_font; }
+    IEWindow*   GetOwnerWindow() const { return m_ownerWindow; }
+    IERenderer* GetRenderer()    const { return m_renderer; }
+
+private:
+    IEFont*     m_font        = nullptr;
+    IEWindow*   m_ownerWindow = nullptr;
+    IERenderer* m_renderer    = nullptr;
 };

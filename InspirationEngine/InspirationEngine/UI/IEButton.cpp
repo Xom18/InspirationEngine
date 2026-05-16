@@ -6,7 +6,7 @@ void IEButton::Draw()
     if (r == nullptr)
         return;
 
-    SDL_Rect rect = GetRect();
+    SDL_Rect rect = IEUIBase::GetRect();
     SDL_Color col = m_pressed ? m_colorPressed
                   : m_hovered ? m_colorHover
                               : m_colorNormal;
@@ -45,7 +45,7 @@ void IEButton::Update()
     bool lmb     = (btn & SDL_BUTTON_LMASK) != 0;
     bool clicked = lmb && !m_prevLMB;
 
-    SDL_Rect rect = GetRect();
+    SDL_Rect rect = IEUIBase::GetRect();
     m_hovered = (mx >= rect.x && mx < rect.x + rect.w &&
                  my >= rect.y && my < rect.y + rect.h);
 

@@ -1,5 +1,5 @@
-#include "IEDockedPanel.h"
 #include "../InspirationEngine.h"
+#include "IEDockedPanel.h"
 
 IEDockedPanel::IEDockedPanel(std::unique_ptr<IEPanel> panel)
     : m_panel(std::move(panel))

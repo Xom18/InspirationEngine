@@ -1,5 +1,5 @@
-#include "IEFloatingPanel.h"
 #include "../InspirationEngine.h"
+#include "IEFloatingPanel.h"
 
 void IEFloatingPanel::Init(std::unique_ptr<IEPanel> panel, IEFont* font, const std::string& windowId)
 {

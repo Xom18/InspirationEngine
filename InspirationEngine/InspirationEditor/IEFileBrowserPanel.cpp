@@ -13,16 +13,19 @@ IEFileBrowserPanel::IEFileBrowserPanel()
 
 void IEFileBrowserPanel::SetFont(IEFont* f)
 {
+    IEPanel::SetFont(f);
     m_fileBrowser.SetFont(f);
 }
 
 void IEFileBrowserPanel::SetOwnerWindow(IEWindow* w)
 {
+    IEPanel::SetOwnerWindow(w);
     m_fileBrowser.SetOwnerWindow(w);
 }
 
 void IEFileBrowserPanel::SetRenderer(IERenderer* r)
 {
+    IEPanel::SetRenderer(r);
     m_fileBrowser.SetRenderer(r);
 }
 
