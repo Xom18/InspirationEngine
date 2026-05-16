@@ -5,6 +5,7 @@
 #include "IEFileBrowserPanel.h"
 #include "IEEntityListPanel.h"
 #include "IECameraPanel.h"
+#include "IEInspectorPanel.h"
 #include <vector>
 #include <string>
 #include <atomic>
@@ -47,6 +48,7 @@ private:
     IEViewportPanel*   m_vpPanel     = nullptr;
     IECameraPanel*     m_camPanel    = nullptr;
     IEEntityListPanel* m_entityPanel = nullptr;
+    IEInspectorPanel*  m_inspPanel   = nullptr;
 
     // 부동 창 ID 카운터 (스레드 안전)
     std::atomic<int32_t> m_floatIdCounter{0};

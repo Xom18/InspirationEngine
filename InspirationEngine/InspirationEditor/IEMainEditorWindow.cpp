@@ -73,6 +73,16 @@ void IEMainEditorWindow::InitPanels(IEFont* font, IEAtlasEditorWindow* atlasEdit
     elDoc.SetOwnerWindow(this);
     elDoc.SetRenderer(r);
     m_panels.push_back(std::move(elDoc));
+
+    // ── Inspector ─────────────────────────────
+    auto inspPtr  = std::make_unique<IEInspectorPanel>();
+    m_inspPanel   = inspPtr.get();
+
+    auto inspDoc = IEDockedPanel(std::move(inspPtr));
+    inspDoc.SetFont(font);
+    inspDoc.SetOwnerWindow(this);
+    inspDoc.SetRenderer(r);
+    m_panels.push_back(std::move(inspDoc));
 }
 
 void IEMainEditorWindow::LayoutPanels()
@@ -90,15 +100,18 @@ void IEMainEditorWindow::LayoutPanels()
     const int32_t fbH  = bodyH / 2;
     const int32_t camH = bodyH - fbH;
 
-    // 우측: EntityList (전체)
+    // 우측: EntityList(위) + Inspector(아래)
+    const int32_t elH   = bodyH / 2;
+    const int32_t inspH = bodyH - elH;
 
-    // m_panels 인덱스: 0=Viewport, 1=FileBrowser, 2=Camera, 3=EntityList
-    if (m_panels.size() >= 4)
+    // m_panels 인덱스: 0=Viewport, 1=FileBrowser, 2=Camera, 3=EntityList, 4=Inspector
+    if (m_panels.size() >= 5)
     {
-        m_panels[0].SetRect(kLeftW,        kMenuH,          vpW,    bodyH);  // Viewport
-        m_panels[1].SetRect(0,             kMenuH,          kLeftW, fbH);    // FileBrowser
-        m_panels[2].SetRect(0,             kMenuH + fbH,    kLeftW, camH);   // Camera
-        m_panels[3].SetRect(kLeftW + vpW,  kMenuH,          kRightW, bodyH); // EntityList
+        m_panels[0].SetRect(kLeftW,       kMenuH,           vpW,     bodyH); // Viewport
+        m_panels[1].SetRect(0,            kMenuH,           kLeftW,  fbH);   // FileBrowser
+        m_panels[2].SetRect(0,            kMenuH + fbH,     kLeftW,  camH);  // Camera
+        m_panels[3].SetRect(kLeftW + vpW, kMenuH,           kRightW, elH);   // EntityList
+        m_panels[4].SetRect(kLeftW + vpW, kMenuH + elH,     kRightW, inspH); // Inspector
     }
 }
 
@@ -127,6 +140,9 @@ void IEMainEditorWindow::CallXButton()
 void IEMainEditorWindow::Update(float deltaTime)
 {
     m_btnAtlas.Update();
+
+    if (m_inspPanel != nullptr && m_vpPanel != nullptr)
+        m_inspPanel->SetTarget(m_vpPanel->GetSelectedObject());
 
     // 역순으로 업데이트 (최상위 z-order 패널이 입력 우선)
     for (int32_t i = static_cast<int32_t>(m_panels.size()) - 1; i >= 0; --i)
@@ -169,9 +185,10 @@ void IEMainEditorWindow::ProcessUndock()
         m_panels.erase(m_panels.begin() + i);
 
         // raw 포인터 무효화 확인 (소유권 이전된 패널이면 nullptr로)
-        if (m_vpPanel     && m_vpPanel     == dynamic_cast<IEViewportPanel*>(panelPtr.get()))   m_vpPanel     = nullptr;
-        if (m_camPanel    && m_camPanel    == dynamic_cast<IECameraPanel*>(panelPtr.get()))      m_camPanel    = nullptr;
-        if (m_entityPanel && m_entityPanel == dynamic_cast<IEEntityListPanel*>(panelPtr.get())) m_entityPanel = nullptr;
+        if (m_vpPanel     && m_vpPanel     == dynamic_cast<IEViewportPanel*>(panelPtr.get()))    m_vpPanel     = nullptr;
+        if (m_camPanel    && m_camPanel    == dynamic_cast<IECameraPanel*>(panelPtr.get()))       m_camPanel    = nullptr;
+        if (m_entityPanel && m_entityPanel == dynamic_cast<IEEntityListPanel*>(panelPtr.get()))  m_entityPanel = nullptr;
+        if (m_inspPanel   && m_inspPanel   == dynamic_cast<IEInspectorPanel*>(panelPtr.get()))   m_inspPanel   = nullptr;
 
         // 부동 창 생성
         std::string winId = "float_" + std::to_string(m_floatIdCounter.fetch_add(1));
