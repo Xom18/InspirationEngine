@@ -54,6 +54,7 @@
 #include "Scene/IEScene.h"				//씬 기반
 #include "Scene/IESceneManager.h"		//씬 관리자
 #include "Scene/IESceneSerializer.h"	//씬 직렬화
+#include "Scene/IEProjectConfig.h"		//프로젝트 설정
 #include "Util/IEFile.h"			//파일
 #include "Core/IEDebugInfo.h"		//디버그 정보
 #include "Core/IECore.h"		//엔진

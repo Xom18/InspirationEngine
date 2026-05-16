@@ -73,7 +73,18 @@ void IEMainEditorWindow::InitWindow(IEFont* font, IEAtlasEditorWindow* atlasEdit
     InitPanels(font, atlasEditor);
 
     if (m_vpPanel != nullptr)
+    {
         m_vpPanel->SetCommandHistory(&m_history);
+
+        // 프로젝트 설정 기본값 적용 (scene.json 로드 전 초기 상태)
+        auto* cam = m_vpPanel->GetCamera();
+        if (cam != nullptr)
+        {
+            cam->SetPosition(IEProjectConfig::GetDefaultCamX(), IEProjectConfig::GetDefaultCamY());
+            cam->SetZoom(IEProjectConfig::GetDefaultCamZoom());
+        }
+        m_vpPanel->SetGridVisible(IEProjectConfig::IsGridVisible());
+    }
 
     LayoutPanels();
 }

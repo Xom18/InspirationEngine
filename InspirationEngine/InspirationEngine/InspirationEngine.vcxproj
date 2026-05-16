@@ -55,6 +55,7 @@
     <ClInclude Include="Scene\IEScene.h" />
     <ClInclude Include="Scene\IESceneManager.h" />
     <ClInclude Include="Scene\IESceneSerializer.h" />
+    <ClInclude Include="Scene\IEProjectConfig.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\ThirdParty\utf8proc\utf8proc.c">
@@ -91,6 +92,7 @@
     <ClCompile Include="GameObject\IEEntity.cpp" />
     <ClCompile Include="Scene\IEScene.cpp" />
     <ClCompile Include="Scene\IESceneSerializer.cpp" />
+    <ClCompile Include="Scene\IEProjectConfig.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9D10CAC6-29F4-4F09-8DF2-BF7B37530E37}</ProjectGuid>

@@ -21,6 +21,8 @@ bool IESceneSerializer::Save(const IEScene& scene, const IECamera* cam, const ch
         nlohmann::json o;
         o["type"]   = obj->GetTypeName();
         o["active"] = obj->IsActive();
+        if (!obj->GetName().empty())
+            o["name"] = obj->GetName();
 
         auto* t = obj->GetComponent<IETransformComponent>();
         if (t != nullptr)
@@ -98,6 +100,7 @@ bool IESceneSerializer::Load(IEScene& scene, IECamera* cam, const char* path)
             obj = scene.AddObject<IEStaticObject>();
 
         obj->SetActive(o.value("active", true));
+        obj->SetName(o.value("name", std::string{}));
 
         if (o.contains("transform"))
         {

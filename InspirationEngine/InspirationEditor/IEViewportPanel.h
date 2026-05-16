@@ -66,6 +66,11 @@ public:
     void SetCommandHistory(IECommandHistory* h) { m_history = h; }
 
     /// <summary>
+    /// 그리드 표시 여부 설정 (프로젝트 설정 초기화용)
+    /// </summary>
+    void SetGridVisible(bool v) { m_gridVisible = v; }
+
+    /// <summary>
     /// 뷰포트 중심 월드 좌표에 오브젝트 추가
     /// </summary>
     /// <param name="type">"StaticObject" 또는 "Entity"</param>
@@ -100,6 +105,8 @@ private:
     float m_camStartY    = 0.0f;
     bool  m_vpPrevLMB    = false;
     bool  m_vpPrevRMB    = false;
+    bool  m_prevG        = false;
+    bool  m_gridVisible  = true;
 
     // 오브젝트 드래그 이동
     bool  m_objDragging  = false;

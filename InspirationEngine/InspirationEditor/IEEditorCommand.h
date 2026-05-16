@@ -103,6 +103,10 @@ public:
             t->SetY(m_wy);
         }
 
+        if (m_name.empty())
+            m_name = m_type + " " + std::to_string(m_scene->GetObjects().size());
+        obj->SetName(m_name);
+
         m_ptr = obj;
         if (m_selRef != nullptr)
             *m_selRef = m_ptr;
@@ -119,6 +123,7 @@ public:
 private:
     IEScene*      m_scene  = nullptr;
     std::string   m_type;
+    std::string   m_name;
     float         m_wx     = 0.0f;
     float         m_wy     = 0.0f;
     IEGameObject* m_ptr    = nullptr;
@@ -136,6 +141,7 @@ public:
         : m_scene(scene), m_ptr(obj), m_selRef(selRef)
     {
         m_type   = obj->GetTypeName();
+        m_name   = obj->GetName();
         m_active = obj->IsActive();
         auto* t  = obj->GetComponent<IETransformComponent>();
         if (t != nullptr)
@@ -163,6 +169,7 @@ public:
             obj = m_scene->AddObject<IEStaticObject>();
 
         obj->SetActive(m_active);
+        obj->SetName(m_name);
         auto* t = obj->GetComponent<IETransformComponent>();
         if (t != nullptr)
         {
@@ -181,6 +188,7 @@ private:
     IEGameObject* m_ptr    = nullptr;
     IEGameObject**m_selRef = nullptr;
     std::string   m_type;
+    std::string   m_name;
     bool          m_active = true;
     float         m_x = 0.0f, m_y = 0.0f, m_z = 0.0f;
 };

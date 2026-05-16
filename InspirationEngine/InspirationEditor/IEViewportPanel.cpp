@@ -66,6 +66,12 @@ void IEViewportPanel::UpdateInput()
     m_vpPrevLMB = lmb;
     m_vpPrevRMB = rmb;
 
+    // G키: 그리드 표시 토글
+    bool gDown = IECore::GetInput().GetKeyState(SDL_SCANCODE_G);
+    if (gDown && !m_prevG)
+        m_gridVisible = !m_gridVisible;
+    m_prevG = gDown;
+
     if (inVp)
     {
         float wheelY = IECore::GetInput().GetMouseWheelY();
@@ -233,7 +239,8 @@ void IEViewportPanel::Draw(IERenderer* r)
     r->DrawRect(kColVp, 0, 0, m_w, m_h, SDL_BLENDMODE_NONE);
 
     m_camera->SetViewport(m_w, m_h);
-    DrawGrid(r);
+    if (m_gridVisible)
+        DrawGrid(r);
 
     m_scene.SetViewportOverride(m_w, m_h);
     m_scene.Draw(r);

@@ -36,11 +36,19 @@ void IEHierarchy::Update(float /*dt*/)
         char buf[64];
         for (int32_t i = 0; i < static_cast<int32_t>(objs.size()); ++i)
         {
-            auto* t = objs[i]->GetComponent<IETransformComponent>();
-            if (t != nullptr)
-                std::snprintf(buf, sizeof(buf), "Object %d  (%.0f, %.0f)", i, t->GetX(), t->GetY());
+            const std::string& name = objs[i]->GetName();
+            if (!name.empty())
+            {
+                std::snprintf(buf, sizeof(buf), "%s", name.c_str());
+            }
             else
-                std::snprintf(buf, sizeof(buf), "Object %d", i);
+            {
+                auto* t = objs[i]->GetComponent<IETransformComponent>();
+                if (t != nullptr)
+                    std::snprintf(buf, sizeof(buf), "Object %d  (%.0f, %.0f)", i, t->GetX(), t->GetY());
+                else
+                    std::snprintf(buf, sizeof(buf), "Object %d", i);
+            }
             items.emplace_back(buf);
         }
         m_list.RefreshItems(std::move(items));

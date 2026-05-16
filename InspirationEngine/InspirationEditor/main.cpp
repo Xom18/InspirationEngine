@@ -20,6 +20,7 @@ int main(int /*argc*/, char* /*argv*/[])
     }
 
     IELocalize::Load("Data/Text/en.json");
+    IEProjectConfig::Load("Data/project.json");
 
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 

@@ -91,8 +91,20 @@ public:
 	/// </summary>
 	virtual const char* GetTypeName() const { return "GameObject"; }
 
+	/// <summary>
+	/// 오브젝트 이름 반환
+	/// </summary>
+	const std::string& GetName() const { return m_name; }
+
+	/// <summary>
+	/// 오브젝트 이름 설정
+	/// </summary>
+	/// <param name="name">설정할 이름</param>
+	void SetName(const std::string& name) { m_name = name; }
+
 private:
 	std::vector<std::unique_ptr<IEComponent>> m_components;
-	IESprite* m_sprite = nullptr;
-	bool      m_active = true;
+	IESprite*   m_sprite = nullptr;
+	bool        m_active = true;
+	std::string m_name;
 };
