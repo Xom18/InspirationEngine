@@ -27,7 +27,7 @@ IECameraPanel::IECameraPanel()
             m_camera->SetPosition(m_camera->GetX(), v);
     });
 
-    m_layout.LoadJson("UI/camera_panel.json");
+    m_layout.LoadJson("Data/UI/camera_panel.json");
     m_layout.Bind("slider_zoom", &m_sliderZoom);
     m_layout.Bind("slider_x",    &m_sliderX);
     m_layout.Bind("slider_y",    &m_sliderY);

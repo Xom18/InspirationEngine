@@ -36,7 +36,7 @@ IEInspectorPanel::IEInspectorPanel()
             t->SetZ(v);
     });
 
-    m_layout.LoadJson("UI/inspector_panel.json");
+    m_layout.LoadJson("Data/UI/inspector_panel.json");
     m_layout.Bind("slider_x", &m_sliderX);
     m_layout.Bind("slider_y", &m_sliderY);
     m_layout.Bind("slider_z", &m_sliderZ);
