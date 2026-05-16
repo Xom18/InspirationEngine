@@ -102,6 +102,7 @@ void IEMainEditorWindow::InitPanels(IEFont* font, IEAtlasEditorWindow* atlasEdit
     vpDoc.SetOwnerWindow(this);
     vpDoc.SetRenderer(r);
     m_panels.push_back(std::move(vpDoc));
+    m_slots.push_back({ EPanelColumn::Center, 0 });
 
     // ── FileBrowser ───────────────────────────
     auto fbPtr = std::make_unique<IEFileBrowserPanel>();
@@ -112,6 +113,7 @@ void IEMainEditorWindow::InitPanels(IEFont* font, IEAtlasEditorWindow* atlasEdit
     fbDoc.SetOwnerWindow(this);
     fbDoc.SetRenderer(r);
     m_panels.push_back(std::move(fbDoc));
+    m_slots.push_back({ EPanelColumn::Left, 0 });
 
     // ── Camera ────────────────────────────────
     auto camPtr = std::make_unique<IECameraPanel>();
@@ -123,6 +125,7 @@ void IEMainEditorWindow::InitPanels(IEFont* font, IEAtlasEditorWindow* atlasEdit
     camDoc.SetOwnerWindow(this);
     camDoc.SetRenderer(r);
     m_panels.push_back(std::move(camDoc));
+    m_slots.push_back({ EPanelColumn::Left, 1 });
 
     // ── EntityList ────────────────────────────
     auto elPtr    = std::make_unique<IEHierarchy>();
@@ -134,6 +137,7 @@ void IEMainEditorWindow::InitPanels(IEFont* font, IEAtlasEditorWindow* atlasEdit
     elDoc.SetOwnerWindow(this);
     elDoc.SetRenderer(r);
     m_panels.push_back(std::move(elDoc));
+    m_slots.push_back({ EPanelColumn::Right, 0 });
 
     // ── Inspector ─────────────────────────────
     auto inspPtr  = std::make_unique<IEInspectorPanel>();
@@ -144,36 +148,73 @@ void IEMainEditorWindow::InitPanels(IEFont* font, IEAtlasEditorWindow* atlasEdit
     inspDoc.SetOwnerWindow(this);
     inspDoc.SetRenderer(r);
     m_panels.push_back(std::move(inspDoc));
+    m_slots.push_back({ EPanelColumn::Right, 1 });
 }
 
 void IEMainEditorWindow::LayoutPanels()
 {
-    const int32_t winW   = GetWidth();
-    const int32_t winH   = GetHeight();
-    const int32_t bodyH  = winH - kMenuH;
+    const int32_t winW  = GetWidth();
+    const int32_t bodyH = GetHeight() - kMenuH;
 
-    // 좌측 폭 / 우측 폭 / 중앙 뷰포트 폭
-    constexpr int32_t kLeftW  = 220;
-    constexpr int32_t kRightW = 260;
-    const int32_t     vpW     = winW - kLeftW - kRightW;
+    // 열별로 살아있는 패널 수집
+    struct ColEntry { int32_t idx; int32_t order; };
+    std::vector<ColEntry> leftCol, centerCol, rightCol;
 
-    // 좌측: FileBrowser(위) + Camera(아래)
-    const int32_t fbH  = bodyH / 2;
-    const int32_t camH = bodyH - fbH;
-
-    // 우측: EntityList(위) + Inspector(아래)
-    const int32_t elH   = bodyH / 2;
-    const int32_t inspH = bodyH - elH;
-
-    // m_panels 인덱스: 0=Viewport, 1=FileBrowser, 2=Camera, 3=EntityList, 4=Inspector
-    if (m_panels.size() >= 5)
+    for (int32_t i = 0; i < static_cast<int32_t>(m_panels.size()); ++i)
     {
-        m_panels[0].SetRect(kLeftW,       kMenuH,           vpW,     bodyH); // Viewport
-        m_panels[1].SetRect(0,            kMenuH,           kLeftW,  fbH);   // FileBrowser
-        m_panels[2].SetRect(0,            kMenuH + fbH,     kLeftW,  camH);  // Camera
-        m_panels[3].SetRect(kLeftW + vpW, kMenuH,           kRightW, elH);   // EntityList
-        m_panels[4].SetRect(kLeftW + vpW, kMenuH + elH,     kRightW, inspH); // Inspector
+        if (!m_panels[i].IsAlive())
+            continue;
+        ColEntry e{ i, m_slots[i].order };
+        switch (m_slots[i].column)
+        {
+            case EPanelColumn::Left:   leftCol.push_back(e);   break;
+            case EPanelColumn::Center: centerCol.push_back(e); break;
+            case EPanelColumn::Right:  rightCol.push_back(e);  break;
+        }
     }
+
+    auto byOrder = [](const ColEntry& a, const ColEntry& b){ return a.order < b.order; };
+    std::sort(leftCol.begin(),   leftCol.end(),   byOrder);
+    std::sort(centerCol.begin(), centerCol.end(), byOrder);
+    std::sort(rightCol.begin(),  rightCol.end(),  byOrder);
+
+    // 열이 비면 폭 0 → 인접 열 자동 확장
+    int32_t leftW   = leftCol.empty()   ? 0 : m_leftColW;
+    int32_t rightW  = rightCol.empty()  ? 0 : m_rightColW;
+    int32_t centerW = winW - leftW - rightW;
+    int32_t rightX  = winW - rightW;
+
+    // 비율 기반 행 높이 분배 (2패널: sepRatio 사용, 그 외 균등)
+    auto assignCol = [&](std::vector<ColEntry>& col, int32_t colX, int32_t colW, float sepRatio)
+    {
+        if (col.empty())
+            return;
+        int32_t n = static_cast<int32_t>(col.size());
+        if (n == 1)
+        {
+            m_panels[col[0].idx].SetRect(colX, kMenuH, colW, bodyH);
+        }
+        else if (n == 2)
+        {
+            int32_t h0 = std::max(20, static_cast<int32_t>(bodyH * sepRatio));
+            int32_t h1 = bodyH - h0;
+            m_panels[col[0].idx].SetRect(colX, kMenuH,      colW, h0);
+            m_panels[col[1].idx].SetRect(colX, kMenuH + h0, colW, h1);
+        }
+        else
+        {
+            int32_t baseH = bodyH / n;
+            for (int32_t j = 0; j < n; ++j)
+            {
+                int32_t h = (j == n - 1) ? bodyH - j * baseH : baseH;
+                m_panels[col[j].idx].SetRect(colX, kMenuH + j * baseH, colW, h);
+            }
+        }
+    };
+
+    assignCol(leftCol,   0,      leftW,   m_leftSepRatio);
+    assignCol(centerCol, leftW,  centerW, 0.5f);
+    assignCol(rightCol,  rightX, rightW,  m_rightSepRatio);
 }
 
 // ─────────────────────────────────────────
@@ -319,13 +360,109 @@ void IEMainEditorWindow::Update(float deltaTime)
         {
             // 클릭된 패널을 맨 뒤(최상위)로 이동
             for (int32_t j = i; j < static_cast<int32_t>(m_panels.size()) - 1; ++j)
+            {
                 std::swap(m_panels[j], m_panels[j + 1]);
-            // raw 포인터 재스캔 (이동 후 인덱스가 바뀔 수 있음)
+                std::swap(m_slots[j],  m_slots[j + 1]);
+            }
             break;
         }
     }
 
     ProcessUndock();
+
+    // ── 구분선 드래그 ───────────────────────────────────────
+    {
+        float gxF = 0.0f, gyF = 0.0f;
+        SDL_MouseButtonFlags btnState = SDL_GetGlobalMouseState(&gxF, &gyF);
+        int32_t winX = 0, winY = 0;
+        SDL_GetWindowPosition(GetSDLWindow(), &winX, &winY);
+        int32_t mx = static_cast<int32_t>(gxF) - winX;
+        int32_t my = static_cast<int32_t>(gyF) - winY;
+        bool lmb      = (btnState & SDL_BUTTON_LMASK) != 0;
+        bool lmbClick = lmb && !m_prevGlobalLMB;
+        m_prevGlobalLMB = lmb;
+
+        const int32_t winW  = GetWidth();
+        const int32_t bodyH = GetHeight() - kMenuH;
+
+        // 열 alive 여부 + 패널 수
+        bool hasLeft = false, hasRight = false;
+        int32_t leftPanelCount = 0, rightPanelCount = 0;
+        for (auto& slot : m_slots)
+        {
+            if (slot.column == EPanelColumn::Left)  { hasLeft  = true; ++leftPanelCount;  }
+            if (slot.column == EPanelColumn::Right) { hasRight = true; ++rightPanelCount; }
+        }
+
+        int32_t leftSepX  = hasLeft  ? m_leftColW          : -1;
+        int32_t rightSepX = hasRight ? winW - m_rightColW   : -1;
+        int32_t leftRowSepY  = (leftPanelCount  >= 2) ? kMenuH + static_cast<int32_t>(bodyH * m_leftSepRatio)  : -1;
+        int32_t rightRowSepY = (rightPanelCount >= 2) ? kMenuH + static_cast<int32_t>(bodyH * m_rightSepRatio) : -1;
+
+        if (!lmb)
+        {
+            m_sepDrag = ESepDrag::None;
+        }
+        else if (m_sepDrag == ESepDrag::None && lmbClick)
+        {
+            if (leftSepX >= 0 && mx >= leftSepX - kSepHitW && mx <= leftSepX + kSepHitW
+                && my > kMenuH)
+            {
+                m_sepDrag = ESepDrag::LeftCol;
+                m_sepDragStartMx  = mx;
+                m_sepDragStartVal = m_leftColW;
+            }
+            else if (rightSepX >= 0 && mx >= rightSepX - kSepHitW && mx <= rightSepX + kSepHitW
+                     && my > kMenuH)
+            {
+                m_sepDrag = ESepDrag::RightCol;
+                m_sepDragStartMx  = mx;
+                m_sepDragStartVal = m_rightColW;
+            }
+            else if (leftRowSepY >= 0 && my >= leftRowSepY - kSepHitW && my <= leftRowSepY + kSepHitW
+                     && mx >= 0 && mx < m_leftColW)
+            {
+                m_sepDrag = ESepDrag::LeftRow;
+                m_sepDragStartMx    = my;
+                m_sepDragStartRatio = m_leftSepRatio;
+            }
+            else if (rightRowSepY >= 0 && my >= rightRowSepY - kSepHitW && my <= rightRowSepY + kSepHitW
+                     && mx >= winW - m_rightColW && mx < winW)
+            {
+                m_sepDrag = ESepDrag::RightRow;
+                m_sepDragStartMx    = my;
+                m_sepDragStartRatio = m_rightSepRatio;
+            }
+        }
+
+        bool needLayout = false;
+        if (m_sepDrag == ESepDrag::LeftCol)
+        {
+            int32_t newW = m_sepDragStartVal + (mx - m_sepDragStartMx);
+            int32_t clamped = std::max(kMinColW, std::min(newW, winW - m_rightColW - kMinColW));
+            if (clamped != m_leftColW) { m_leftColW = clamped; needLayout = true; }
+        }
+        else if (m_sepDrag == ESepDrag::RightCol)
+        {
+            int32_t newW = m_sepDragStartVal - (mx - m_sepDragStartMx);
+            int32_t clamped = std::max(kMinColW, std::min(newW, winW - m_leftColW - kMinColW));
+            if (clamped != m_rightColW) { m_rightColW = clamped; needLayout = true; }
+        }
+        else if (m_sepDrag == ESepDrag::LeftRow)
+        {
+            float newR = m_sepDragStartRatio + static_cast<float>(my - m_sepDragStartMx) / bodyH;
+            float clamped = std::max(0.1f, std::min(newR, 0.9f));
+            if (clamped != m_leftSepRatio) { m_leftSepRatio = clamped; needLayout = true; }
+        }
+        else if (m_sepDrag == ESepDrag::RightRow)
+        {
+            float newR = m_sepDragStartRatio + static_cast<float>(my - m_sepDragStartMx) / bodyH;
+            float clamped = std::max(0.1f, std::min(newR, 0.9f));
+            if (clamped != m_rightSepRatio) { m_rightSepRatio = clamped; needLayout = true; }
+        }
+        if (needLayout)
+            LayoutPanels();
+    }
 }
 
 void IEMainEditorWindow::ProcessUndock()
@@ -341,9 +478,11 @@ void IEMainEditorWindow::ProcessUndock()
         int32_t fy = m_panels[i].GetUndockScreenY();
         int32_t fw = m_panels[i].GetUndockW();
         int32_t fh = m_panels[i].GetUndockH();
+        PanelSlot origSlot = m_slots[i]; // erase 전에 저장
 
         auto panelPtr = m_panels[i].ReleasePanel();
         m_panels.erase(m_panels.begin() + i);
+        m_slots.erase(m_slots.begin() + i);
 
         // raw 포인터 무효화 확인 (소유권 이전된 패널이면 nullptr로)
         if (m_vpPanel != nullptr && m_vpPanel == dynamic_cast<IEViewportPanel*>(panelPtr.get()))
@@ -355,6 +494,9 @@ void IEMainEditorWindow::ProcessUndock()
         if (m_inspPanel != nullptr && m_inspPanel == dynamic_cast<IEInspectorPanel*>(panelPtr.get()))
             m_inspPanel = nullptr;
 
+        // 남은 패널들이 빈 공간을 채우도록 레이아웃 재계산
+        LayoutPanels();
+
         // 메인 스레드에서 SDL 창 생성 (HWND 스레드 어피니티 → 커서/메시지 큐 정상 처리)
         std::string winId = "float_" + std::to_string(m_floatIdCounter.fetch_add(1));
 
@@ -365,6 +507,7 @@ void IEMainEditorWindow::ProcessUndock()
             int32_t                  fw, fh, fx, fy;
             IEFont*                  font;
             std::string              windowId;
+            PanelSlot                slot;
         };
         auto task      = std::make_shared<CreateTask>();
         task->title    = panelPtr->GetTitle();
@@ -375,17 +518,62 @@ void IEMainEditorWindow::ProcessUndock()
         task->fy       = fy;
         task->font     = m_font;
         task->windowId = winId;
+        task->slot     = origSlot;
 
-        IECore::PostMainThreadTask([task]() {
+        IECore::PostMainThreadTask([task, this]() {
             auto* floatWin = new IEFloatingPanelWindow();
             floatWin->CreateWindow(task->title.c_str(), task->fw, task->fh, task->fx, task->fy,
                 static_cast<SDL_WindowFlags>(SDL_WINDOW_RESIZABLE | SDL_WINDOW_BORDERLESS));
             floatWin->Init(std::move(task->panel), task->font, task->windowId);
+            EPanelColumn origCol = task->slot.column;
+            floatWin->SetRedockCallback([this, origCol](std::unique_ptr<IEPanel> p) {
+                Redock(std::move(p), origCol);
+            });
             IECore::RequestAddWindow(task->windowId.c_str(), floatWin);
         });
 
         break; // 한 프레임에 하나만 처리
     }
+}
+
+void IEMainEditorWindow::RescanRawPtrs()
+{
+    m_vpPanel     = nullptr;
+    m_camPanel    = nullptr;
+    m_entityPanel = nullptr;
+    m_inspPanel   = nullptr;
+    for (auto& dp : m_panels)
+    {
+        if (!dp.IsAlive())
+            continue;
+        IEPanel* p = dp.GetPanel();
+        if (auto* vp = dynamic_cast<IEViewportPanel*>(p))   m_vpPanel     = vp;
+        if (auto* cam = dynamic_cast<IECameraPanel*>(p))    m_camPanel    = cam;
+        if (auto* hier = dynamic_cast<IEHierarchy*>(p))     m_entityPanel = hier;
+        if (auto* insp = dynamic_cast<IEInspectorPanel*>(p)) m_inspPanel  = insp;
+    }
+}
+
+void IEMainEditorWindow::Redock(std::unique_ptr<IEPanel> panel, EPanelColumn col)
+{
+    // 해당 열의 현재 최대 order + 1 에 삽입
+    int32_t maxOrder = -1;
+    for (auto& slot : m_slots)
+    {
+        if (slot.column == col)
+            maxOrder = std::max(maxOrder, slot.order);
+    }
+
+    auto doc = IEDockedPanel(std::move(panel));
+    doc.SetFont(m_font);
+    doc.SetOwnerWindow(this);
+    doc.SetRenderer(GetRenderer(0));
+
+    m_panels.push_back(std::move(doc));
+    m_slots.push_back({ col, maxOrder + 1 });
+
+    RescanRawPtrs();
+    LayoutPanels();
 }
 
 // ─────────────────────────────────────────
@@ -417,5 +605,37 @@ void IEMainEditorWindow::Draw()
     {
         if (panel.IsAlive())
             panel.Draw();
+    }
+
+    // 구분선
+    {
+        bool hasLeft = false, hasRight = false;
+        int32_t leftPanelCount = 0, rightPanelCount = 0;
+        for (auto& slot : m_slots)
+        {
+            if (slot.column == EPanelColumn::Left)  { hasLeft  = true; ++leftPanelCount;  }
+            if (slot.column == EPanelColumn::Right) { hasRight = true; ++rightPanelCount; }
+        }
+        const int32_t bodyH = winH - kMenuH;
+
+        auto colSepColor = [&](ESepDrag drag) {
+            return (m_sepDrag == drag) ? kColSepHot : kColSep;
+        };
+
+        if (hasLeft)
+            r->DrawLine(colSepColor(ESepDrag::LeftCol), m_leftColW, kMenuH, m_leftColW, winH);
+        if (hasRight)
+            r->DrawLine(colSepColor(ESepDrag::RightCol), winW - m_rightColW, kMenuH, winW - m_rightColW, winH);
+
+        if (leftPanelCount >= 2)
+        {
+            int32_t y = kMenuH + static_cast<int32_t>(bodyH * m_leftSepRatio);
+            r->DrawLine(colSepColor(ESepDrag::LeftRow), 0, y, m_leftColW, y);
+        }
+        if (rightPanelCount >= 2)
+        {
+            int32_t y = kMenuH + static_cast<int32_t>(bodyH * m_rightSepRatio);
+            r->DrawLine(colSepColor(ESepDrag::RightRow), winW - m_rightColW, y, winW, y);
+        }
     }
 }

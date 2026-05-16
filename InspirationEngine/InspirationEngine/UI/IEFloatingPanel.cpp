@@ -51,21 +51,32 @@ void IEFloatingPanel::Update(float dt)
         int32_t mx = gx - wx;
         int32_t my = gy - wy;
 
-        bool onClose = (mx >= GetWidth() - kCloseW && mx < GetWidth() &&
-                        my >= 0 && my < kDragBarH);
-        if (onClose)
+        bool onTitle = (my >= 0 && my < kDragBarH);
+        if (onTitle)
         {
-            IECore::RequestRemoveWindow(m_windowId.c_str());
-            return;
-        }
+            bool onDock = (mx >= 0 && mx < kDockBtnW);
+            if (onDock)
+            {
+                if (m_redockCallback && m_panel != nullptr)
+                    m_redockCallback(std::move(m_panel));
+                IECore::RequestRemoveWindow(m_windowId.c_str());
+                return;
+            }
 
-        bool onDrag = (mx >= 0 && mx < GetWidth() - kCloseW &&
-                       my >= 0 && my < kDragBarH);
-        if (onDrag)
-        {
-            m_dragging    = true;
-            m_dragOffsetX = gx - wx;
-            m_dragOffsetY = gy - wy;
+            bool onClose = (mx >= GetWidth() - kCloseW && mx < GetWidth());
+            if (onClose)
+            {
+                IECore::RequestRemoveWindow(m_windowId.c_str());
+                return;
+            }
+
+            bool onDrag = (mx >= kDockBtnW && mx < GetWidth() - kCloseW);
+            if (onDrag)
+            {
+                m_dragging    = true;
+                m_dragOffsetX = gx - wx;
+                m_dragOffsetY = gy - wy;
+            }
         }
     }
 
@@ -88,8 +99,12 @@ void IEFloatingPanel::Draw()
 
     r->DrawRect(kColDragBar, 0, 0, GetWidth(), kDragBarH, SDL_BLENDMODE_NONE);
 
+    r->DrawRect(kColDockBtn, 0, 0, kDockBtnW, kDragBarH, SDL_BLENDMODE_NONE);
+    if (m_font != nullptr)
+        r->DrawText(m_font, "<", kColDragText, 8, 5);
+
     if (m_font != nullptr && m_panel != nullptr && m_panel->GetTitle() != nullptr)
-        r->DrawText(m_font, m_panel->GetTitle(), kColDragText, 6, 5);
+        r->DrawText(m_font, m_panel->GetTitle(), kColDragText, kDockBtnW + 6, 5);
 
     r->DrawRect(kColClose, GetWidth() - kCloseW, 0, kCloseW, kDragBarH, SDL_BLENDMODE_NONE);
     if (m_font != nullptr)

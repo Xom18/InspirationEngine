@@ -42,8 +42,9 @@ public:
     /// </summary>
     std::unique_ptr<IEPanel> ReleasePanel();
 
-    SDL_Rect GetRect()  const { return m_rect; }
-    bool     IsAlive()  const { return m_panel != nullptr; }
+    SDL_Rect  GetRect()  const { return m_rect; }
+    bool      IsAlive()  const { return m_panel != nullptr; }
+    IEPanel*  GetPanel() const { return m_panel.get(); }
 
     /// <summary>
     /// LMB가 타이틀바 위에서 눌렸는지 (클릭한 프레임만 true → z-order 갱신용)

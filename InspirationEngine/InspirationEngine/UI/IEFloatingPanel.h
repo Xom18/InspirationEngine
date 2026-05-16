@@ -47,16 +47,25 @@ public:
     /// </summary>
     const std::string& GetWindowId() const { return m_windowId; }
 
+    /// <summary>
+    /// 도킹 복귀 콜백 — "←" 버튼 클릭 시 패널 소유권을 이전하며 호출
+    /// </summary>
+    using RedockCallback = std::function<void(std::unique_ptr<IEPanel>)>;
+    void SetRedockCallback(RedockCallback cb) { m_redockCallback = std::move(cb); }
+
 private:
     static constexpr int32_t   kDragBarH   = 24;
     static constexpr int32_t   kCloseW     = 24;
+    static constexpr int32_t   kDockBtnW   = 24;
     static constexpr SDL_Color kColDragBar  = {  55,  55,  62, 255 };
     static constexpr SDL_Color kColDragText = { 200, 200, 200, 255 };
     static constexpr SDL_Color kColClose    = { 160,  50,  50, 255 };
+    static constexpr SDL_Color kColDockBtn  = {  50,  90, 140, 255 };
 
     std::unique_ptr<IEPanel> m_panel;
-    IEFont*     m_font        = nullptr;
-    std::string m_windowId;
+    IEFont*      m_font        = nullptr;
+    std::string  m_windowId;
+    RedockCallback m_redockCallback;
 
     bool    m_dragging    = false;
     int32_t m_dragOffsetX = 0;
