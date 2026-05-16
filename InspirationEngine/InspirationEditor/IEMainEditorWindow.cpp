@@ -17,7 +17,7 @@ void IEMainEditorWindow::InitWindow(IEFont* font, IEAtlasEditorWindow* atlasEdit
     m_btnAtlas.SetFont(font);
     m_btnAtlas.SetRenderer(r);
     m_btnAtlas.SetRect(8, 6, 110, 28);
-    m_btnAtlas.SetLabel("Atlas Editor");
+    m_btnAtlas.SetLabel(IELocalize::Get("btn.atlas_editor"));
     m_btnAtlas.SetOwnerWindow(this);
     m_btnAtlas.SetCallback([this]() {
         if (m_atlasEditor != nullptr)

@@ -79,6 +79,6 @@ void IECameraPanel::Draw(IERenderer* r)
     {
         int32_t px = m_layout.GetOriginX() + 8;
         int32_t py = m_layout.GetOriginY() + 92;
-        r->DrawText(font, "type: TopView", kColText, px, py);
+        r->DrawText(font, IELocalize::Get("label.camera_type"), kColText, px, py);
     }
 }

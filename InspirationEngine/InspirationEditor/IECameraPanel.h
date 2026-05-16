@@ -11,7 +11,7 @@ public:
 
     virtual void        Draw(IERenderer* r)                                         override;
     virtual void        Update(float dt)                                            override;
-    virtual const char* GetTitle()                                       const override { return "Camera"; }
+    virtual const char* GetTitle()                                       const override { return IELocalize::Get("panel.camera"); }
     virtual void        SetContentRect(int32_t x, int32_t y, int32_t w, int32_t h) override;
     virtual void        SetFont(IEFont* f)                                          override;
     virtual void        SetOwnerWindow(IEWindow* w)                                 override;

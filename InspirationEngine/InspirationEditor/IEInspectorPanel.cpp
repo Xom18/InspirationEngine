@@ -97,7 +97,7 @@ void IEInspectorPanel::Draw(IERenderer* r)
     {
         IEFont* font = GetFont();
         if (font != nullptr)
-            r->DrawText(font, "No Selection", kColNoSel,
+            r->DrawText(font, IELocalize::Get("label.no_selection"), kColNoSel,
                         m_layout.GetOriginX() + 8, m_layout.GetOriginY() + 8);
         return;
     }

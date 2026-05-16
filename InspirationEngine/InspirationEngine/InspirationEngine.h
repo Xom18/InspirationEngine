@@ -16,6 +16,7 @@
 #include <optional>
 #include "utf8proc.h"
 #include "Util/IEStrUTF8.h"
+#include "Util/IELocalize.h"
 #include "Core/MacroDefine.h"	//매크로 / Define용 헤더
 #include "Text/IEFont.h"			//폰트 관리
 #include "Text/IETextRenderer.h"//FreeType+HarfBuzz 렌더링 유틸리티

@@ -12,7 +12,7 @@ public:
 
     virtual void        Draw(IERenderer* r)                                override;
     virtual void        Update(float dt)                                   override;
-    virtual const char* GetTitle()                               const override { return "Viewport"; }
+    virtual const char* GetTitle()                               const override { return IELocalize::Get("panel.viewport"); }
     virtual void        SetContentRect(int32_t x, int32_t y, int32_t w, int32_t h) override;
     IEScene&         GetScene()          { return m_scene; }
     IECameraTopView* GetCamera()         { return m_camera; }

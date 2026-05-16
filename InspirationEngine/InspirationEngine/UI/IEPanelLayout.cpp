@@ -268,7 +268,10 @@ void IEPanelLayout::Draw()
             float drawX = axisPoint.x + e.x - pivotPoint.x;
             float drawY = axisPoint.y + e.y - pivotPoint.y;
 
-            m_renderer->DrawText(m_font, e.labelText.c_str(), e.labelColor,
+            const char* text = e.labelText.c_str();
+            if (!e.labelText.empty() && e.labelText[0] == '$')
+                text = IELocalize::Get(e.labelText.c_str() + 1);
+            m_renderer->DrawText(m_font, text, e.labelColor,
                 static_cast<int32_t>(drawX), static_cast<int32_t>(drawY));
         }
         else if (e.widget != nullptr)

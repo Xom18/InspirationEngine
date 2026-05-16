@@ -19,6 +19,8 @@ int main(int argc, char* argv[])
         SDL_free(const_cast<char*>(bp));
     }
 
+    IELocalize::Load("Data/Text/en.json");
+
     SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 
     constexpr int32_t kTickRate = 1000 / 60;
@@ -26,12 +28,12 @@ int main(int argc, char* argv[])
     auto* mainWin  = new IEMainEditorWindow();
     auto* atlasWin = new IEAtlasEditorWindow();
 
-    mainWin->CreateWindow("InspirationEditor", 1280, 720, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SDL_WINDOW_RESIZABLE);
+    mainWin->CreateWindow(IELocalize::Get("win.editor"), 1280, 720, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SDL_WINDOW_RESIZABLE);
     SDL_SetWindowMinimumSize(mainWin->GetSDLWindow(), IEMainEditorWindow::kMinW, IEMainEditorWindow::kMinH);
     IECore::AddNewWindow("main", mainWin);
     IECore::AddWindowIndex(mainWin);
 
-    atlasWin->CreateWindow("InspirationEditor — Atlas Editor", 1280, 720);
+    atlasWin->CreateWindow(IELocalize::Get("win.atlas_editor"), 1280, 720);
     atlasWin->HideWindow();
     IECore::AddNewWindow("atlas", atlasWin);
     IECore::AddWindowIndex(atlasWin);

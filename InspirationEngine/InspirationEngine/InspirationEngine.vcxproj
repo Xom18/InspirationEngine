@@ -39,6 +39,7 @@
     <ClInclude Include="Text\IETextRenderer.h" />
     <ClInclude Include="Util\IEStrUTF8.h" />
     <ClInclude Include="Util\IEFile.h" />
+    <ClInclude Include="Util\IELocalize.h" />
     <ClInclude Include="Sprite\IESpriteManager.h" />
     <ClInclude Include="Sprite\IEAtlasManager.h" />
     <ClInclude Include="GameObject\IEComponent.h" />
@@ -80,6 +81,7 @@
     <ClCompile Include="Text\IETextRenderer.cpp" />
     <ClCompile Include="Util\IEStrUTF8.cpp" />
     <ClCompile Include="Util\IEFile.cpp" />
+    <ClCompile Include="Util\IELocalize.cpp" />
     <ClCompile Include="Sprite\IESpriteManager.cpp" />
     <ClCompile Include="Sprite\IEAtlasManager.cpp" />
     <ClCompile Include="GameObject\IEStaticObject.cpp" />

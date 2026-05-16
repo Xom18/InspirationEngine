@@ -40,7 +40,7 @@ void IEAtlasEditorWindow::InitWindow(IEFont* font)
     m_btnSetPath.SetFont(font);
     m_btnSetPath.SetRenderer(r);
     m_btnSetPath.SetRect(160, 8, 36, 28);
-    m_btnSetPath.SetLabel("Go");
+    m_btnSetPath.SetLabel(IELocalize::Get("btn.go"));
     m_btnSetPath.SetOwnerWindow(this);
     m_btnSetPath.SetCallback([this]() {
         std::string root = m_tbBrowserPath.GetText();
@@ -75,7 +75,7 @@ void IEAtlasEditorWindow::InitWindow(IEFont* font)
     m_btnLoad.SetFont(font);
     m_btnLoad.SetRenderer(r);
     m_btnLoad.SetRect(822, 8, 80, 28);
-    m_btnLoad.SetLabel("Load");
+    m_btnLoad.SetLabel(IELocalize::Get("btn.load"));
     m_btnLoad.SetOwnerWindow(this);
     m_btnLoad.SetCallback([this]() { LoadPNG(); });
 
@@ -130,14 +130,14 @@ void IEAtlasEditorWindow::InitWindow(IEFont* font)
     m_btnApply.SetFont(font);
     m_btnApply.SetRenderer(r);
     m_btnApply.SetRect(px, kWinH - kFooterH - 36, pw, 28);
-    m_btnApply.SetLabel("Apply");
+    m_btnApply.SetLabel(IELocalize::Get("btn.apply"));
     m_btnApply.SetOwnerWindow(this);
     m_btnApply.SetCallback([this]() { ApplyPanel(); });
 
     m_btnSave.SetFont(font);
     m_btnSave.SetRenderer(r);
     m_btnSave.SetRect(kBrowserW + 8, kWinH - kFooterH + 8, 120, 28);
-    m_btnSave.SetLabel("Save JSON");
+    m_btnSave.SetLabel(IELocalize::Get("btn.save_json"));
     m_btnSave.SetOwnerWindow(this);
     m_btnSave.SetCallback([this]() { SaveJSON(); });
 }
@@ -184,7 +184,7 @@ void IEAtlasEditorWindow::Draw()
     r->DrawLine(kColSep, kCanvasX + kCanvasW,    0, kCanvasX + kCanvasW,    kWinH);
 
     // File browser header
-    r->DrawText(m_font, "Root:", kColText, 4, 12);
+    r->DrawText(m_font, IELocalize::Get("label.root"), kColText, 4, 12);
     DrawTextBoxBg(r, &m_tbBrowserPath, m_focusedBox == &m_tbBrowserPath, kColTbBor);
     m_tbBrowserPath.Draw();
     m_btnSetPath.Draw();
@@ -193,9 +193,9 @@ void IEAtlasEditorWindow::Draw()
     m_fileBrowser.Draw();
 
     // Atlas header
-    r->DrawText(m_font, "PNG:", kColText, 208, 12);
-    r->DrawText(m_font, "W:",   kColText, 654, 12);
-    r->DrawText(m_font, "H:",   kColText, 738, 12);
+    r->DrawText(m_font, IELocalize::Get("label.png"),    kColText, 208, 12);
+    r->DrawText(m_font, IELocalize::Get("label.width"),  kColText, 654, 12);
+    r->DrawText(m_font, IELocalize::Get("label.height"), kColText, 738, 12);
     DrawTextBoxBg(r, &m_tbPath,  m_focusedBox == &m_tbPath,  kColTbBor);  m_tbPath.Draw();
     DrawTextBoxBg(r, &m_tbTileW, m_focusedBox == &m_tbTileW, kColTbBor);  m_tbTileW.Draw();
     DrawTextBoxBg(r, &m_tbTileH, m_focusedBox == &m_tbTileH, kColTbBor);  m_tbTileH.Draw();
@@ -255,31 +255,31 @@ void IEAtlasEditorWindow::Draw()
     int32_t py  = kHeaderH + 8;
     int32_t gap = 28;
 
-    r->DrawText(m_font, "name:", kColText, px, py + 3);
+    r->DrawText(m_font, IELocalize::Get("label.name"),  kColText, px, py + 3);
     DrawTextBoxBg(r, &m_tbName,   m_focusedBox == &m_tbName,   kColTbBor);  m_tbName.Draw();
     py += gap;
 
-    r->DrawText(m_font, "x:", kColText, px, py + 3);
+    r->DrawText(m_font, IELocalize::Get("label.x"),     kColText, px, py + 3);
     DrawTextBoxBg(r, &m_tbX,      m_focusedBox == &m_tbX,      kColTbBor);  m_tbX.Draw();
     py += gap;
 
-    r->DrawText(m_font, "y:", kColText, px, py + 3);
+    r->DrawText(m_font, IELocalize::Get("label.y"),     kColText, px, py + 3);
     DrawTextBoxBg(r, &m_tbY,      m_focusedBox == &m_tbY,      kColTbBor);  m_tbY.Draw();
     py += gap;
 
-    r->DrawText(m_font, "w:", kColText, px, py + 3);
+    r->DrawText(m_font, IELocalize::Get("label.w"),     kColText, px, py + 3);
     DrawTextBoxBg(r, &m_tbTW,     m_focusedBox == &m_tbTW,     kColTbBor);  m_tbTW.Draw();
     py += gap;
 
-    r->DrawText(m_font, "h:", kColText, px, py + 3);
+    r->DrawText(m_font, IELocalize::Get("label.h"),     kColText, px, py + 3);
     DrawTextBoxBg(r, &m_tbTH,     m_focusedBox == &m_tbTH,     kColTbBor);  m_tbTH.Draw();
     py += gap;
 
-    r->DrawText(m_font, "pivX:", kColText, px, py + 3);
+    r->DrawText(m_font, IELocalize::Get("label.piv_x"), kColText, px, py + 3);
     DrawTextBoxBg(r, &m_tbPivotX, m_focusedBox == &m_tbPivotX, kColTbBor);  m_tbPivotX.Draw();
     py += gap;
 
-    r->DrawText(m_font, "pivY:", kColText, px, py + 3);
+    r->DrawText(m_font, IELocalize::Get("label.piv_y"), kColText, px, py + 3);
     DrawTextBoxBg(r, &m_tbPivotY, m_focusedBox == &m_tbPivotY, kColTbBor);  m_tbPivotY.Draw();
 
     m_btnApply.Draw();
@@ -426,7 +426,7 @@ void IEAtlasEditorWindow::ApplyPanel()
     td.pivotX = std::atoi(m_tbPivotX.GetText());
     td.pivotY = std::atoi(m_tbPivotY.GetText());
 
-    m_statusMsg = "Applied tile #" + std::to_string(m_selectedTile);
+    m_statusMsg = std::string(IELocalize::Get("msg.applied_tile")) + std::to_string(m_selectedTile);
 }
 
 bool IEAtlasEditorWindow::LoadPNGFromPath(const std::string& path)
@@ -434,7 +434,7 @@ bool IEAtlasEditorWindow::LoadPNGFromPath(const std::string& path)
     SDL_Surface* surf = IMG_Load(path.c_str());
     if (surf == nullptr)
     {
-        m_statusMsg = std::string("Load failed: ") + SDL_GetError();
+        m_statusMsg = std::string(IELocalize::Get("msg.load_failed")) + SDL_GetError();
         return false;
     }
 
@@ -457,7 +457,7 @@ void IEAtlasEditorWindow::LoadPNG()
     std::string path = m_tbPath.GetText();
     if (path.empty())
     {
-        m_statusMsg = "No path specified";
+        m_statusMsg = IELocalize::Get("msg.no_path");
         return;
     }
 
@@ -470,7 +470,7 @@ void IEAtlasEditorWindow::LoadPNG()
     if (m_tileH <= 0) m_tileH = 16;
 
     AutoSplit();
-    m_statusMsg = "Loaded: " + fs::path(path).filename().string();
+    m_statusMsg = std::string(IELocalize::Get("msg.loaded")) + fs::path(path).filename().string();
 }
 
 void IEAtlasEditorWindow::LoadJSON(const std::string& jsonPath)
@@ -478,7 +478,7 @@ void IEAtlasEditorWindow::LoadJSON(const std::string& jsonPath)
     std::ifstream f(jsonPath);
     if (!f.is_open())
     {
-        m_statusMsg = "Cannot open: " + fs::path(jsonPath).filename().string();
+        m_statusMsg = std::string(IELocalize::Get("msg.cannot_open")) + fs::path(jsonPath).filename().string();
         return;
     }
 
@@ -486,7 +486,7 @@ void IEAtlasEditorWindow::LoadJSON(const std::string& jsonPath)
     try { f >> j; }
     catch (const std::exception& e)
     {
-        m_statusMsg = std::string("JSON error: ") + e.what();
+        m_statusMsg = std::string(IELocalize::Get("msg.json_error")) + e.what();
         return;
     }
 
@@ -531,8 +531,11 @@ void IEAtlasEditorWindow::LoadJSON(const std::string& jsonPath)
         }
     }
 
-    m_statusMsg = "Loaded: " + fs::path(jsonPath).filename().string()
-                + " (" + std::to_string(m_tiles.size()) + " tiles)";
+    m_statusMsg = std::string(IELocalize::Get("msg.loaded"))
+                + fs::path(jsonPath).filename().string()
+                + IELocalize::Get("msg.loaded_tiles_pre")
+                + std::to_string(m_tiles.size())
+                + IELocalize::Get("msg.loaded_tiles");
 }
 
 void IEAtlasEditorWindow::OpenWithFile(const std::string& path)
@@ -592,7 +595,7 @@ void IEAtlasEditorWindow::SaveJSON()
 {
     if (m_tiles.empty())
     {
-        m_statusMsg = "No tiles to save";
+        m_statusMsg = IELocalize::Get("msg.no_tiles_to_save");
         return;
     }
 
@@ -620,9 +623,9 @@ void IEAtlasEditorWindow::SaveJSON()
     std::ofstream ofs(outPath);
     if (!ofs)
     {
-        m_statusMsg = "Cannot write: " + outPath;
+        m_statusMsg = std::string(IELocalize::Get("msg.cannot_write")) + outPath;
         return;
     }
     ofs << j.dump(2);
-    m_statusMsg = "Saved: " + fs::path(outPath).filename().string();
+    m_statusMsg = std::string(IELocalize::Get("msg.saved")) + fs::path(outPath).filename().string();
 }
