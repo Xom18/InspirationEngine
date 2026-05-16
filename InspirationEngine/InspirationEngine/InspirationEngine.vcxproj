@@ -52,6 +52,8 @@
     <ClInclude Include="Camera\IECameraSideView.h" />
     <ClInclude Include="Camera\IECameraOverheadOblique.h" />
     <ClInclude Include="Camera\IECameraDepthSide.h" />
+    <ClInclude Include="Camera\IECameraComponent.h" />
+    <ClInclude Include="Camera\IECameraObject.h" />
     <ClInclude Include="Scene\IEScene.h" />
     <ClInclude Include="Scene\IESceneManager.h" />
     <ClInclude Include="Scene\IESceneSerializer.h" />
@@ -90,6 +92,8 @@
     <ClCompile Include="Sprite\IEAtlasManager.cpp" />
     <ClCompile Include="GameObject\IEStaticObject.cpp" />
     <ClCompile Include="GameObject\IEEntity.cpp" />
+    <ClCompile Include="Camera\IECameraComponent.cpp" />
+    <ClCompile Include="Camera\IECameraObject.cpp" />
     <ClCompile Include="Scene\IEScene.cpp" />
     <ClCompile Include="Scene\IESceneSerializer.cpp" />
     <ClCompile Include="Scene\IEProjectConfig.cpp" />

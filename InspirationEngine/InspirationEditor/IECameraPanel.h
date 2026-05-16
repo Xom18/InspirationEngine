@@ -57,16 +57,17 @@ public:
     virtual void        SetRenderer(IERenderer* r)                                  override;
 
     /// <summary>
-    /// 편집 대상 카메라 설정 — 슬라이더 값 즉시 동기화
+    /// 편집 대상 카메라 오브젝트 설정 — 슬라이더 값 즉시 동기화.
+    /// IECameraComponent + IETransformComponent 를 통해 편집.
     /// </summary>
-    /// <param name="camera">대상 카메라 포인터</param>
-    void SetCamera(IECamera* camera);
+    /// <param name="obj">IECameraComponent 를 보유한 IEGameObject (nullptr 가능)</param>
+    void SetCameraObject(IEGameObject* obj);
 
 private:
     static constexpr SDL_Color kColBg   = {  35,  35,  40, 255 };
     static constexpr SDL_Color kColText = { 180, 180, 180, 255 };
 
-    IECamera*     m_camera = nullptr;
+    IEGameObject* m_cameraObj = nullptr;
     IEPanelLayout m_layout;
 
     IESlider m_sliderZoom;

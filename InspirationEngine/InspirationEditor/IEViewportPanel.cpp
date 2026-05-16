@@ -10,9 +10,11 @@ SDL_Color IEViewportPanel::kColText   = { 120, 120, 120, 255 };
 
 IEViewportPanel::IEViewportPanel()
 {
-    auto cam = std::make_unique<IECameraTopView>();
-    m_camera = cam.get();
-    m_scene.SetCamera(cam.release());
+    // 에디터 내비게이션 카메라는 씬에 주입하지 않음 (m_editorCam 자체 소유)
+    // 게임 카메라는 씬 내 IECameraObject 로 관리
+    auto* camObj = m_scene.AddObject<IECameraObject>();
+    camObj->SetName("Main Camera");
+    m_scene.SetCameraObject(camObj);
 }
 
 void IEViewportPanel::SetContentRect(int32_t x, int32_t y, int32_t w, int32_t h)
@@ -21,8 +23,7 @@ void IEViewportPanel::SetContentRect(int32_t x, int32_t y, int32_t w, int32_t h)
     m_y = y;
     m_w = (w > 0) ? w : 1;
     m_h = (h > 0) ? h : 1;
-    if (m_camera != nullptr)
-        m_camera->SetViewport(m_w, m_h);
+    m_editorCam.SetViewport(m_w, m_h);
 }
 
 void IEViewportPanel::Update(float dt)
@@ -34,7 +35,7 @@ void IEViewportPanel::Update(float dt)
 void IEViewportPanel::UpdateInput()
 {
     IEWindow* ownerWindow = GetOwnerWindow();
-    if (m_camera == nullptr || ownerWindow == nullptr)
+    if (ownerWindow == nullptr)
         return;
     if (IECore::GetMouseOnWindow() != ownerWindow)
     {
@@ -77,16 +78,16 @@ void IEViewportPanel::UpdateInput()
         float wheelY = IECore::GetInput().GetMouseWheelY();
         if (wheelY != 0.0f)
         {
-            float oldZoom = m_camera->GetZoom();
+            float oldZoom = m_editorCam.GetZoom();
             float newZoom = std::clamp(oldZoom * std::pow(1.12f, wheelY), 0.05f, 20.0f);
-            m_camera->SetViewport(m_w, m_h);
-            auto wp = m_camera->ScreenToWorld(vx, vy);
-            m_camera->SetZoom(newZoom);
-            m_camera->SetViewport(m_w, m_h);
-            auto wp2 = m_camera->ScreenToWorld(vx, vy);
-            m_camera->SetPosition(
-                m_camera->GetX() + static_cast<float>(wp.GetX() - wp2.GetX()),
-                m_camera->GetY() + static_cast<float>(wp.GetY() - wp2.GetY()));
+            m_editorCam.SetViewport(m_w, m_h);
+            auto wp = m_editorCam.ScreenToWorld(vx, vy);
+            m_editorCam.SetZoom(newZoom);
+            m_editorCam.SetViewport(m_w, m_h);
+            auto wp2 = m_editorCam.ScreenToWorld(vx, vy);
+            m_editorCam.SetPosition(
+                m_editorCam.GetX() + static_cast<float>(wp.GetX() - wp2.GetX()),
+                m_editorCam.GetY() + static_cast<float>(wp.GetY() - wp2.GetY()));
         }
     }
 
@@ -96,23 +97,23 @@ void IEViewportPanel::UpdateInput()
         m_vpDragging   = true;
         m_vpDragStartX = static_cast<float>(vx);
         m_vpDragStartY = static_cast<float>(vy);
-        m_camStartX    = m_camera->GetX();
-        m_camStartY    = m_camera->GetY();
+        m_camStartX    = m_editorCam.GetX();
+        m_camStartY    = m_editorCam.GetY();
     }
     if (!rmb)
         m_vpDragging = false;
 
     if (m_vpDragging)
     {
-        float zoom = m_camera->GetZoom();
+        float zoom = m_editorCam.GetZoom();
         float dx   = (static_cast<float>(vx) - m_vpDragStartX) / zoom;
         float dy   = (static_cast<float>(vy) - m_vpDragStartY) / zoom;
-        m_camera->SetPosition(m_camStartX - dx, m_camStartY - dy);
+        m_editorCam.SetPosition(m_camStartX - dx, m_camStartY - dy);
     }
 
     // 오브젝트 드래그 이동 (LMB)
-    m_camera->SetViewport(m_w, m_h);
-    auto curWp = m_camera->ScreenToWorld(vx, vy);
+    m_editorCam.SetViewport(m_w, m_h);
+    auto curWp = m_editorCam.ScreenToWorld(vx, vy);
     float curWx = static_cast<float>(curWp.GetX());
     float curWy = static_cast<float>(curWp.GetY());
 
@@ -121,7 +122,7 @@ void IEViewportPanel::UpdateInput()
         auto* t = m_selectedObj->GetComponent<IETransformComponent>();
         if (t != nullptr)
         {
-            float radius = 24.0f / m_camera->GetZoom();
+            float radius = 24.0f / m_editorCam.GetZoom();
             float dx = t->GetX() - curWx;
             float dy = t->GetY() - curWy;
             if (dx * dx + dy * dy <= radius * radius)
@@ -177,11 +178,11 @@ void IEViewportPanel::UpdateInput()
 
 void IEViewportPanel::AddObject(const std::string& type)
 {
-    if (m_camera == nullptr || m_history == nullptr)
+    if (m_history == nullptr)
         return;
 
-    m_camera->SetViewport(m_w, m_h);
-    auto center = m_camera->ScreenToWorld(m_w / 2, m_h / 2);
+    m_editorCam.SetViewport(m_w, m_h);
+    auto center = m_editorCam.ScreenToWorld(m_w / 2, m_h / 2);
     float wx = static_cast<float>(center.GetX());
     float wy = static_cast<float>(center.GetY());
 
@@ -198,12 +199,12 @@ void IEViewportPanel::DeleteSelectedObject()
 
 void IEViewportPanel::SelectAt(int32_t vx, int32_t vy)
 {
-    m_camera->SetViewport(m_w, m_h);
-    auto wp = m_camera->ScreenToWorld(vx, vy);
+    m_editorCam.SetViewport(m_w, m_h);
+    auto wp = m_editorCam.ScreenToWorld(vx, vy);
     float wx = static_cast<float>(wp.GetX());
     float wy = static_cast<float>(wp.GetY());
 
-    float radius  = 24.0f / m_camera->GetZoom();
+    float radius  = 24.0f / m_editorCam.GetZoom();
     IEGameObject* best     = nullptr;
     float         bestDist = radius;
 
@@ -229,7 +230,7 @@ void IEViewportPanel::SelectAt(int32_t vx, int32_t vy)
 
 void IEViewportPanel::Draw(IERenderer* r)
 {
-    if (r == nullptr || m_camera == nullptr)
+    if (r == nullptr)
         return;
 
     SDL_Renderer* sdlR = r->GetSDLRenderer();
@@ -238,12 +239,12 @@ void IEViewportPanel::Draw(IERenderer* r)
 
     r->DrawRect(kColVp, 0, 0, m_w, m_h, SDL_BLENDMODE_NONE);
 
-    m_camera->SetViewport(m_w, m_h);
+    m_editorCam.SetViewport(m_w, m_h);
     if (m_gridVisible)
         DrawGrid(r);
 
     m_scene.SetViewportOverride(m_w, m_h);
-    m_scene.Draw(r);
+    m_scene.Draw(r, &m_editorCam);
 
     // 선택 표시
     if (m_selectedObj != nullptr)
@@ -251,7 +252,7 @@ void IEViewportPanel::Draw(IERenderer* r)
         auto* t = m_selectedObj->GetComponent<IETransformComponent>();
         if (t != nullptr)
         {
-            auto sp = m_camera->WorldToScreen(t->GetX(), t->GetY(), t->GetZ());
+            auto sp = m_editorCam.WorldToScreen(t->GetX(), t->GetY(), t->GetZ());
             constexpr int32_t kR = 14;
             int32_t sx = sp.GetX();
             int32_t sy = sp.GetY();
@@ -267,7 +268,7 @@ void IEViewportPanel::Draw(IERenderer* r)
     {
         char buf[64];
         std::snprintf(buf, sizeof(buf), "cam (%.0f, %.0f)  zoom %.2f",
-                      m_camera->GetX(), m_camera->GetY(), m_camera->GetZoom());
+                      m_editorCam.GetX(), m_editorCam.GetY(), m_editorCam.GetZoom());
         r->DrawText(font, buf, kColText, 6, 6);
 
         int32_t objCount = static_cast<int32_t>(m_scene.GetObjects().size());
@@ -280,10 +281,10 @@ void IEViewportPanel::Draw(IERenderer* r)
 
 void IEViewportPanel::DrawGrid(IERenderer* r)
 {
-    auto wTL = m_camera->ScreenToWorld(0, 0);
-    auto wBR = m_camera->ScreenToWorld(m_w, m_h);
+    auto wTL = m_editorCam.ScreenToWorld(0, 0);
+    auto wBR = m_editorCam.ScreenToWorld(m_w, m_h);
 
-    float zoom     = m_camera->GetZoom();
+    float zoom     = m_editorCam.GetZoom();
     float gridSize = 64.0f;
     if (zoom < 0.25f)
         gridSize = 512.0f;
@@ -299,18 +300,18 @@ void IEViewportPanel::DrawGrid(IERenderer* r)
 
     for (float wx = startX; wx <= static_cast<float>(wBR.GetX()) + gridSize; wx += gridSize)
     {
-        auto s1 = m_camera->WorldToScreen(wx, static_cast<float>(wTL.GetY()));
-        auto s2 = m_camera->WorldToScreen(wx, static_cast<float>(wBR.GetY()));
+        auto s1 = m_editorCam.WorldToScreen(wx, static_cast<float>(wTL.GetY()));
+        auto s2 = m_editorCam.WorldToScreen(wx, static_cast<float>(wBR.GetY()));
         r->DrawLine(kColGrid, s1.GetX(), s1.GetY(), s2.GetX(), s2.GetY());
     }
     for (float wy = startY; wy <= static_cast<float>(wBR.GetY()) + gridSize; wy += gridSize)
     {
-        auto s1 = m_camera->WorldToScreen(static_cast<float>(wTL.GetX()), wy);
-        auto s2 = m_camera->WorldToScreen(static_cast<float>(wBR.GetX()), wy);
+        auto s1 = m_editorCam.WorldToScreen(static_cast<float>(wTL.GetX()), wy);
+        auto s2 = m_editorCam.WorldToScreen(static_cast<float>(wBR.GetX()), wy);
         r->DrawLine(kColGrid, s1.GetX(), s1.GetY(), s2.GetX(), s2.GetY());
     }
 
-    auto orig = m_camera->WorldToScreen(0.0f, 0.0f);
+    auto orig = m_editorCam.WorldToScreen(0.0f, 0.0f);
     if (orig.GetX() >= -4 && orig.GetX() < m_w + 4 &&
         orig.GetY() >= -4 && orig.GetY() < m_h + 4)
     {

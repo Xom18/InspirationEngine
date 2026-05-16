@@ -51,6 +51,8 @@
 #include "Camera/IECameraSideView.h"			//사이드뷰 카메라
 #include "Camera/IECameraOverheadOblique.h"	//오버헤드 오블리크 카메라
 #include "Camera/IECameraDepthSide.h"			//뎁스 사이드뷰 카메라
+#include "Camera/IECameraComponent.h"		//카메라 컴포넌트
+#include "Camera/IECameraObject.h"			//카메라 오브젝트
 #include "Scene/IEScene.h"				//씬 기반
 #include "Scene/IESceneManager.h"		//씬 관리자
 #include "Scene/IESceneSerializer.h"	//씬 직렬화

@@ -46,9 +46,9 @@ public:
     IEScene&         GetScene()          { return m_scene; }
 
     /// <summary>
-    /// 뷰포트 카메라 포인터 반환
+    /// 편집 내비게이션 전용 에디터 카메라 포인터 반환 (씬 미포함)
     /// </summary>
-    IECameraTopView* GetCamera()         { return m_camera; }
+    IECameraTopView* GetCamera()         { return &m_editorCam; }
 
     /// <summary>
     /// 현재 선택된 오브젝트 포인터 반환 (없으면 nullptr)
@@ -93,7 +93,7 @@ private:
     static SDL_Color kColText;
 
     IEScene          m_scene;
-    IECameraTopView* m_camera      = nullptr;
+    IECameraTopView  m_editorCam;            // 편집 내비게이션 전용 (씬 미포함)
     IEGameObject*    m_selectedObj = nullptr;
 
     int32_t m_x = 0, m_y = 0, m_w = 1, m_h = 1;

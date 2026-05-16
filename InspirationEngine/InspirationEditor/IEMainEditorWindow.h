@@ -6,6 +6,7 @@
 #include "IEFileBrowserPanel.h"
 #include "IEHierarchy.h"
 #include "IECameraPanel.h"
+#include "IECameraViewPanel.h"
 #include "IEInspectorPanel.h"
 #include <list>
 #include <string>
@@ -125,10 +126,11 @@ private:
     std::unique_ptr<SplitNode> m_layoutRoot;
 
     // 빠른 접근용 raw 포인터 (소유권은 m_panels 안에 있음)
-    IEViewportPanel*  m_vpPanel     = nullptr;
-    IECameraPanel*    m_camPanel    = nullptr;
-    IEHierarchy*      m_entityPanel = nullptr;
-    IEInspectorPanel* m_inspPanel   = nullptr;
+    IEViewportPanel*   m_vpPanel     = nullptr;
+    IECameraPanel*     m_camPanel    = nullptr;
+    IECameraViewPanel* m_cvPanel     = nullptr;
+    IEHierarchy*       m_entityPanel = nullptr;
+    IEInspectorPanel*  m_inspPanel   = nullptr;
 
     // 부동 창 ID 카운터 (스레드 안전)
     std::atomic<int32_t> m_floatIdCounter{0};

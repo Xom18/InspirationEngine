@@ -58,7 +58,7 @@ void IEMainEditorWindow::InitWindow(IEFont* font, IEAtlasEditorWindow* atlasEdit
     m_btnSave.SetOwnerWindow(this);
     m_btnSave.SetCallback([this]() {
         if (m_vpPanel != nullptr)
-            IESceneSerializer::Save(m_vpPanel->GetScene(), m_vpPanel->GetCamera(), kScenePath);
+            IESceneSerializer::Save(m_vpPanel->GetScene(), kScenePath);
     });
 
     m_btnLoad.SetFont(font);
@@ -69,10 +69,12 @@ void IEMainEditorWindow::InitWindow(IEFont* font, IEAtlasEditorWindow* atlasEdit
     m_btnLoad.SetCallback([this]() {
         if (m_vpPanel != nullptr)
         {
-            IESceneSerializer::Load(m_vpPanel->GetScene(), m_vpPanel->GetCamera(), kScenePath);
+            IESceneSerializer::Load(m_vpPanel->GetScene(), kScenePath);
             m_history.Clear();
             if (m_entityPanel != nullptr)
                 m_entityPanel->RefreshList();
+            if (m_camPanel != nullptr)
+                m_camPanel->SetCameraObject(m_vpPanel->GetScene().GetCameraObject());
         }
     });
 
@@ -102,11 +104,12 @@ void IEMainEditorWindow::InitWindow(IEFont* font, IEAtlasEditorWindow* atlasEdit
     {
         m_vpPanel->SetCommandHistory(&m_history);
 
-        auto* cam = m_vpPanel->GetCamera();
-        if (cam != nullptr)
+        // 에디터 내비게이션 카메라 초기 위치 (게임 카메라와 독립)
+        auto* editorCam = m_vpPanel->GetCamera();
+        if (editorCam != nullptr)
         {
-            cam->SetPosition(IEProjectConfig::GetDefaultCamX(), IEProjectConfig::GetDefaultCamY());
-            cam->SetZoom(IEProjectConfig::GetDefaultCamZoom());
+            editorCam->SetPosition(IEProjectConfig::GetDefaultCamX(), IEProjectConfig::GetDefaultCamY());
+            editorCam->SetZoom(IEProjectConfig::GetDefaultCamZoom());
         }
         m_vpPanel->SetGridVisible(IEProjectConfig::IsGridVisible());
     }
@@ -145,7 +148,8 @@ void IEMainEditorWindow::InitPanels(IEFont* font, IEAtlasEditorWindow* atlasEdit
     {
         auto camPtr = std::make_unique<IECameraPanel>();
         m_camPanel  = camPtr.get();
-        camPtr->SetCamera(m_vpPanel->GetCamera());
+        if (m_vpPanel != nullptr)
+            camPtr->SetCameraObject(m_vpPanel->GetScene().GetCameraObject());
         m_panels.emplace_back(std::move(camPtr));
         setup(m_panels.back());
     }
@@ -166,28 +170,40 @@ void IEMainEditorWindow::InitPanels(IEFont* font, IEAtlasEditorWindow* atlasEdit
         m_panels.emplace_back(std::move(inspPtr));
         setup(m_panels.back());
     }
+
+    // ── CameraView ────────────────────────────
+    {
+        auto cvPtr = std::make_unique<IECameraViewPanel>();
+        m_cvPanel  = cvPtr.get();
+        if (m_vpPanel != nullptr)
+            cvPtr->SetScene(&m_vpPanel->GetScene());
+        m_panels.emplace_back(std::move(cvPtr));
+        setup(m_panels.back());
+    }
 }
 
 void IEMainEditorWindow::BuildLayoutTree()
 {
-    // m_panels 삽입 순서: Viewport, FileBrowser, Camera, Hierarchy, Inspector
+    // m_panels 삽입 순서: Viewport, FileBrowser, Camera, Hierarchy, Inspector, CameraView
     auto it = m_panels.begin();
     IEDockedPanel* vp   = &*it++;
     IEDockedPanel* fb   = &*it++;
     IEDockedPanel* cam  = &*it++;
     IEDockedPanel* hier = &*it++;
-    IEDockedPanel* insp = &*it;
+    IEDockedPanel* insp = &*it++;
+    IEDockedPanel* cv   = &*it;
 
     constexpr float kLeftW  = 220.0f;
     constexpr float kRightW = 260.0f;
     constexpr float kWinW   = 1280.0f;
 
-    float lRatio = kLeftW / kWinW;
-    float rRatio = (kWinW - kLeftW - kRightW) / (kWinW - kLeftW);
+    float lRatio  = kLeftW / kWinW;
+    float vpRatio = (kWinW - kLeftW - kRightW) / (kWinW - kLeftW);
 
-    auto leftSplit  = MakeBranch(SN::Dir::V, 0.5f, MakeLeaf(fb),  MakeLeaf(cam));
-    auto rightSplit = MakeBranch(SN::Dir::V, 0.5f, MakeLeaf(hier), MakeLeaf(insp));
-    auto rightPart  = MakeBranch(SN::Dir::H, rRatio, MakeLeaf(vp), std::move(rightSplit));
+    auto leftSplit   = MakeBranch(SN::Dir::V, 0.5f,   MakeLeaf(fb),   MakeLeaf(cam));
+    auto centerSplit = MakeBranch(SN::Dir::V, 0.6f,   MakeLeaf(vp),   MakeLeaf(cv));
+    auto rightSplit  = MakeBranch(SN::Dir::V, 0.5f,   MakeLeaf(hier), MakeLeaf(insp));
+    auto rightPart   = MakeBranch(SN::Dir::H, vpRatio, std::move(centerSplit), std::move(rightSplit));
 
     m_layoutRoot = MakeBranch(SN::Dir::H, lRatio, std::move(leftSplit), std::move(rightPart));
 }
@@ -475,6 +491,7 @@ void IEMainEditorWindow::RescanRawPtrs()
 {
     m_vpPanel     = nullptr;
     m_camPanel    = nullptr;
+    m_cvPanel     = nullptr;
     m_entityPanel = nullptr;
     m_inspPanel   = nullptr;
     for (auto& dp : m_panels)
@@ -483,6 +500,7 @@ void IEMainEditorWindow::RescanRawPtrs()
         if (p == nullptr) continue;
         if (auto* vp   = dynamic_cast<IEViewportPanel*>(p))   m_vpPanel     = vp;
         if (auto* cam  = dynamic_cast<IECameraPanel*>(p))     m_camPanel    = cam;
+        if (auto* cv   = dynamic_cast<IECameraViewPanel*>(p)) m_cvPanel     = cv;
         if (auto* hier = dynamic_cast<IEHierarchy*>(p))       m_entityPanel = hier;
         if (auto* insp = dynamic_cast<IEInspectorPanel*>(p))  m_inspPanel   = insp;
     }
@@ -614,15 +632,17 @@ void IEMainEditorWindow::Update(float deltaTime)
     if (ctrlHeld && sDown && !m_prevCtrlS)
     {
         if (m_vpPanel != nullptr)
-            IESceneSerializer::Save(m_vpPanel->GetScene(), m_vpPanel->GetCamera(), kScenePath);
+            IESceneSerializer::Save(m_vpPanel->GetScene(), kScenePath);
     }
     if (ctrlHeld && oDown && !m_prevCtrlO)
     {
         if (m_vpPanel != nullptr)
         {
-            IESceneSerializer::Load(m_vpPanel->GetScene(), m_vpPanel->GetCamera(), kScenePath);
+            IESceneSerializer::Load(m_vpPanel->GetScene(), kScenePath);
             if (m_entityPanel != nullptr)
                 m_entityPanel->RefreshList();
+            if (m_camPanel != nullptr)
+                m_camPanel->SetCameraObject(m_vpPanel->GetScene().GetCameraObject());
         }
     }
 
