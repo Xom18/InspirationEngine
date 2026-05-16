@@ -33,6 +33,7 @@
 #include "UI/IEListView.h"			//UI-리스트뷰
 #include "UI/IEDropdown.h"			//UI-드롭다운
 #include "UI/IEPanelLayout.h"		//UI-패널레이아웃
+#include "UI/IESection.h"			//UI-섹션 컨테이너
 #include "UI/IEFileBrowser.h"		//UI-파일브라우저
 #include "Input/MouseCusor.h"	//마우스 커서
 #include "Window/IERenderer.h"	//렌더러
