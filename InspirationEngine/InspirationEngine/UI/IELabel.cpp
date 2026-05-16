@@ -3,8 +3,10 @@
 void IELabel::Draw()
 {
     IERenderer* r = GetRenderer();
-    if (r == nullptr || m_font == nullptr)
+    IEFont* font = GetFont();
+    if (r == nullptr || font == nullptr)
         return;
 
-    r->DrawText(m_font, m_text.c_str(), m_color, m_x, m_y);
+    SDL_Rect rect = GetRect();
+    r->DrawText(font, m_text.c_str(), m_color, rect.x, rect.y);
 }

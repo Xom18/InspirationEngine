@@ -25,16 +25,19 @@ void IEFileBrowser::SetRenderer(IERenderer* r)
 
 void IEFileBrowser::SetRect(int32_t x, int32_t y, int32_t w, int32_t h)
 {
+    IEUIBase::SetRect(x, y, w, h);
     m_treeView.SetRect(x, y, w, h);
 }
 
 void IEFileBrowser::SetFont(IEFont* font)
 {
+    IEUIBase::SetFont(font);
     m_treeView.SetFont(font);
 }
 
 void IEFileBrowser::SetOwnerWindow(IEWindow* window)
 {
+    IEUIBase::SetOwnerWindow(window);
     m_treeView.SetOwnerWindow(window);
 }
 

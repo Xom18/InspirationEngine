@@ -3,7 +3,6 @@
 #include <vector>
 #include <memory>
 
-class IEWindow;
 class IETreeNode;
 
 class IETreeView : public IEUIBase
@@ -15,32 +14,32 @@ public:
     /// <summary>
     /// 렌더러 설정 — 내부 IEScrollView에도 전파
     /// </summary>
-    void SetRenderer(IERenderer* r)
+    virtual void SetRenderer(IERenderer* r) override
     {
         IEUIBase::SetRenderer(r);
         m_scroll.SetRenderer(r);
     }
 
     /// <summary>
-    /// 뷰포트 영역 설정
+    /// 뷰포트 영역 설정 — 내부 IEScrollView에도 전파
     /// </summary>
-    void SetRect(int32_t x, int32_t y, int32_t w, int32_t h)
+    virtual void SetRect(int32_t x, int32_t y, int32_t w, int32_t h) override
     {
-        m_rect = { x, y, w, h };
+        IEUIBase::SetRect(x, y, w, h);
         m_scroll.SetRect(x, y, w, h);
     }
 
     /// <summary>
     /// 폰트 설정
     /// </summary>
-    void SetFont(IEFont* font) { m_font = font; }
+    virtual void SetFont(IEFont* font) override { IEUIBase::SetFont(font); }
 
     /// <summary>
-    /// 마우스 이벤트 소유 창 설정
+    /// 마우스 이벤트 소유 창 설정 — 내부 IEScrollView에도 전파
     /// </summary>
-    void SetOwnerWindow(IEWindow* window)
+    virtual void SetOwnerWindow(IEWindow* window) override
     {
-        m_ownerWindow = window;
+        IEUIBase::SetOwnerWindow(window);
         m_scroll.SetOwnerWindow(window);
     }
 
@@ -84,9 +83,6 @@ private:
     static constexpr int32_t kArrowW  = 14;
     static constexpr int32_t kPadX    = 4;
 
-    IEFont*      m_font        = nullptr;
-    IEWindow*    m_ownerWindow = nullptr;
-    SDL_Rect     m_rect        = {};
     IEScrollView m_scroll;
 
     std::vector<std::unique_ptr<IETreeNode>> m_roots;

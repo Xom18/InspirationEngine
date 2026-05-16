@@ -80,8 +80,9 @@ public:
 	/// 폰트 설정
 	/// </summary>
 	/// <param name="font">사용할 폰트</param>
-	void SetFont(IEFont* font)
+	virtual void SetFont(IEFont* font) override
 	{
+		IEUIBase::SetFont(font);
 		m_font = font;
 		m_fontHeight = m_font->GetHeight();
 	}
@@ -285,6 +286,7 @@ public:
 	{
 		m_rect.x = x;
 		m_rect.y = y;
+		IEUIBase::SetRect(x, y, m_rect.w, m_rect.h);
 	}
 
 	/// <summary>
@@ -294,8 +296,9 @@ public:
 	/// <param name="y">화면 Y</param>
 	/// <param name="w">너비 (0이면 제한 없음)</param>
 	/// <param name="h">높이 (0이면 제한 없음)</param>
-	void SetRect(int32_t x, int32_t y, int32_t w = 0, int32_t h = 0)
+	virtual void SetRect(int32_t x, int32_t y, int32_t w = 0, int32_t h = 0) override
 	{
+		IEUIBase::SetRect(x, y, w, h);
 		m_rect.x = x;
 		m_rect.y = y;
 		m_rect.w = w;

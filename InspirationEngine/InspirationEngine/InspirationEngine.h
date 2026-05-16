@@ -28,6 +28,7 @@
 #include "UI/IETreeNode.h"			//UI-트리노드
 #include "UI/IETreeView.h"			//UI-트리뷰
 #include "UI/IESlider.h"			//UI-슬라이더
+#include "UI/IEPanelLayout.h"		//UI-패널레이아웃
 #include "UI/IEFileBrowser.h"		//UI-파일브라우저
 #include "Input/MouseCusor.h"	//마우스 커서
 #include "Window/IERenderer.h"	//렌더러

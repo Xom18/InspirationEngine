@@ -38,14 +38,12 @@ void IETreeView::DrawArrow(IERenderer* r, int32_t x, int32_t y, bool expanded) c
 
     if (expanded)
     {
-        // ▼ 아래쪽 삼각형
         r->DrawLine(col, cx - s, cy - s / 2, cx + s, cy - s / 2);
         r->DrawLine(col, cx + s, cy - s / 2, cx,     cy + s);
         r->DrawLine(col, cx,     cy + s,     cx - s, cy - s / 2);
     }
     else
     {
-        // ▶ 오른쪽 삼각형
         r->DrawLine(col, cx - s / 2, cy - s, cx - s / 2, cy + s);
         r->DrawLine(col, cx - s / 2, cy - s, cx + s,     cy);
         r->DrawLine(col, cx + s,     cy,     cx - s / 2, cy + s);
@@ -56,7 +54,8 @@ void IETreeView::Update()
 {
     m_scroll.Update();
 
-    if (m_ownerWindow == nullptr || IECore::GetMouseOnWindow() != m_ownerWindow)
+    IEWindow* ownerWindow = GetOwnerWindow();
+    if (ownerWindow == nullptr || IECore::GetMouseOnWindow() != ownerWindow)
     {
         m_prevLMB = false;
         return;
@@ -66,7 +65,7 @@ void IETreeView::Update()
     SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
 
     int32_t winX = 0, winY = 0;
-    SDL_GetWindowPosition(m_ownerWindow->GetSDLWindow(), &winX, &winY);
+    SDL_GetWindowPosition(ownerWindow->GetSDLWindow(), &winX, &winY);
 
     int32_t mx = static_cast<int32_t>(gx) - winX;
     int32_t my = static_cast<int32_t>(gy) - winY;
@@ -78,8 +77,9 @@ void IETreeView::Update()
     if (!clicked)
         return;
 
-    if (mx < m_rect.x || mx >= m_rect.x + m_rect.w ||
-        my < m_rect.y || my >= m_rect.y + m_rect.h)
+    SDL_Rect rect = GetRect();
+    if (mx < rect.x || mx >= rect.x + rect.w ||
+        my < rect.y || my >= rect.y + rect.h)
         return;
 
     std::vector<FlatEntry> flat;
@@ -89,13 +89,12 @@ void IETreeView::Update()
 
     for (auto& entry : flat)
     {
-        int32_t rowY = m_rect.y + entry.contentY - scrollY;
+        int32_t rowY = rect.y + entry.contentY - scrollY;
         if (my < rowY || my >= rowY + kRowH)
             continue;
 
-        int32_t indentX = m_rect.x + kPadX + entry.depth * kIndentW;
+        int32_t indentX = rect.x + kPadX + entry.depth * kIndentW;
 
-        // 화살표 클릭 → 펼치기/접기
         if (entry.node->HasChildren() && mx >= indentX && mx < indentX + kArrowW)
         {
             entry.node->SetExpanded(!entry.node->IsExpanded());
@@ -105,7 +104,6 @@ void IETreeView::Update()
             return;
         }
 
-        // 라벨 클릭 → 선택
         int32_t labelX = indentX + kArrowW + 2;
         if (mx >= labelX)
         {
@@ -123,7 +121,8 @@ void IETreeView::Update()
 void IETreeView::Draw()
 {
     IERenderer* r = GetRenderer();
-    if (r == nullptr || m_font == nullptr)
+    IEFont* font = GetFont();
+    if (r == nullptr || font == nullptr)
         return;
 
     std::vector<FlatEntry> flat;
@@ -135,24 +134,26 @@ void IETreeView::Draw()
 
     m_scroll.BeginDraw();
 
+    SDL_Rect rect = GetRect();
+
     for (const auto& entry : flat)
     {
-        int32_t rowY = m_rect.y + entry.contentY - scrollY;
+        int32_t rowY = rect.y + entry.contentY - scrollY;
 
-        if (rowY + kRowH <= m_rect.y || rowY >= m_rect.y + m_rect.h)
+        if (rowY + kRowH <= rect.y || rowY >= rect.y + rect.h)
             continue;
 
-        int32_t indentX = m_rect.x + kPadX + entry.depth * kIndentW;
+        int32_t indentX = rect.x + kPadX + entry.depth * kIndentW;
 
         if (entry.node->IsSelected())
-            r->DrawRect({ 70, 130, 180, 120 }, m_rect.x, rowY, m_rect.w, kRowH, SDL_BLENDMODE_BLEND);
+            r->DrawRect({ 70, 130, 180, 120 }, rect.x, rowY, rect.w, kRowH, SDL_BLENDMODE_BLEND);
 
         if (entry.node->HasChildren())
             DrawArrow(r, indentX, rowY, entry.node->IsExpanded());
 
         int32_t labelX = indentX + kArrowW + 2;
-        int32_t labelY = rowY + (kRowH - m_font->GetHeight()) / 2;
-        r->DrawText(m_font, entry.node->GetLabel().c_str(), { 220, 220, 220, 255 }, labelX, labelY);
+        int32_t labelY = rowY + (kRowH - font->GetHeight()) / 2;
+        r->DrawText(font, entry.node->GetLabel().c_str(), { 220, 220, 220, 255 }, labelX, labelY);
     }
 
     m_scroll.EndDraw();

@@ -6,27 +6,30 @@ void IEButton::Draw()
     if (r == nullptr)
         return;
 
+    SDL_Rect rect = GetRect();
     SDL_Color col = m_pressed ? m_colorPressed
                   : m_hovered ? m_colorHover
                               : m_colorNormal;
 
-    r->DrawRect(col, m_rect.x, m_rect.y, m_rect.w, m_rect.h, SDL_BLENDMODE_NONE);
+    r->DrawRect(col, rect.x, rect.y, rect.w, rect.h, SDL_BLENDMODE_NONE);
 
-    if (m_font == nullptr || m_label.empty())
+    IEFont* font = GetFont();
+    if (font == nullptr || m_label.empty())
         return;
 
-    int32_t fontH = m_font->GetHeight();
-    int32_t textY = m_rect.y + (m_rect.h - fontH) / 2;
-    r->DrawText(m_font, m_label.c_str(), m_colorText, m_rect.x + 6, textY);
+    int32_t fontH = font->GetHeight();
+    int32_t textY = rect.y + (rect.h - fontH) / 2;
+    r->DrawText(font, m_label.c_str(), m_colorText, rect.x + 6, textY);
 }
 
 void IEButton::Update()
 {
-    if (m_ownerWindow == nullptr || IECore::GetMouseOnWindow() != m_ownerWindow)
+    IEWindow* ownerWindow = GetOwnerWindow();
+    if (ownerWindow == nullptr || IECore::GetMouseOnWindow() != ownerWindow)
     {
-        m_hovered  = false;
-        m_pressed  = false;
-        m_prevLMB  = false;
+        m_hovered = false;
+        m_pressed = false;
+        m_prevLMB = false;
         return;
     }
 
@@ -34,7 +37,7 @@ void IEButton::Update()
     SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
 
     int32_t winX = 0, winY = 0;
-    SDL_GetWindowPosition(m_ownerWindow->GetSDLWindow(), &winX, &winY);
+    SDL_GetWindowPosition(ownerWindow->GetSDLWindow(), &winX, &winY);
 
     int32_t mx = static_cast<int32_t>(gx) - winX;
     int32_t my = static_cast<int32_t>(gy) - winY;
@@ -42,8 +45,9 @@ void IEButton::Update()
     bool lmb     = (btn & SDL_BUTTON_LMASK) != 0;
     bool clicked = lmb && !m_prevLMB;
 
-    m_hovered = (mx >= m_rect.x && mx < m_rect.x + m_rect.w &&
-                 my >= m_rect.y && my < m_rect.y + m_rect.h);
+    SDL_Rect rect = GetRect();
+    m_hovered = (mx >= rect.x && mx < rect.x + rect.w &&
+                 my >= rect.y && my < rect.y + rect.h);
 
     m_pressed = lmb && m_hovered;
 

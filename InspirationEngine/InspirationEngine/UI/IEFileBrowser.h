@@ -11,10 +11,10 @@ public:
     virtual void Draw() override;
     virtual void Update() override;
 
-    void SetRenderer(IERenderer* r);
-    void SetRect(int32_t x, int32_t y, int32_t w, int32_t h);
-    void SetFont(IEFont* font);
-    void SetOwnerWindow(IEWindow* window);
+    virtual void SetRenderer(IERenderer* r) override;
+    virtual void SetRect(int32_t x, int32_t y, int32_t w, int32_t h) override;
+    virtual void SetFont(IEFont* font) override;
+    virtual void SetOwnerWindow(IEWindow* window) override;
 
     /// <summary>
     /// 탐색할 루트 디렉터리 경로 설정 — 설정 즉시 Refresh 호출

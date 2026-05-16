@@ -16,22 +16,25 @@ void IESlider::SetValue(float v)
 
 float IESlider::ThumbCenterX() const
 {
+    SDL_Rect rect = GetRect();
     float t = (m_maxVal > m_minVal)
         ? (m_value - m_minVal) / (m_maxVal - m_minVal)
         : 0.0f;
-    return static_cast<float>(m_rect.x) + t * static_cast<float>(m_rect.w);
+    return static_cast<float>(rect.x) + t * static_cast<float>(rect.w);
 }
 
 float IESlider::ValueFromX(int32_t x) const
 {
-    float t = static_cast<float>(x - m_rect.x) / static_cast<float>(m_rect.w);
+    SDL_Rect rect = GetRect();
+    float t = static_cast<float>(x - rect.x) / static_cast<float>(rect.w);
     t = std::clamp(t, 0.0f, 1.0f);
     return m_minVal + t * (m_maxVal - m_minVal);
 }
 
 void IESlider::Update()
 {
-    if (m_ownerWindow == nullptr || IECore::GetMouseOnWindow() != m_ownerWindow)
+    IEWindow* ownerWindow = GetOwnerWindow();
+    if (ownerWindow == nullptr || IECore::GetMouseOnWindow() != ownerWindow)
     {
         m_prevLMB    = false;
         m_isDragging = false;
@@ -42,7 +45,7 @@ void IESlider::Update()
     SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
 
     int32_t winX = 0, winY = 0;
-    SDL_GetWindowPosition(m_ownerWindow->GetSDLWindow(), &winX, &winY);
+    SDL_GetWindowPosition(ownerWindow->GetSDLWindow(), &winX, &winY);
 
     int32_t mx = static_cast<int32_t>(gx) - winX;
     int32_t my = static_cast<int32_t>(gy) - winY;
@@ -61,8 +64,9 @@ void IESlider::Update()
 
     if (clicked)
     {
-        if (mx >= m_rect.x && mx < m_rect.x + m_rect.w &&
-            my >= m_rect.y && my < m_rect.y + m_rect.h)
+        SDL_Rect rect = GetRect();
+        if (mx >= rect.x && mx < rect.x + rect.w &&
+            my >= rect.y && my < rect.y + rect.h)
             m_isDragging = true;
     }
 
@@ -84,27 +88,29 @@ void IESlider::Draw()
     if (r == nullptr)
         return;
 
-    int32_t trackY  = m_rect.y + (m_rect.h - kTrackH) / 2;
+    SDL_Rect rect = GetRect();
+    int32_t trackY  = rect.y + (rect.h - kTrackH) / 2;
     int32_t thumbCx = static_cast<int32_t>(ThumbCenterX());
     int32_t thumbX  = thumbCx - kThumbW / 2;
-    int32_t thumbY  = m_rect.y + (m_rect.h - kThumbH) / 2;
+    int32_t thumbY  = rect.y + (rect.h - kThumbH) / 2;
 
-    r->DrawRect({ 60, 60, 60, 255 }, m_rect.x, trackY, m_rect.w, kTrackH);
+    r->DrawRect({ 60, 60, 60, 255 }, rect.x, trackY, rect.w, kTrackH);
 
-    int32_t fillW = thumbCx - m_rect.x;
+    int32_t fillW = thumbCx - rect.x;
     if (fillW > 0)
-        r->DrawRect({ 100, 160, 220, 255 }, m_rect.x, trackY, fillW, kTrackH);
+        r->DrawRect({ 100, 160, 220, 255 }, rect.x, trackY, fillW, kTrackH);
 
     SDL_Color thumbCol = m_isDragging
         ? SDL_Color{ 255, 255, 255, 255 }
         : SDL_Color{ 200, 200, 200, 255 };
     r->DrawRect(thumbCol, thumbX, thumbY, kThumbW, kThumbH);
 
-    if (m_showValue && m_font != nullptr)
+    IEFont* font = GetFont();
+    if (m_showValue && font != nullptr)
     {
         char buf[16];
         std::snprintf(buf, sizeof(buf), "%.2f", m_value);
-        int32_t textY = m_rect.y + (m_rect.h - m_font->GetHeight()) / 2;
-        r->DrawText(m_font, buf, { 200, 200, 200, 255 }, m_rect.x + m_rect.w + 6, textY);
+        int32_t textY = rect.y + (rect.h - font->GetHeight()) / 2;
+        r->DrawText(font, buf, { 200, 200, 200, 255 }, rect.x + rect.w + 6, textY);
     }
 }

@@ -2,8 +2,6 @@
 #include <functional>
 #include <string>
 
-class IEWindow;
-
 class IEButton : public IEUIBase
 {
 public:
@@ -11,52 +9,19 @@ public:
     virtual void Update() override;
 
     /// <summary>
-    /// 버튼 영역 설정
-    /// </summary>
-    void SetRect(int32_t x, int32_t y, int32_t w, int32_t h)
-    {
-        m_rect = { x, y, w, h };
-    }
-
-    /// <summary>
     /// 버튼 영역 반환
     /// </summary>
-    void GetRect(SDL_Rect& rect) const
-    {
-        rect = m_rect;
-    }
+    void GetRect(SDL_Rect& rect) const { rect = IEUIBase::GetRect(); }
 
     /// <summary>
     /// 버튼 라벨 설정 (UTF-8)
     /// </summary>
-    void SetLabel(const char* label)
-    {
-        m_label = label;
-    }
-
-    /// <summary>
-    /// 라벨 렌더링에 사용할 폰트 설정
-    /// </summary>
-    void SetFont(IEFont* font)
-    {
-        m_font = font;
-    }
-
-    /// <summary>
-    /// 마우스 이벤트를 소유한 창 설정 — Update()에서 마우스 위치를 이 창 기준으로 변환
-    /// </summary>
-    void SetOwnerWindow(IEWindow* window)
-    {
-        m_ownerWindow = window;
-    }
+    void SetLabel(const char* label) { m_label = label; }
 
     /// <summary>
     /// 클릭 콜백 설정
     /// </summary>
-    void SetCallback(std::function<void()> callback)
-    {
-        m_callback = std::move(callback);
-    }
+    void SetCallback(std::function<void()> callback) { m_callback = std::move(callback); }
 
     /// <summary>
     /// 일반 상태 배경색
@@ -89,10 +54,7 @@ public:
     bool IsPressed() const { return m_pressed; }
 
 private:
-    IEFont*               m_font        = nullptr;
-    IEWindow*             m_ownerWindow = nullptr;
     std::function<void()> m_callback;
-    SDL_Rect              m_rect        = {};
     std::string           m_label;
 
     SDL_Color m_colorNormal  = {  70,  90, 120, 255 };
