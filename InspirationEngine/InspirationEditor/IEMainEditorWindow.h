@@ -1,6 +1,7 @@
 #pragma once
 #include "../InspirationEngine/InspirationEngine.h"
 #include "IEDockedPanel.h"
+#include "IEEditorCommand.h"
 #include "IEViewportPanel.h"
 #include "IEFileBrowserPanel.h"
 #include "IEHierarchy.h"
@@ -65,6 +66,10 @@ private:
     IEButton m_btnAtlas;
     IEButton m_btnSave;
     IEButton m_btnLoad;
+    IEButton m_btnAddStatic;
+    IEButton m_btnAddEntity;
+
+    IECommandHistory m_history;
 
     static constexpr char kScenePath[] = "Data/scene.json";
 
@@ -81,6 +86,9 @@ private:
     std::atomic<int32_t> m_floatIdCounter{0};
 
     // 단축키 엣지 감지용 이전 상태
-    bool m_prevCtrlS = false;
-    bool m_prevCtrlO = false;
+    bool m_prevCtrlS  = false;
+    bool m_prevCtrlO  = false;
+    bool m_prevCtrlZ  = false;
+    bool m_prevCtrlY  = false;
+    bool m_prevDelete = false;
 };

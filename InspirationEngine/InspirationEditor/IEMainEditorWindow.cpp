@@ -44,12 +44,37 @@ void IEMainEditorWindow::InitWindow(IEFont* font, IEAtlasEditorWindow* atlasEdit
         if (m_vpPanel != nullptr)
         {
             IESceneSerializer::Load(m_vpPanel->GetScene(), m_vpPanel->GetCamera(), kScenePath);
+            m_history.Clear();
             if (m_entityPanel != nullptr)
                 m_entityPanel->RefreshList();
         }
     });
 
+    m_btnAddStatic.SetFont(font);
+    m_btnAddStatic.SetRenderer(r);
+    m_btnAddStatic.SetRect(302, 6, 80, 28);
+    m_btnAddStatic.SetLabel(IELocalize::Get("btn.add_static"));
+    m_btnAddStatic.SetOwnerWindow(this);
+    m_btnAddStatic.SetCallback([this]() {
+        if (m_vpPanel != nullptr)
+            m_vpPanel->AddObject("StaticObject");
+    });
+
+    m_btnAddEntity.SetFont(font);
+    m_btnAddEntity.SetRenderer(r);
+    m_btnAddEntity.SetRect(390, 6, 80, 28);
+    m_btnAddEntity.SetLabel(IELocalize::Get("btn.add_entity"));
+    m_btnAddEntity.SetOwnerWindow(this);
+    m_btnAddEntity.SetCallback([this]() {
+        if (m_vpPanel != nullptr)
+            m_vpPanel->AddObject("Entity");
+    });
+
     InitPanels(font, atlasEditor);
+
+    if (m_vpPanel != nullptr)
+        m_vpPanel->SetCommandHistory(&m_history);
+
     LayoutPanels();
 }
 
@@ -167,6 +192,8 @@ void IEMainEditorWindow::Update(float deltaTime)
     m_btnAtlas.Update();
     m_btnSave.Update();
     m_btnLoad.Update();
+    m_btnAddStatic.Update();
+    m_btnAddEntity.Update();
 
     IEInput& input = IECore::GetInput();
     bool ctrlHeld = input.GetKeyState(SDL_SCANCODE_LCTRL) || input.GetKeyState(SDL_SCANCODE_RCTRL);
@@ -190,6 +217,27 @@ void IEMainEditorWindow::Update(float deltaTime)
 
     m_prevCtrlS = ctrlHeld && sDown;
     m_prevCtrlO = ctrlHeld && oDown;
+
+    // Ctrl+Z : Undo
+    bool zDown = input.GetKeyState(SDL_SCANCODE_Z);
+    if (ctrlHeld && zDown && !m_prevCtrlZ)
+        m_history.Undo();
+    m_prevCtrlZ = ctrlHeld && zDown;
+
+    // Ctrl+Y : Redo
+    bool yDown = input.GetKeyState(SDL_SCANCODE_Y);
+    if (ctrlHeld && yDown && !m_prevCtrlY)
+        m_history.Redo();
+    m_prevCtrlY = ctrlHeld && yDown;
+
+    // Delete : 선택된 오브젝트 삭제
+    bool delDown = input.GetKeyState(SDL_SCANCODE_DELETE);
+    if (delDown && !m_prevDelete)
+    {
+        if (m_vpPanel != nullptr)
+            m_vpPanel->DeleteSelectedObject();
+    }
+    m_prevDelete = delDown;
 
     if (m_inspPanel != nullptr && m_vpPanel != nullptr)
         m_inspPanel->SetTarget(m_vpPanel->GetSelectedObject());
@@ -298,6 +346,8 @@ void IEMainEditorWindow::Draw()
     m_btnAtlas.Draw();
     m_btnSave.Draw();
     m_btnLoad.Draw();
+    m_btnAddStatic.Draw();
+    m_btnAddEntity.Draw();
 
     // 패널 (앞 → 뒤 순서로 그림, back이 최상위)
     for (auto& panel : m_panels)

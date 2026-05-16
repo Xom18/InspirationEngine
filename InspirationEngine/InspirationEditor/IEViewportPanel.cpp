@@ -41,6 +41,7 @@ void IEViewportPanel::UpdateInput()
         m_vpPrevLMB  = false;
         m_vpPrevRMB  = false;
         m_vpDragging = false;
+        m_objDragging = false;
         return;
     }
 
@@ -83,6 +84,7 @@ void IEViewportPanel::UpdateInput()
         }
     }
 
+    // 카메라 패닝 (RMB)
     if (rmbClicked && inVp)
     {
         m_vpDragging   = true;
@@ -102,8 +104,90 @@ void IEViewportPanel::UpdateInput()
         m_camera->SetPosition(m_camStartX - dx, m_camStartY - dy);
     }
 
-    if (lmbClicked && inVp && !m_vpDragging)
+    // 오브젝트 드래그 이동 (LMB)
+    m_camera->SetViewport(m_w, m_h);
+    auto curWp = m_camera->ScreenToWorld(vx, vy);
+    float curWx = static_cast<float>(curWp.GetX());
+    float curWy = static_cast<float>(curWp.GetY());
+
+    if (lmbClicked && inVp && !m_vpDragging && m_selectedObj != nullptr)
+    {
+        auto* t = m_selectedObj->GetComponent<IETransformComponent>();
+        if (t != nullptr)
+        {
+            float radius = 24.0f / m_camera->GetZoom();
+            float dx = t->GetX() - curWx;
+            float dy = t->GetY() - curWy;
+            if (dx * dx + dy * dy <= radius * radius)
+            {
+                m_objDragging = true;
+                m_objDragWx   = curWx;
+                m_objDragWy   = curWy;
+                m_objStartX   = t->GetX();
+                m_objStartY   = t->GetY();
+            }
+        }
+    }
+
+    if (m_objDragging && m_selectedObj != nullptr)
+    {
+        auto* t = m_selectedObj->GetComponent<IETransformComponent>();
+        if (t != nullptr)
+        {
+            t->SetX(m_objStartX + (curWx - m_objDragWx));
+            t->SetY(m_objStartY + (curWy - m_objDragWy));
+        }
+    }
+
+    if (!lmb && m_objDragging)
+    {
+        // 실제로 움직인 경우에만 커맨드 push
+        if (m_selectedObj != nullptr && m_history != nullptr)
+        {
+            auto* t = m_selectedObj->GetComponent<IETransformComponent>();
+            if (t != nullptr)
+            {
+                float newX = t->GetX();
+                float newY = t->GetY();
+                constexpr float kEps = 0.5f;
+                if (std::abs(newX - m_objStartX) > kEps || std::abs(newY - m_objStartY) > kEps)
+                {
+                    // 이미 위치가 적용됐으므로 Execute 없이 히스토리만 push
+                    // CmdMoveObject::Execute는 to로 세팅하므로 현재 위치 = toX/toY
+                    auto cmd = std::make_unique<CmdMoveObject>(
+                        m_selectedObj, m_objStartX, m_objStartY, newX, newY, &m_selectedObj);
+                    // 직접 push하되 Execute는 건너뜀 (이미 적용됨)
+                    m_history->PushNoExec(std::move(cmd));
+                }
+            }
+        }
+        m_objDragging = false;
+    }
+
+    // LMB 클릭 시 선택 (드래그 아닐 때)
+    if (lmbClicked && inVp && !m_vpDragging && !m_objDragging)
         SelectAt(vx, vy);
+}
+
+void IEViewportPanel::AddObject(const std::string& type)
+{
+    if (m_camera == nullptr || m_history == nullptr)
+        return;
+
+    m_camera->SetViewport(m_w, m_h);
+    auto center = m_camera->ScreenToWorld(m_w / 2, m_h / 2);
+    float wx = static_cast<float>(center.GetX());
+    float wy = static_cast<float>(center.GetY());
+
+    m_history->Push(std::make_unique<CmdCreateObject>(&m_scene, type, wx, wy, &m_selectedObj));
+}
+
+void IEViewportPanel::DeleteSelectedObject()
+{
+    if (m_selectedObj == nullptr || m_history == nullptr)
+        return;
+
+    m_history->Push(std::make_unique<CmdDeleteObject>(&m_scene, m_selectedObj, &m_selectedObj));
 }
 
 void IEViewportPanel::SelectAt(int32_t vx, int32_t vy)

@@ -1,5 +1,6 @@
 #pragma once
 #include "IEEditorPanel.h"
+#include "IEEditorCommand.h"
 #include <cmath>
 
 /// <summary>
@@ -54,6 +55,22 @@ public:
     /// </summary>
     IEGameObject*    GetSelectedObject() { return m_selectedObj; }
 
+    /// <summary>
+    /// 커맨드 히스토리 주입 (외부에서 Undo/Redo 공유)
+    /// </summary>
+    void SetCommandHistory(IECommandHistory* h) { m_history = h; }
+
+    /// <summary>
+    /// 뷰포트 중심 월드 좌표에 오브젝트 추가
+    /// </summary>
+    /// <param name="type">"StaticObject" 또는 "Entity"</param>
+    void AddObject(const std::string& type);
+
+    /// <summary>
+    /// 현재 선택된 오브젝트 삭제
+    /// </summary>
+    void DeleteSelectedObject();
+
 private:
     void DrawGrid(IERenderer* r);
     void UpdateInput();
@@ -78,4 +95,13 @@ private:
     float m_camStartY    = 0.0f;
     bool  m_vpPrevLMB    = false;
     bool  m_vpPrevRMB    = false;
+
+    // 오브젝트 드래그 이동
+    bool  m_objDragging  = false;
+    float m_objDragWx    = 0.0f;  // 드래그 시작 시 월드 마우스 X
+    float m_objDragWy    = 0.0f;
+    float m_objStartX    = 0.0f;  // 드래그 시작 시 오브젝트 위치
+    float m_objStartY    = 0.0f;
+
+    IECommandHistory* m_history = nullptr;
 };
