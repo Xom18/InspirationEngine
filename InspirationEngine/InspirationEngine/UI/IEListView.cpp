@@ -52,6 +52,17 @@ void IEListView::ClearItems()
     UpdateScrollHeight();
 }
 
+void IEListView::RefreshItems(std::vector<std::string> items)
+{
+    m_items = std::move(items);
+    int32_t count = static_cast<int32_t>(m_items.size());
+    if (m_selectedIndex >= count)
+        m_selectedIndex = -1;
+    if (m_hoveredIndex >= count)
+        m_hoveredIndex = -1;
+    UpdateScrollHeight();
+}
+
 void IEListView::SetSelectedIndex(int32_t index)
 {
     int32_t count = static_cast<int32_t>(m_items.size());

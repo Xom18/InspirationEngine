@@ -32,6 +32,12 @@ public:
     void ClearItems();
 
     /// <summary>
+    /// 항목 내용을 교체하되 스크롤·선택 상태는 유지.
+    /// 항목 수 감소로 선택이 범위 밖이 되면 -1로 초기화.
+    /// </summary>
+    void RefreshItems(std::vector<std::string> items);
+
+    /// <summary>
     /// 선택 인덱스 프로그래밍 방식으로 설정.
     /// </summary>
     void SetSelectedIndex(int32_t index);
