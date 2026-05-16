@@ -269,16 +269,31 @@ void IECore::OperateEvent()
 		int32_t mouseYInt = static_cast<int32_t>(mouseY);
 		m_Input.UpdateMousePos(mouseXInt, mouseYInt);
 
-		//마우스가 올라와있는 윈도우
-		SDL_Window* sdlWindow = SDL_GetMouseFocus();
-		if (sdlWindow != nullptr)
+		// 글로벌 좌표 + 각 창 영역 비교 → m_mouseOnWindow 결정
+		// SDL_GetMouseFocus()는 드래그 후 stale하거나 새 창이 커서 아래에
+		// 등장할 때 MOUSE_ENTER가 미발생하는 문제가 있어 사용하지 않음
+		float gxF = 0.0f, gyF = 0.0f;
+		SDL_GetGlobalMouseState(&gxF, &gyF);
+		int32_t gx = static_cast<int32_t>(gxF);
+		int32_t gy = static_cast<int32_t>(gyF);
+
+		m_mouseOnWindow = nullptr;
+		for (auto& [_, win] : m_windows)
 		{
-			Uint32 windowID = SDL_GetWindowID(sdlWindow);
-			m_mouseOnWindow = GetWindowByID(windowID);
-		}
-		else
-		{
-			m_mouseOnWindow = nullptr;
+			SDL_WindowFlags wf = SDL_GetWindowFlags(win->GetSDLWindow());
+			if (wf & (SDL_WINDOW_HIDDEN | SDL_WINDOW_MINIMIZED))
+				continue;
+
+			int32_t wx = 0, wy = 0;
+			SDL_GetWindowPosition(win->GetSDLWindow(), &wx, &wy);
+			int32_t ww = 0, wh = 0;
+			SDL_GetWindowSize(win->GetSDLWindow(), &ww, &wh);
+
+			if (gx >= wx && gx < wx + ww && gy >= wy && gy < wy + wh)
+			{
+				m_mouseOnWindow = win.get();
+				break;
+			}
 		}
 	}
 }
