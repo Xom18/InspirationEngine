@@ -1,31 +1,31 @@
 #include "../InspirationEngine/InspirationEngine.h"
-#include "IEEntityListPanel.h"
+#include "IEHierarchy.h"
 #include <cstdio>
 
-void IEEntityListPanel::SetFont(IEFont* f)
+void IEHierarchy::SetFont(IEFont* f)
 {
     IEPanel::SetFont(f);
     m_list.SetFont(f);
 }
 
-void IEEntityListPanel::SetOwnerWindow(IEWindow* w)
+void IEHierarchy::SetOwnerWindow(IEWindow* w)
 {
     IEPanel::SetOwnerWindow(w);
     m_list.SetOwnerWindow(w);
 }
 
-void IEEntityListPanel::SetRenderer(IERenderer* r)
+void IEHierarchy::SetRenderer(IERenderer* r)
 {
     IEPanel::SetRenderer(r);
     m_list.SetRenderer(r);
 }
 
-void IEEntityListPanel::SetContentRect(int32_t x, int32_t y, int32_t w, int32_t h)
+void IEHierarchy::SetContentRect(int32_t x, int32_t y, int32_t w, int32_t h)
 {
     m_list.SetRect(x, y, w, h);
 }
 
-void IEEntityListPanel::Update(float dt)
+void IEHierarchy::Update(float dt)
 {
     if (m_scene != nullptr)
     {
@@ -49,7 +49,7 @@ void IEEntityListPanel::Update(float dt)
     m_list.Update();
 }
 
-void IEEntityListPanel::Draw(IERenderer* r)
+void IEHierarchy::Draw(IERenderer* r)
 {
     m_list.Draw();
 }

@@ -3,7 +3,7 @@
 #include "IEDockedPanel.h"
 #include "IEViewportPanel.h"
 #include "IEFileBrowserPanel.h"
-#include "IEEntityListPanel.h"
+#include "IEHierarchy.h"
 #include "IECameraPanel.h"
 #include "IEInspectorPanel.h"
 #include <vector>
@@ -47,7 +47,7 @@ private:
     // 빠른 접근용 raw 포인터 (소유권은 m_panels 안에 있음)
     IEViewportPanel*   m_vpPanel     = nullptr;
     IECameraPanel*     m_camPanel    = nullptr;
-    IEEntityListPanel* m_entityPanel = nullptr;
+    IEHierarchy* m_entityPanel = nullptr;
     IEInspectorPanel*  m_inspPanel   = nullptr;
 
     // 부동 창 ID 카운터 (스레드 안전)

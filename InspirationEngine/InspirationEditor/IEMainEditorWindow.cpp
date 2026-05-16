@@ -64,7 +64,7 @@ void IEMainEditorWindow::InitPanels(IEFont* font, IEAtlasEditorWindow* atlasEdit
     m_panels.push_back(std::move(camDoc));
 
     // ── EntityList ────────────────────────────
-    auto elPtr    = std::make_unique<IEEntityListPanel>();
+    auto elPtr    = std::make_unique<IEHierarchy>();
     m_entityPanel = elPtr.get();
     elPtr->SetScene(&m_vpPanel->GetScene());
 
@@ -187,7 +187,7 @@ void IEMainEditorWindow::ProcessUndock()
         // raw 포인터 무효화 확인 (소유권 이전된 패널이면 nullptr로)
         if (m_vpPanel     && m_vpPanel     == dynamic_cast<IEViewportPanel*>(panelPtr.get()))    m_vpPanel     = nullptr;
         if (m_camPanel    && m_camPanel    == dynamic_cast<IECameraPanel*>(panelPtr.get()))       m_camPanel    = nullptr;
-        if (m_entityPanel && m_entityPanel == dynamic_cast<IEEntityListPanel*>(panelPtr.get()))  m_entityPanel = nullptr;
+        if (m_entityPanel && m_entityPanel == dynamic_cast<IEHierarchy*>(panelPtr.get()))  m_entityPanel = nullptr;
         if (m_inspPanel   && m_inspPanel   == dynamic_cast<IEInspectorPanel*>(panelPtr.get()))   m_inspPanel   = nullptr;
 
         // 부동 창 생성

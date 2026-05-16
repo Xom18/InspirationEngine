@@ -4,7 +4,7 @@
 /// <summary>
 /// 씬 오브젝트 목록 패널. 클릭 시 선택 연동 예정.
 /// </summary>
-class IEEntityListPanel : public IEEditorPanel
+class IEHierarchy : public IEEditorPanel
 {
 public:
     virtual void        Draw(IERenderer* r)                                          override;
