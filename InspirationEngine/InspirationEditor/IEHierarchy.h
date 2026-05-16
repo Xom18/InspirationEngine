@@ -67,6 +67,12 @@ public:
     /// </summary>
     int32_t GetSelectedIndex() const { return m_list.GetSelectedIndex(); }
 
+    /// <summary>
+    /// 선택 항목을 외부에서 직접 지정 (Viewport → Hierarchy 역방향 동기화용)
+    /// </summary>
+    /// <param name="idx">선택할 인덱스 (-1이면 선택 해제)</param>
+    void    SetSelectedIndex(int32_t idx) { m_list.SetSelectedIndex(idx); }
+
 private:
     IEScene*   m_scene = nullptr;
     IEListView m_list;

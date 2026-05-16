@@ -85,6 +85,10 @@ private:
     // 부동 창 ID 카운터 (스레드 안전)
     std::atomic<int32_t> m_floatIdCounter{0};
 
+    // Hierarchy ↔ Viewport 선택 동기화
+    int32_t      m_prevHierIdx      = -1;
+    IEGameObject* m_prevVpSelected  = nullptr;
+
     // 단축키 엣지 감지용 이전 상태
     bool m_prevCtrlS  = false;
     bool m_prevCtrlO  = false;

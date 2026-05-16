@@ -56,6 +56,11 @@ public:
     IEGameObject*    GetSelectedObject() { return m_selectedObj; }
 
     /// <summary>
+    /// 외부(Hierarchy 등)에서 선택 오브젝트 직접 지정
+    /// </summary>
+    void             SetSelectedObject(IEGameObject* obj) { m_selectedObj = obj; }
+
+    /// <summary>
     /// 커맨드 히스토리 주입 (외부에서 Undo/Redo 공유)
     /// </summary>
     void SetCommandHistory(IECommandHistory* h) { m_history = h; }

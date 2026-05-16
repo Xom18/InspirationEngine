@@ -239,6 +239,58 @@ void IEMainEditorWindow::Update(float deltaTime)
     }
     m_prevDelete = delDown;
 
+    // Hierarchy → Viewport 선택 동기화
+    if (m_entityPanel != nullptr && m_vpPanel != nullptr)
+    {
+        int32_t hierIdx = m_entityPanel->GetSelectedIndex();
+        if (hierIdx != m_prevHierIdx)
+        {
+            if (hierIdx >= 0)
+            {
+                const auto& objs = m_vpPanel->GetScene().GetObjects();
+                if (hierIdx < static_cast<int32_t>(objs.size()))
+                    m_vpPanel->SetSelectedObject(objs[hierIdx].get());
+                else
+                    m_vpPanel->SetSelectedObject(nullptr);
+            }
+            else
+            {
+                m_vpPanel->SetSelectedObject(nullptr);
+            }
+            m_prevHierIdx = hierIdx;
+        }
+    }
+
+    // Viewport → Hierarchy 역방향 동기화
+    if (m_entityPanel != nullptr && m_vpPanel != nullptr)
+    {
+        IEGameObject* vpSel = m_vpPanel->GetSelectedObject();
+        if (vpSel != m_prevVpSelected)
+        {
+            m_prevVpSelected = vpSel;
+            if (vpSel != nullptr)
+            {
+                const auto& objs = m_vpPanel->GetScene().GetObjects();
+                int32_t idx = -1;
+                for (int32_t i = 0; i < static_cast<int32_t>(objs.size()); ++i)
+                {
+                    if (objs[i].get() == vpSel)
+                    {
+                        idx = i;
+                        break;
+                    }
+                }
+                m_entityPanel->SetSelectedIndex(idx);
+                m_prevHierIdx = idx;
+            }
+            else
+            {
+                m_entityPanel->SetSelectedIndex(-1);
+                m_prevHierIdx = -1;
+            }
+        }
+    }
+
     if (m_inspPanel != nullptr && m_vpPanel != nullptr)
         m_inspPanel->SetTarget(m_vpPanel->GetSelectedObject());
 

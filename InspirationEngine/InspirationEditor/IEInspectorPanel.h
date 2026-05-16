@@ -59,19 +59,28 @@ public:
     virtual void        SetRenderer(IERenderer* r)                                   override;
 
     /// <summary>
-    /// 편집 대상 오브젝트 설정 — 슬라이더 값 즉시 동기화
+    /// 편집 대상 오브젝트 설정 — 텍스트박스 값 즉시 동기화
     /// </summary>
     /// <param name="obj">대상 오브젝트 (nullptr 허용)</param>
     void SetTarget(IEGameObject* obj);
 
 private:
-    static constexpr SDL_Color kColBg     = {  35,  35,  40, 255 };
-    static constexpr SDL_Color kColNoSel  = { 110, 110, 110, 255 };
+    void SetFocus(IETextBox* tb);
+    bool HitTest(const SDL_Rect& r, int32_t mx, int32_t my) const;
+    void SyncTextToTransform(IETextBox& tb, float value);
 
-    IEGameObject* m_target = nullptr;
+    static constexpr SDL_Color kColBg    = {  35,  35,  40, 255 };
+    static constexpr SDL_Color kColNoSel = { 110, 110, 110, 255 };
+    static constexpr SDL_Color kColTbBg  = {  30,  30,  35, 255 };
+    static constexpr SDL_Color kColTbBor = {  70,  70,  80, 255 };
+    static constexpr SDL_Color kColTbFoc = {  70, 130, 180, 255 };
+
+    IEGameObject* m_target     = nullptr;
+    IETextBox*    m_focusedBox = nullptr;
+    bool          m_prevLMB    = false;
 
     IEPanelLayout m_layout;
-    IESlider      m_sliderX;
-    IESlider      m_sliderY;
-    IESlider      m_sliderZ;
+    IETextBox     m_tbX;
+    IETextBox     m_tbY;
+    IETextBox     m_tbZ;
 };
