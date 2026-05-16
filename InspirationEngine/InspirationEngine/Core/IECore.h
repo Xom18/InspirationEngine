@@ -284,6 +284,18 @@ public:
 	static void PollPlatformIME(SDL_Window* focusWin);
 
 	/// <summary>
+	/// 메인 스레드에서 실행할 태스크를 큐에 추가.
+	/// SDL 창 생성 등 HWND 스레드 어피니티가 필요한 작업에 사용.
+	/// </summary>
+	/// <param name="task">실행할 함수 객체</param>
+	static void PostMainThreadTask(std::function<void()> task);
+
+	/// <summary>
+	/// 큐에 쌓인 메인 스레드 태스크를 모두 실행. 메인 스레드에서 호출.
+	/// </summary>
+	static void RunMainThreadTasks();
+
+	/// <summary>
 	/// 텍스트 편집 이벤트 처리 — 처리했으면 true 반환
 	/// </summary>
 	/// <param name="event">처리할 SDL 이벤트</param>
@@ -334,4 +346,7 @@ private:
 	static std::mutex                                           m_pendingWindowsMutex;
 	static std::vector<std::pair<std::string, IEWindow*>>       m_pendingWindowsToAdd;
 	static std::vector<std::string>                             m_pendingWindowsToRemove;
+
+	static std::mutex                                           m_mainTasksMutex;
+	static std::vector<std::function<void()>>                   m_mainTasks;
 };

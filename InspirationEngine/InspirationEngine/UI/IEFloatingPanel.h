@@ -48,7 +48,18 @@ public:
     const std::string& GetWindowId() const { return m_windowId; }
 
 private:
+    static constexpr int32_t   kDragBarH   = 24;
+    static constexpr int32_t   kCloseW     = 24;
+    static constexpr SDL_Color kColDragBar  = {  55,  55,  62, 255 };
+    static constexpr SDL_Color kColDragText = { 200, 200, 200, 255 };
+    static constexpr SDL_Color kColClose    = { 160,  50,  50, 255 };
+
     std::unique_ptr<IEPanel> m_panel;
-    IEFont*     m_font     = nullptr;
+    IEFont*     m_font        = nullptr;
     std::string m_windowId;
+
+    bool    m_dragging    = false;
+    int32_t m_dragOffsetX = 0;
+    int32_t m_dragOffsetY = 0;
+    bool    m_prevLMB     = false;
 };

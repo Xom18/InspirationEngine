@@ -14,6 +14,7 @@
 #include <stack>
 #include <sstream>
 #include <optional>
+#include <functional>
 #include "utf8proc.h"
 #include "Util/IEStrUTF8.h"
 #include "Util/IELocalize.h"

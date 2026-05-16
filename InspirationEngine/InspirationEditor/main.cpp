@@ -52,6 +52,8 @@ int main(int /*argc*/, char* /*argv*/[])
 
     while (IECore::IsRunning())
     {
+        IECore::RunMainThreadTasks();
+
         SDL_Event event;
         if (SDL_WaitEventTimeout(&event, kTickRate))
         {

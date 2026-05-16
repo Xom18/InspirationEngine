@@ -194,15 +194,34 @@ void IEMainEditorWindow::ProcessUndock()
         if (m_inspPanel != nullptr && m_inspPanel == dynamic_cast<IEInspectorPanel*>(panelPtr.get()))
             m_inspPanel = nullptr;
 
-        // 부동 창 생성
+        // 메인 스레드에서 SDL 창 생성 (HWND 스레드 어피니티 → 커서/메시지 큐 정상 처리)
         std::string winId = "float_" + std::to_string(m_floatIdCounter.fetch_add(1));
-        const char* title = panelPtr->GetTitle();
 
-        auto* floatWin = new IEFloatingPanelWindow();
-        floatWin->CreateWindow(title, fw, fh, fx, fy, SDL_WINDOW_RESIZABLE);
-        floatWin->Init(std::move(panelPtr), m_font, winId);
+        struct CreateTask
+        {
+            std::unique_ptr<IEPanel> panel;
+            std::string              title;
+            int32_t                  fw, fh, fx, fy;
+            IEFont*                  font;
+            std::string              windowId;
+        };
+        auto task      = std::make_shared<CreateTask>();
+        task->title    = panelPtr->GetTitle();
+        task->panel    = std::move(panelPtr);
+        task->fw       = fw;
+        task->fh       = fh;
+        task->fx       = fx;
+        task->fy       = fy;
+        task->font     = m_font;
+        task->windowId = winId;
 
-        IECore::RequestAddWindow(winId.c_str(), floatWin);
+        IECore::PostMainThreadTask([task]() {
+            auto* floatWin = new IEFloatingPanelWindow();
+            floatWin->CreateWindow(task->title.c_str(), task->fw, task->fh, task->fx, task->fy,
+                static_cast<SDL_WindowFlags>(SDL_WINDOW_RESIZABLE | SDL_WINDOW_BORDERLESS));
+            floatWin->Init(std::move(task->panel), task->font, task->windowId);
+            IECore::RequestAddWindow(task->windowId.c_str(), floatWin);
+        });
 
         break; // 한 프레임에 하나만 처리
     }
