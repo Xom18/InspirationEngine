@@ -28,6 +28,8 @@
     <ClInclude Include="UI\IETreeNode.h" />
     <ClInclude Include="UI\IETreeView.h" />
     <ClInclude Include="UI\IESlider.h" />
+    <ClInclude Include="UI\IEListView.h" />
+    <ClInclude Include="UI\IEDropdown.h" />
     <ClInclude Include="UI\IEPanelLayout.h" />
     <ClInclude Include="UI\IEFileBrowser.h" />
     <ClInclude Include="UI\IEPanel.h" />
@@ -68,6 +70,8 @@
     <ClCompile Include="UI\IEScrollView.cpp" />
     <ClCompile Include="UI\IETreeView.cpp" />
     <ClCompile Include="UI\IESlider.cpp" />
+    <ClCompile Include="UI\IEListView.cpp" />
+    <ClCompile Include="UI\IEDropdown.cpp" />
     <ClCompile Include="UI\IEPanelLayout.cpp" />
     <ClCompile Include="UI\IEFileBrowser.cpp" />
     <ClCompile Include="UI\IEDockedPanel.cpp" />
