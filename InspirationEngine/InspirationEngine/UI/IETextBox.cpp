@@ -135,6 +135,9 @@ void IETextBox::TransToTexture()
 		FT_Face curFTFace = pCurFace->m_ftFace;
 		hb_font_t* curHBFont = pCurFace->m_hbFont;
 
+		// FT_Face / hb_font_t 는 스레드 비안전 — 이 이터레이션 전체 직렬화
+		std::lock_guard<std::mutex> faceLock(pCurFace->m_mutex);
+
 		// 너비 제한 처리
 		if (m_rect.w != 0 && m_rect.h != 0 && (m_textBoxStyle & dTEXT_BOX_AUTO_NEXTLINE))
 		{
