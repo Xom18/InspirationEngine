@@ -10,9 +10,9 @@ SDL_Color IEViewportPanel::kColText   = { 120, 120, 120, 255 };
 
 IEViewportPanel::IEViewportPanel()
 {
-    auto* cam = new IECameraTopView();
-    m_camera = cam;
-    m_scene.SetCamera(cam);
+    auto cam = std::make_unique<IECameraTopView>();
+    m_camera = cam.get();
+    m_scene.SetCamera(cam.release());
 }
 
 void IEViewportPanel::SetContentRect(int32_t x, int32_t y, int32_t w, int32_t h)
@@ -119,9 +119,11 @@ void IEViewportPanel::SelectAt(int32_t vx, int32_t vy)
 
     for (const auto& obj : m_scene.GetObjects())
     {
-        if (!obj->IsActive()) continue;
+        if (!obj->IsActive())
+            continue;
         auto* t = obj->GetComponent<IETransformComponent>();
-        if (t == nullptr) continue;
+        if (t == nullptr)
+            continue;
 
         float dx   = t->GetX() - wx;
         float dy   = t->GetY() - wy;
@@ -192,10 +194,14 @@ void IEViewportPanel::DrawGrid(IERenderer* r)
 
     float zoom     = m_camera->GetZoom();
     float gridSize = 64.0f;
-    if      (zoom < 0.25f) gridSize = 512.0f;
-    else if (zoom < 0.5f)  gridSize = 256.0f;
-    else if (zoom > 4.0f)  gridSize = 16.0f;
-    else if (zoom > 2.0f)  gridSize = 32.0f;
+    if (zoom < 0.25f)
+        gridSize = 512.0f;
+    else if (zoom < 0.5f)
+        gridSize = 256.0f;
+    else if (zoom > 4.0f)
+        gridSize = 16.0f;
+    else if (zoom > 2.0f)
+        gridSize = 32.0f;
 
     float startX = std::floor(static_cast<float>(wTL.GetX()) / gridSize) * gridSize;
     float startY = std::floor(static_cast<float>(wTL.GetY()) / gridSize) * gridSize;

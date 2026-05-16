@@ -9,6 +9,9 @@
 class IEStaticObject : public IEGameObject
 {
 public:
+	/// <summary>
+	/// IETransformComponent를 자동 추가
+	/// </summary>
 	IEStaticObject()
 	{
 		AddComponent<IETransformComponent>();
@@ -21,5 +24,5 @@ public:
 	/// <param name="screenX">스크린 X</param>
 	/// <param name="screenY">스크린 Y</param>
 	/// <param name="zoom">카메라 확대 배율</param>
-	void Draw(IERenderer* renderer, int32_t screenX, int32_t screenY, float zoom = 1.0f) override;
+	virtual void Draw(IERenderer* renderer, int32_t screenX, int32_t screenY, float zoom = 1.0f) override;
 };

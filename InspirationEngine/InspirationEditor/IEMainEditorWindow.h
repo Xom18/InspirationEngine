@@ -15,11 +15,34 @@ class IEAtlasEditorWindow;
 class IEMainEditorWindow : public IEWindow
 {
 public:
+    /// <summary>
+    /// 창 전체 콘텐츠 렌더링
+    /// </summary>
     virtual void Draw()                          override;
+
+    /// <summary>
+    /// 이벤트 처리 및 패널 상태 갱신
+    /// </summary>
+    /// <param name="deltaTime">경과 시간 (초)</param>
     virtual void Update(float deltaTime)         override;
+
+    /// <summary>
+    /// 닫기 버튼 동작 — 엔진 종료
+    /// </summary>
     virtual void CallXButton()                   override;
+
+    /// <summary>
+    /// 창 크기 변경 시 패널 레이아웃 재계산
+    /// </summary>
+    /// <param name="w">새 창 너비</param>
+    /// <param name="h">새 창 높이</param>
     virtual void OnResize(int32_t w, int32_t h)  override;
 
+    /// <summary>
+    /// 패널 및 위젯 초기화
+    /// </summary>
+    /// <param name="font">사용할 폰트</param>
+    /// <param name="atlasEditor">아틀라스 에디터 창 참조</param>
     void InitWindow(IEFont* font, IEAtlasEditorWindow* atlasEditor);
 
     static constexpr int32_t kMinW = 800;

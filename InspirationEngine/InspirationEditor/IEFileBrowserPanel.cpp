@@ -34,12 +34,12 @@ void IEFileBrowserPanel::SetContentRect(int32_t x, int32_t y, int32_t w, int32_t
     m_fileBrowser.SetRect(x, y, w, h);
 }
 
-void IEFileBrowserPanel::Update(float dt)
+void IEFileBrowserPanel::Update(float /*dt*/)
 {
     m_fileBrowser.Update();
 }
 
-void IEFileBrowserPanel::Draw(IERenderer* r)
+void IEFileBrowserPanel::Draw(IERenderer* /*r*/)
 {
     m_fileBrowser.Draw();
 }

@@ -10,6 +10,9 @@
 class IEEntity : public IEGameObject
 {
 public:
+	/// <summary>
+	/// IETransformComponent, IEVelocityComponent를 자동 추가
+	/// </summary>
 	IEEntity()
 	{
 		AddComponent<IETransformComponent>();
@@ -20,7 +23,7 @@ public:
 	/// IEVelocityComponent 속도 × deltaTime 으로 위치 갱신
 	/// </summary>
 	/// <param name="deltaTime">경과 시간 (초)</param>
-	void Update(float deltaTime) override;
+	virtual void Update(float deltaTime) override;
 
 	/// <summary>
 	/// 스프라이트를 IETransformComponent 위치에 렌더링
@@ -29,5 +32,5 @@ public:
 	/// <param name="screenX">스크린 X</param>
 	/// <param name="screenY">스크린 Y</param>
 	/// <param name="zoom">카메라 확대 배율</param>
-	void Draw(IERenderer* renderer, int32_t screenX, int32_t screenY, float zoom = 1.0f) override;
+	virtual void Draw(IERenderer* renderer, int32_t screenX, int32_t screenY, float zoom = 1.0f) override;
 };

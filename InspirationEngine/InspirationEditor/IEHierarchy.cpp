@@ -25,7 +25,7 @@ void IEHierarchy::SetContentRect(int32_t x, int32_t y, int32_t w, int32_t h)
     m_list.SetRect(x, y, w, h);
 }
 
-void IEHierarchy::Update(float dt)
+void IEHierarchy::Update(float /*dt*/)
 {
     if (m_scene != nullptr)
     {
@@ -49,7 +49,7 @@ void IEHierarchy::Update(float dt)
     m_list.Update();
 }
 
-void IEHierarchy::Draw(IERenderer* r)
+void IEHierarchy::Draw(IERenderer* /*r*/)
 {
     m_list.Draw();
 }

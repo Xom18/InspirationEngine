@@ -7,11 +7,32 @@
 class IEAtlasEditorWindow : public IEWindow
 {
 public:
+    /// <summary>
+    /// 창 전체 콘텐츠 렌더링
+    /// </summary>
     virtual void Draw() override;
+
+    /// <summary>
+    /// 이벤트 처리 및 상태 갱신
+    /// </summary>
+    /// <param name="deltaTime">경과 시간 (초)</param>
     virtual void Update(float deltaTime) override;
+
+    /// <summary>
+    /// 닫기 버튼 동작 — 창을 숨김
+    /// </summary>
     virtual void CallXButton() override;
 
+    /// <summary>
+    /// 폰트 및 위젯 초기화
+    /// </summary>
+    /// <param name="font">사용할 폰트</param>
     void InitWindow(IEFont* font);
+
+    /// <summary>
+    /// 지정 경로의 아틀라스 파일을 열어 로드
+    /// </summary>
+    /// <param name="path">파일 경로 (.png 또는 .json)</param>
     void OpenWithFile(const std::string& path);
 
 private:

@@ -17,7 +17,7 @@ public:
 	/// 프레임 업데이트
 	/// </summary>
 	/// <param name="deltaTime">경과 시간 (초)</param>
-	virtual void Update(float deltaTime) {}
+	virtual void Update(float /*deltaTime*/) {}
 
 	/// <summary>
 	/// 그리기
@@ -34,7 +34,7 @@ public:
 	/// </summary>
 	/// <param name="w">새 너비</param>
 	/// <param name="h">새 높이</param>
-	virtual void OnResize(int32_t w, int32_t h) {}
+	virtual void OnResize(int32_t /*w*/, int32_t /*h*/) {}
 
 	/// <summary>
 	/// 창 생성
@@ -145,11 +145,11 @@ public:
 	}
 
 	/// <summary>
-	/// 그린 상태 초기화
+	/// 그린 상태 초기화 — 드로우 스레드 기동 신호
 	/// </summary>
 	void ResetDrawed()
 	{
-		m_isDrawed = false;
+		m_isDrawed.store(false, std::memory_order_release);
 	}
 
 	/// <summary>
@@ -183,5 +183,6 @@ private:
 	std::unique_ptr<std::thread> m_drawThread;
 	std::atomic<bool>            m_shouldStop{false};
 	bool                         m_drawThreadIsRunning = false;
-	bool                         m_isDrawed            = false;
+	// true로 초기화: 드로우 스레드가 ResetDrawed() 호출 전에 즉시 실행되지 않도록
+	std::atomic<bool>            m_isDrawed{true};
 };

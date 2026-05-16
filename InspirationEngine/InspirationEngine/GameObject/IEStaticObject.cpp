@@ -13,7 +13,6 @@ void IEStaticObject::Draw(IERenderer* renderer, int32_t screenX, int32_t screenY
 		if (def == nullptr || tex == nullptr)
 			return;
 
-		int32_t dw = std::lround(def->top.w * zoom);
 		int32_t dh = std::lround(def->top.h * zoom);
 		int32_t dx = screenX - std::lround(def->pivotX * zoom);
 		int32_t dy = screenY - std::lround(def->pivotY * zoom);
@@ -24,7 +23,6 @@ void IEStaticObject::Draw(IERenderer* renderer, int32_t screenX, int32_t screenY
 		if (def->hasSide)
 		{
 			int32_t sdw = std::lround(def->side.w * zoom);
-			int32_t sdh = std::lround(def->side.h * zoom);
 			int32_t sdx = screenX - sdw / 2;
 			int32_t sdy = dy + dh;
 			SDL_FRect sideR = { static_cast<float>(def->side.x), static_cast<float>(def->side.y), static_cast<float>(def->side.w), static_cast<float>(def->side.h) };

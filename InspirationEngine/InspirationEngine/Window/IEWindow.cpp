@@ -136,7 +136,7 @@ void IEWindow::DrawThread()
 
 		//그릴 때 까지 대기
 		waiter->wait(lkWaiter, [&] {
-			return m_shouldStop.load() || m_isDrawed == false || !IECore::IsRunning();
+			return m_shouldStop.load() || !m_isDrawed.load(std::memory_order_acquire) || !IECore::IsRunning();
 			});
 
 		//스레드 정지 요청 or 엔진 종료
@@ -146,14 +146,14 @@ void IEWindow::DrawThread()
 		//창이 숨겨져있다
 		if (IsWindowHide())
 		{
+			m_isDrawed.store(true, std::memory_order_release);
 			IECore::IncreaseDrawCompleteCount();
-			m_isDrawed = true;
 			continue;
 		}
 
 		Draw();
 		Render();
-		m_isDrawed = true;
+		m_isDrawed.store(true, std::memory_order_release);
 		IECore::IncreaseDrawCompleteCount();
 	}
 }

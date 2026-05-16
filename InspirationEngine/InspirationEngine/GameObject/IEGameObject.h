@@ -43,7 +43,7 @@ public:
 	/// 프레임 업데이트
 	/// </summary>
 	/// <param name="deltaTime">경과 시간 (초)</param>
-	virtual void Update(float deltaTime) {}
+	virtual void Update(float /*deltaTime*/) {}
 
 	/// <summary>
 	/// 렌더러에 오브젝트 그리기 — 씬이 카메라 투영 후 스크린 좌표 전달

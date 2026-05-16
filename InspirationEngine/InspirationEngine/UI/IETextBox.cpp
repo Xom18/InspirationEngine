@@ -30,7 +30,6 @@ void IETextBox::TransToTexture()
 	if (textLength == 0)
 		return;
 
-	FT_Face ftFace = pFontFace->m_ftFace;
 	int32_t ascent = m_font->GetAscent();
 
 	size_t begPoint = 0;

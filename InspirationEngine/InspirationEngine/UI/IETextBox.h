@@ -259,7 +259,7 @@ public:
 	/// </summary>
 	/// <param name="text">삽입할 텍스트 (UTF-8)</param>
 	/// <param name="insertPoint">삽입 위치 (바이트 오프셋)</param>
-	void Insert(const char* text, int32_t insertPoint)
+	void Insert(const char* /*text*/, int32_t /*insertPoint*/)
 	{
 	}
 

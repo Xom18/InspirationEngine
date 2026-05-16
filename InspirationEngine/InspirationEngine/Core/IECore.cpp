@@ -205,6 +205,20 @@ void IECore::OperateEvent()
 			m_Input.AddMouseWheelY(Event.wheel.y);
 		}
 		break;
+		case SDL_EVENT_WINDOW_MOUSE_ENTER:
+		{
+			IEWindow* window = GetWindowByID(Event.window.windowID);
+			if (window != nullptr)
+				m_mouseOnWindow = window;
+		}
+		break;
+		case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+		{
+			IEWindow* window = GetWindowByID(Event.window.windowID);
+			if (window != nullptr && m_mouseOnWindow == window)
+				m_mouseOnWindow = nullptr;
+		}
+		break;
 		case SDL_EVENT_WINDOW_RESIZED:
 		{
 			IEWindow* window = GetWindowByID(Event.window.windowID);

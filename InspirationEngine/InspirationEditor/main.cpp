@@ -4,7 +4,7 @@
 #include "IEMainEditorWindow.h"
 #include "IEAtlasEditorWindow.h"
 
-int main(int argc, char* argv[])
+int main(int /*argc*/, char* /*argv*/[])
 {
 #if defined(_WIN32) && defined(_DEBUG)
     SetConsoleOutputCP(CP_UTF8);

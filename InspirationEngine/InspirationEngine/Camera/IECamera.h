@@ -26,7 +26,7 @@ public:
 	/// 드로우 정렬 키 — 낮을수록 먼저(뒤에) 그려짐.
 	/// 기본: y (TopView / SideView 기준)
 	/// </summary>
-	virtual float GetSortKey(float x, float y, float z) const
+	virtual float GetSortKey(float /*x*/, float y, float /*z*/) const
 	{
 		return y;
 	}

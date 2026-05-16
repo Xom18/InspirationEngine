@@ -70,7 +70,7 @@ void IEInspectorPanel::SetContentRect(int32_t x, int32_t y, int32_t w, int32_t h
     m_layout.SetContentRect(x, y, w, h);
 }
 
-void IEInspectorPanel::Update(float dt)
+void IEInspectorPanel::Update(float /*dt*/)
 {
     if (m_target != nullptr)
     {

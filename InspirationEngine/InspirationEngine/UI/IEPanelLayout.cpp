@@ -14,20 +14,29 @@ SDL_FPoint IEPanelLayout::ResolveAnchorPoint(IEAnchor a,
 
 IEAnchor IEPanelLayout::ParseAnchor(const std::string& s)
 {
-    if (s == "TopCenter")    return IEAnchor::TopCenter;
-    if (s == "TopRight")     return IEAnchor::TopRight;
-    if (s == "MiddleLeft")   return IEAnchor::MiddleLeft;
-    if (s == "Center")       return IEAnchor::Center;
-    if (s == "MiddleRight")  return IEAnchor::MiddleRight;
-    if (s == "BottomLeft")   return IEAnchor::BottomLeft;
-    if (s == "BottomCenter") return IEAnchor::BottomCenter;
-    if (s == "BottomRight")  return IEAnchor::BottomRight;
+    if (s == "TopCenter")
+        return IEAnchor::TopCenter;
+    if (s == "TopRight")
+        return IEAnchor::TopRight;
+    if (s == "MiddleLeft")
+        return IEAnchor::MiddleLeft;
+    if (s == "Center")
+        return IEAnchor::Center;
+    if (s == "MiddleRight")
+        return IEAnchor::MiddleRight;
+    if (s == "BottomLeft")
+        return IEAnchor::BottomLeft;
+    if (s == "BottomCenter")
+        return IEAnchor::BottomCenter;
+    if (s == "BottomRight")
+        return IEAnchor::BottomRight;
     return IEAnchor::TopLeft;
 }
 
 IESizeMode IEPanelLayout::ParseMode(const std::string& s)
 {
-    if (s == "ratio") return IESizeMode::Ratio;
+    if (s == "ratio")
+        return IESizeMode::Ratio;
     return IESizeMode::Pixel;
 }
 
@@ -61,7 +70,8 @@ void IEPanelLayout::ApplyElement(const IELayoutElement& e) const
         float rightEdge = ox + pw + e.width;
         float leftEdge  = axisPoint.x + ax;
         absW = rightEdge - leftEdge;
-        if (absW < 0.0f) absW = 0.0f;
+        if (absW < 0.0f)
+            absW = 0.0f;
     }
     else if (e.sizeMode == IESizeMode::Ratio)
         absW = e.width * pw;
@@ -74,7 +84,8 @@ void IEPanelLayout::ApplyElement(const IELayoutElement& e) const
         float bottomEdge = oy + ph + e.height;
         float topEdge    = axisPoint.y + ay;
         absH = bottomEdge - topEdge;
-        if (absH < 0.0f) absH = 0.0f;
+        if (absH < 0.0f)
+            absH = 0.0f;
     }
     else if (e.sizeMode == IESizeMode::Ratio)
         absH = e.height * ph;
@@ -98,9 +109,12 @@ void IEPanelLayout::ApplyElement(const IELayoutElement& e) const
 
 void IEPanelLayout::PropagateCommon(IEUIBase* widget) const
 {
-    if (m_renderer != nullptr) widget->SetRenderer(m_renderer);
-    if (m_font     != nullptr) widget->SetFont(m_font);
-    if (m_ownerWin != nullptr) widget->SetOwnerWindow(m_ownerWin);
+    if (m_renderer != nullptr)
+        widget->SetRenderer(m_renderer);
+    if (m_font != nullptr)
+        widget->SetFont(m_font);
+    if (m_ownerWin != nullptr)
+        widget->SetOwnerWindow(m_ownerWin);
 }
 
 // --- JSON loading ---

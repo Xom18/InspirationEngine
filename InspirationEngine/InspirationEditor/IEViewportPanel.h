@@ -8,14 +8,50 @@
 class IEViewportPanel : public IEEditorPanel
 {
 public:
+    /// <summary>
+    /// 카메라 및 씬 초기화
+    /// </summary>
     IEViewportPanel();
 
+    /// <summary>
+    /// 그리드, 오브젝트, 선택 표시를 렌더링
+    /// </summary>
+    /// <param name="r">사용할 렌더러</param>
     virtual void        Draw(IERenderer* r)                                override;
+
+    /// <summary>
+    /// 패닝·줌·선택 입력 처리 및 상태 갱신
+    /// </summary>
+    /// <param name="dt">경과 시간 (초)</param>
     virtual void        Update(float dt)                                   override;
+
+    /// <summary>
+    /// 패널 타이틀 문자열 반환
+    /// </summary>
     virtual const char* GetTitle()                               const override { return IELocalize::Get("panel.viewport"); }
+
+    /// <summary>
+    /// 패널 콘텐츠 영역 설정
+    /// </summary>
+    /// <param name="x">좌상단 X</param>
+    /// <param name="y">좌상단 Y</param>
+    /// <param name="w">너비</param>
+    /// <param name="h">높이</param>
     virtual void        SetContentRect(int32_t x, int32_t y, int32_t w, int32_t h) override;
+
+    /// <summary>
+    /// 씬 참조 반환
+    /// </summary>
     IEScene&         GetScene()          { return m_scene; }
+
+    /// <summary>
+    /// 뷰포트 카메라 포인터 반환
+    /// </summary>
     IECameraTopView* GetCamera()         { return m_camera; }
+
+    /// <summary>
+    /// 현재 선택된 오브젝트 포인터 반환 (없으면 nullptr)
+    /// </summary>
     IEGameObject*    GetSelectedObject() { return m_selectedObj; }
 
 private:

@@ -7,16 +7,59 @@
 class IECameraPanel : public IEEditorPanel
 {
 public:
+    /// <summary>
+    /// 슬라이더 범위·콜백 및 레이아웃 초기화
+    /// </summary>
     IECameraPanel();
 
+    /// <summary>
+    /// 카메라 슬라이더 및 정보를 렌더링
+    /// </summary>
+    /// <param name="r">사용할 렌더러</param>
     virtual void        Draw(IERenderer* r)                                         override;
+
+    /// <summary>
+    /// 카메라 상태와 슬라이더 동기화 및 입력 처리
+    /// </summary>
+    /// <param name="dt">경과 시간 (초)</param>
     virtual void        Update(float dt)                                            override;
+
+    /// <summary>
+    /// 패널 타이틀 문자열 반환
+    /// </summary>
     virtual const char* GetTitle()                                       const override { return IELocalize::Get("panel.camera"); }
+
+    /// <summary>
+    /// 패널 콘텐츠 영역 설정
+    /// </summary>
+    /// <param name="x">좌상단 X</param>
+    /// <param name="y">좌상단 Y</param>
+    /// <param name="w">너비</param>
+    /// <param name="h">높이</param>
     virtual void        SetContentRect(int32_t x, int32_t y, int32_t w, int32_t h) override;
+
+    /// <summary>
+    /// 폰트 설정 — 내부 위젯에 전파
+    /// </summary>
+    /// <param name="f">사용할 폰트</param>
     virtual void        SetFont(IEFont* f)                                          override;
+
+    /// <summary>
+    /// 소유 창 설정 — 내부 위젯에 전파
+    /// </summary>
+    /// <param name="w">소유 창 포인터</param>
     virtual void        SetOwnerWindow(IEWindow* w)                                 override;
+
+    /// <summary>
+    /// 렌더러 설정 — 내부 위젯에 전파
+    /// </summary>
+    /// <param name="r">사용할 렌더러</param>
     virtual void        SetRenderer(IERenderer* r)                                  override;
 
+    /// <summary>
+    /// 편집 대상 카메라 설정 — 슬라이더 값 즉시 동기화
+    /// </summary>
+    /// <param name="camera">대상 카메라 포인터</param>
     void SetCamera(IECamera* camera);
 
 private:

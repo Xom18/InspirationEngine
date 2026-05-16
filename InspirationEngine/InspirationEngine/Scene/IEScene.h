@@ -15,7 +15,14 @@ class IEScene
 public:
 	virtual ~IEScene();
 
+	/// <summary>
+	/// 씬이 활성화될 때 호출 (파생 클래스에서 오버라이드)
+	/// </summary>
 	virtual void OnEnter() {}
+
+	/// <summary>
+	/// 씬이 비활성화될 때 호출 (파생 클래스에서 오버라이드)
+	/// </summary>
 	virtual void OnExit() {}
 
 	/// <summary>
@@ -56,13 +63,22 @@ public:
 	/// </summary>
 	void RemoveObject(IEGameObject* obj);
 
+	/// <summary>
+	/// 씬 내 모든 오브젝트 목록 반환 (읽기 전용)
+	/// </summary>
 	const std::vector<std::unique_ptr<IEGameObject>>& GetObjects() const { return m_objects; }
 
 	/// <summary>
 	/// Draw 시 renderer 크기 대신 지정 크기를 카메라 뷰포트로 사용.
 	/// 에디터 서브뷰포트 렌더링용.
 	/// </summary>
+	/// <param name="w">뷰포트 너비 (픽셀)</param>
+	/// <param name="h">뷰포트 높이 (픽셀)</param>
 	void SetViewportOverride(int32_t w, int32_t h) { m_vpOverrideW = w; m_vpOverrideH = h; }
+
+	/// <summary>
+	/// 뷰포트 오버라이드 제거 — renderer 실제 크기 사용으로 복귀
+	/// </summary>
 	void ClearViewportOverride()                   { m_vpOverrideW = 0; m_vpOverrideH = 0; }
 
 private:

@@ -53,7 +53,7 @@ void IECameraPanel::SetContentRect(int32_t x, int32_t y, int32_t w, int32_t h)
     m_layout.SetContentRect(x, y, w, h);
 }
 
-void IECameraPanel::Update(float dt)
+void IECameraPanel::Update(float /*dt*/)
 {
     if (m_camera != nullptr)
     {

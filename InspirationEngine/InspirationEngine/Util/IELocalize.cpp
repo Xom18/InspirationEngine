@@ -11,8 +11,14 @@ bool IELocalize::Load(const char* filePath)
         return false;
 
     nlohmann::json j;
-    try { f >> j; }
-    catch (...) { return false; }
+    try
+    {
+        f >> j;
+    }
+    catch (...)
+    {
+        return false;
+    }
 
     s_table.clear();
     for (auto& [key, val] : j.items())

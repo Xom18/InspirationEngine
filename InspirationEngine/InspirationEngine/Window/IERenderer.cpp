@@ -15,7 +15,7 @@ void IERenderer::DrawRect(SDL_Color color, int32_t x, int32_t y, int32_t width, 
 	colorValue <<= 8;
 	colorValue += color.b;
 
-	SDL_UpdateTexture(pTexture, NULL, &colorValue, sizeof(Uint32));
+	SDL_UpdateTexture(pTexture, nullptr,&colorValue, sizeof(Uint32));
 
 	//텍스쳐 내에서의 위치
 	SDL_FRect SrcRect;
@@ -41,7 +41,7 @@ void IERenderer::DrawBuffer(int32_t* buffer, int32_t bufferWidth, int32_t buffer
 	SDL_Texture* pTexture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, bufferWidth, bufferHeight);
 	SDL_SetTextureScaleMode(pTexture, SDL_SCALEMODE_PIXELART);
 	SDL_SetTextureBlendMode(pTexture, blendMode);
-	SDL_UpdateTexture(pTexture, NULL, buffer, bufferWidth * sizeof(Uint32));
+	SDL_UpdateTexture(pTexture, nullptr,buffer, bufferWidth * sizeof(Uint32));
 	DrawTexture(pTexture, x, y, widthPercent, heightPercent, angle, pivot, flip);
 	SDL_DestroyTexture(pTexture);
 }
@@ -137,15 +137,23 @@ void IERenderer::DrawText(IEFont* font, const char* text, SDL_Color color, int32
 	if (pFace == nullptr || pFace->m_ftFace == nullptr)
 		return;
 
-	auto glyphs = IETextRenderer::shape(pFace->m_hbFont, text, static_cast<int32_t>(std::strlen(text)));
-	auto ms     = IETextRenderer::measure(pFace->m_ftFace, glyphs);
+	// FT_Face / hb_font_t 는 스레드 비안전: shape + measure + renderToTexture 전 구간 직렬화
+	std::vector<IEShapedGlyph> glyphs;
+	IETextMeasure ms = {};
+	SDL_Texture* pTex = nullptr;
+	{
+		std::lock_guard<std::mutex> lock(pFace->m_mutex);
 
-	if (ms.width <= 0 || ms.height <= 0)
-		return;
+		glyphs = IETextRenderer::shape(pFace->m_hbFont, text, static_cast<int32_t>(std::strlen(text)));
+		ms     = IETextRenderer::measure(pFace->m_ftFace, glyphs);
 
-	SDL_Texture* pTex = IETextRenderer::renderToTexture(
-		m_renderer, pFace->m_ftFace, glyphs, color,
-		ms.width, ms.height, ms.ascent, pFace->m_bold);
+		if (ms.width <= 0 || ms.height <= 0)
+			return;
+
+		pTex = IETextRenderer::renderToTexture(
+			m_renderer, pFace->m_ftFace, glyphs, color,
+			ms.width, ms.height, ms.ascent, pFace->m_bold);
+	}
 
 	if (pTex != nullptr)
 	{

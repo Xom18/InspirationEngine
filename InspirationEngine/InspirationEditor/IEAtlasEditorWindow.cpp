@@ -333,37 +333,81 @@ void IEAtlasEditorWindow::OnClick(int32_t mx, int32_t my)
     SDL_Rect rect = {};
 
     m_tbBrowserPath.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbBrowserPath); return; }
+    if (HitTest(rect, mx, my))
+    {
+        SetFocus(&m_tbBrowserPath);
+        return;
+    }
 
     m_tbPath.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbPath);   return; }
+    if (HitTest(rect, mx, my))
+    {
+        SetFocus(&m_tbPath);
+        return;
+    }
 
     m_tbTileW.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbTileW);  return; }
+    if (HitTest(rect, mx, my))
+    {
+        SetFocus(&m_tbTileW);
+        return;
+    }
 
     m_tbTileH.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbTileH);  return; }
+    if (HitTest(rect, mx, my))
+    {
+        SetFocus(&m_tbTileH);
+        return;
+    }
 
     m_tbName.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbName);   return; }
+    if (HitTest(rect, mx, my))
+    {
+        SetFocus(&m_tbName);
+        return;
+    }
 
     m_tbX.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbX);      return; }
+    if (HitTest(rect, mx, my))
+    {
+        SetFocus(&m_tbX);
+        return;
+    }
 
     m_tbY.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbY);      return; }
+    if (HitTest(rect, mx, my))
+    {
+        SetFocus(&m_tbY);
+        return;
+    }
 
     m_tbTW.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbTW);     return; }
+    if (HitTest(rect, mx, my))
+    {
+        SetFocus(&m_tbTW);
+        return;
+    }
 
     m_tbTH.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbTH);     return; }
+    if (HitTest(rect, mx, my))
+    {
+        SetFocus(&m_tbTH);
+        return;
+    }
 
     m_tbPivotX.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbPivotX); return; }
+    if (HitTest(rect, mx, my))
+    {
+        SetFocus(&m_tbPivotX);
+        return;
+    }
 
     m_tbPivotY.GetRect(rect);
-    if (HitTest(rect, mx, my)) { SetFocus(&m_tbPivotY); return; }
+    if (HitTest(rect, mx, my))
+    {
+        SetFocus(&m_tbPivotY);
+        return;
+    }
 
     // Canvas tile click
     if (mx >= kCanvasX && mx < kCanvasX + kCanvasW &&
@@ -466,8 +510,10 @@ void IEAtlasEditorWindow::LoadPNG()
 
     m_tileW = std::atoi(m_tbTileW.GetText());
     m_tileH = std::atoi(m_tbTileH.GetText());
-    if (m_tileW <= 0) m_tileW = 32;
-    if (m_tileH <= 0) m_tileH = 16;
+    if (m_tileW <= 0)
+        m_tileW = 32;
+    if (m_tileH <= 0)
+        m_tileH = 16;
 
     AutoSplit();
     m_statusMsg = std::string(IELocalize::Get("msg.loaded")) + fs::path(path).filename().string();
@@ -483,7 +529,10 @@ void IEAtlasEditorWindow::LoadJSON(const std::string& jsonPath)
     }
 
     nlohmann::json j;
-    try { f >> j; }
+    try
+    {
+        f >> j;
+    }
     catch (const std::exception& e)
     {
         m_statusMsg = std::string(IELocalize::Get("msg.json_error")) + e.what();
