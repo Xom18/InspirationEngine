@@ -80,6 +80,8 @@ void IEFloatingPanel::Update(float dt)
         }
     }
 
+    bool wasD = m_dragging;
+
     if (!lmb)
         m_dragging = false;
 
@@ -88,6 +90,21 @@ void IEFloatingPanel::Update(float dt)
         int32_t wx = 0, wy = 0;
         SDL_GetWindowPosition(sdlWin, &wx, &wy);
         SDL_SetWindowPosition(sdlWin, gx - m_dragOffsetX, gy - m_dragOffsetY);
+        IECore::SetFloatDragging(true, gx, gy);
+    }
+
+    // 드래그 종료: 드롭 타겟 확인
+    if (wasD && !m_dragging)
+    {
+        IECore::SetFloatDragging(false, 0, 0);
+        IEDockedPanel* target = IECore::GetDropTargetPanel();
+        int32_t side = IECore::GetDropTargetSide();
+        if (target != nullptr && m_dropDockCallback && m_panel != nullptr)
+        {
+            m_dropDockCallback(std::move(m_panel), target, side);
+            IECore::ClearDropTarget();
+            IECore::RequestRemoveWindow(m_windowId.c_str());
+        }
     }
 }
 

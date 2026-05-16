@@ -53,6 +53,14 @@ public:
     using RedockCallback = std::function<void(std::unique_ptr<IEPanel>)>;
     void SetRedockCallback(RedockCallback cb) { m_redockCallback = std::move(cb); }
 
+    /// <summary>
+    /// 드롭 도킹 콜백 — 플로팅 창 드래그 중 메인 창 드롭 존에 놓을 때 호출.
+    /// target = 대상 IEDockedPanel*, side = 0~4 (Center/L/R/T/B).
+    /// </summary>
+    using DropDockCallback = std::function<void(std::unique_ptr<IEPanel>,
+                                                IEDockedPanel* target, int32_t side)>;
+    void SetDropDockCallback(DropDockCallback cb) { m_dropDockCallback = std::move(cb); }
+
 private:
     static constexpr int32_t   kDragBarH   = 24;
     static constexpr int32_t   kCloseW     = 24;
@@ -65,7 +73,8 @@ private:
     std::unique_ptr<IEPanel> m_panel;
     IEFont*      m_font        = nullptr;
     std::string  m_windowId;
-    RedockCallback m_redockCallback;
+    RedockCallback    m_redockCallback;
+    DropDockCallback  m_dropDockCallback;
 
     bool    m_dragging    = false;
     int32_t m_dragOffsetX = 0;

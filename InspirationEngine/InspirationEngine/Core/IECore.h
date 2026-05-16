@@ -1,5 +1,7 @@
 #pragma once
 
+class IEDockedPanel;
+
 enum class EnginePhase : int32_t
 {
 	NaN = 0,
@@ -301,6 +303,24 @@ public:
 	/// <param name="event">처리할 SDL 이벤트</param>
 	static bool OperateTextEdit(SDL_Event* event);
 
+	/// <summary>플로팅 창 드래그 상태 설정 (IEFloatingPanel 이 호출)</summary>
+	static void SetFloatDragging(bool on, int32_t gx, int32_t gy)
+	{
+		s_floatDragging = on; s_floatDragGX = gx; s_floatDragGY = gy;
+	}
+	static bool    IsFloatDragging()  { return s_floatDragging; }
+	static int32_t GetFloatDragGX()   { return s_floatDragGX; }
+	static int32_t GetFloatDragGY()   { return s_floatDragGY; }
+
+	/// <summary>드롭 타겟 설정 — side: 0=Center 1=Left 2=Right 3=Top 4=Bottom</summary>
+	static void SetDropTarget(IEDockedPanel* target, int32_t side)
+	{
+		s_dropTargetPanel = target; s_dropTargetSide = side;
+	}
+	static void           ClearDropTarget()      { s_dropTargetPanel = nullptr; s_dropTargetSide = 0; }
+	static IEDockedPanel* GetDropTargetPanel()   { return s_dropTargetPanel; }
+	static int32_t        GetDropTargetSide()    { return s_dropTargetSide; }
+
 private:
 	static void MainThread();
 	static void OperateEvent();
@@ -349,4 +369,11 @@ private:
 
 	static std::mutex                                           m_mainTasksMutex;
 	static std::vector<std::function<void()>>                   m_mainTasks;
+
+	// 플로팅 드래그 / 드롭 타겟 상태 (엔진 스레드 전용, mutex 불필요)
+	static bool          s_floatDragging;
+	static int32_t       s_floatDragGX;
+	static int32_t       s_floatDragGY;
+	static IEDockedPanel* s_dropTargetPanel;
+	static int32_t       s_dropTargetSide;
 };

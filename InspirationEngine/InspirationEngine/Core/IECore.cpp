@@ -55,6 +55,12 @@ std::vector<std::string>                           IECore::m_pendingWindowsToRem
 std::mutex                                         IECore::m_mainTasksMutex;
 std::vector<std::function<void()>>                 IECore::m_mainTasks;
 
+bool          IECore::s_floatDragging   = false;
+int32_t       IECore::s_floatDragGX     = 0;
+int32_t       IECore::s_floatDragGY     = 0;
+IEDockedPanel* IECore::s_dropTargetPanel = nullptr;
+int32_t       IECore::s_dropTargetSide  = 0;
+
 
 void IECore::PostMainThreadTask(std::function<void()> task)
 {
