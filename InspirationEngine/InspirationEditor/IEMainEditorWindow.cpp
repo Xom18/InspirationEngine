@@ -2,6 +2,7 @@
 #include "IEAtlasEditorWindow.h"
 #include "IEFloatingPanelWindow.h"
 #include <cstdio>
+#include "../InspirationEngine/Scene/IESceneSerializer.h"
 
 // ─────────────────────────────────────────
 // Init
@@ -22,6 +23,30 @@ void IEMainEditorWindow::InitWindow(IEFont* font, IEAtlasEditorWindow* atlasEdit
     m_btnAtlas.SetCallback([this]() {
         if (m_atlasEditor != nullptr)
             m_atlasEditor->ShowWindow();
+    });
+
+    m_btnSave.SetFont(font);
+    m_btnSave.SetRenderer(r);
+    m_btnSave.SetRect(126, 6, 80, 28);
+    m_btnSave.SetLabel(IELocalize::Get("btn.save"));
+    m_btnSave.SetOwnerWindow(this);
+    m_btnSave.SetCallback([this]() {
+        if (m_vpPanel != nullptr)
+            IESceneSerializer::Save(m_vpPanel->GetScene(), m_vpPanel->GetCamera(), kScenePath);
+    });
+
+    m_btnLoad.SetFont(font);
+    m_btnLoad.SetRenderer(r);
+    m_btnLoad.SetRect(214, 6, 80, 28);
+    m_btnLoad.SetLabel(IELocalize::Get("btn.load"));
+    m_btnLoad.SetOwnerWindow(this);
+    m_btnLoad.SetCallback([this]() {
+        if (m_vpPanel != nullptr)
+        {
+            IESceneSerializer::Load(m_vpPanel->GetScene(), m_vpPanel->GetCamera(), kScenePath);
+            if (m_entityPanel != nullptr)
+                m_entityPanel->RefreshList();
+        }
     });
 
     InitPanels(font, atlasEditor);
@@ -140,6 +165,31 @@ void IEMainEditorWindow::CallXButton()
 void IEMainEditorWindow::Update(float deltaTime)
 {
     m_btnAtlas.Update();
+    m_btnSave.Update();
+    m_btnLoad.Update();
+
+    IEInput& input = IECore::GetInput();
+    bool ctrlHeld = input.GetKeyState(SDL_SCANCODE_LCTRL) || input.GetKeyState(SDL_SCANCODE_RCTRL);
+    bool sDown    = input.GetKeyState(SDL_SCANCODE_S);
+    bool oDown    = input.GetKeyState(SDL_SCANCODE_O);
+
+    if (ctrlHeld && sDown && !m_prevCtrlS)
+    {
+        if (m_vpPanel != nullptr)
+            IESceneSerializer::Save(m_vpPanel->GetScene(), m_vpPanel->GetCamera(), kScenePath);
+    }
+    if (ctrlHeld && oDown && !m_prevCtrlO)
+    {
+        if (m_vpPanel != nullptr)
+        {
+            IESceneSerializer::Load(m_vpPanel->GetScene(), m_vpPanel->GetCamera(), kScenePath);
+            if (m_entityPanel != nullptr)
+                m_entityPanel->RefreshList();
+        }
+    }
+
+    m_prevCtrlS = ctrlHeld && sDown;
+    m_prevCtrlO = ctrlHeld && oDown;
 
     if (m_inspPanel != nullptr && m_vpPanel != nullptr)
         m_inspPanel->SetTarget(m_vpPanel->GetSelectedObject());
@@ -246,6 +296,8 @@ void IEMainEditorWindow::Draw()
     r->DrawLine(kColSep,  0, kMenuH, winW, kMenuH);
 
     m_btnAtlas.Draw();
+    m_btnSave.Draw();
+    m_btnLoad.Draw();
 
     // 패널 (앞 → 뒤 순서로 그림, back이 최상위)
     for (auto& panel : m_panels)

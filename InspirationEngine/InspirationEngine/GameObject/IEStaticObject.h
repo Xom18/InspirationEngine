@@ -17,6 +17,8 @@ public:
 		AddComponent<IETransformComponent>();
 	}
 
+	virtual const char* GetTypeName() const override { return "StaticObject"; }
+
 	/// <summary>
 	/// 스프라이트 또는 타일을 IETransformComponent 위치에 렌더링
 	/// </summary>

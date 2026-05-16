@@ -19,6 +19,8 @@ public:
 		AddComponent<IEVelocityComponent>();
 	}
 
+	virtual const char* GetTypeName() const override { return "Entity"; }
+
 	/// <summary>
 	/// IEVelocityComponent 속도 × deltaTime 으로 위치 갱신
 	/// </summary>

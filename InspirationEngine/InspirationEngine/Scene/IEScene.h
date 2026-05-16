@@ -69,6 +69,11 @@ public:
 	const std::vector<std::unique_ptr<IEGameObject>>& GetObjects() const { return m_objects; }
 
 	/// <summary>
+	/// 씬의 모든 오브젝트 제거
+	/// </summary>
+	void Clear() { m_objects.clear(); }
+
+	/// <summary>
 	/// Draw 시 renderer 크기 대신 지정 크기를 카메라 뷰포트로 사용.
 	/// 에디터 서브뷰포트 렌더링용.
 	/// </summary>

@@ -86,6 +86,11 @@ public:
 	/// </summary>
 	bool IsActive() const { return m_active; }
 
+	/// <summary>
+	/// 직렬화용 타입 이름 반환
+	/// </summary>
+	virtual const char* GetTypeName() const { return "GameObject"; }
+
 private:
 	std::vector<std::unique_ptr<IEComponent>> m_components;
 	IESprite* m_sprite = nullptr;

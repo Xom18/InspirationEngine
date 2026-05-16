@@ -58,6 +58,11 @@ public:
     void    SetScene(IEScene* scene) { m_scene = scene; }
 
     /// <summary>
+    /// 씬 오브젝트 목록을 즉시 갱신 (로드 후 강제 동기화용)
+    /// </summary>
+    void    RefreshList() { Update(0.0f); }
+
+    /// <summary>
     /// 현재 선택된 항목의 인덱스 반환 (없으면 -1)
     /// </summary>
     int32_t GetSelectedIndex() const { return m_list.GetSelectedIndex(); }
