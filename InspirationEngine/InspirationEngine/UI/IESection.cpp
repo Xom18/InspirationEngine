@@ -1,5 +1,6 @@
 #include "../InspirationEngine.h"
 #include "IESection.h"
+#include "IERow.h"
 
 // ─────────────────────────────────────────
 // 자식 추가
@@ -7,136 +8,68 @@
 
 IESection* IESection::AddSection(const std::string& title)
 {
-    Entry e;
-    e.kind    = EntryKind::Section;
-    auto sec  = std::make_unique<IESection>();
+    auto sec = std::make_unique<IESection>();
     sec->SetTitle(title);
     IESection* ptr = sec.get();
-    e.section = std::move(sec);
-    m_entries.push_back(std::move(e));
+    AddChild(std::move(sec));
     return ptr;
 }
 
 IETextBox* IESection::AddTextBox(const std::string& rowLabel)
 {
-    Entry e;
-    e.kind     = EntryKind::TextBox;
-    e.rowLabel = rowLabel;
-    auto tb    = std::make_unique<IETextBox>();
+    auto row = std::make_unique<IERow>();
+    row->SetLabel(rowLabel);
+
+    auto tb = std::make_unique<IETextBox>();
     tb->SetStyle(dTEXT_BOX_STYLE_EDITABLE);
     constexpr SDL_Color kTextCol = { 210, 210, 210, 255 };
     tb->SetDefaultColor(kTextCol);
-    IETextBox* ptr = tb.get();
-    e.textBox  = std::move(tb);
-    m_entries.push_back(std::move(e));
+    IETextBox* ptr = row->SetWidget(std::move(tb));
+
+    AddChild(std::move(row));
     return ptr;
 }
 
 IESlider* IESection::AddSlider(const std::string& rowLabel, float minV, float maxV)
 {
-    Entry e;
-    e.kind     = EntryKind::Slider;
-    e.rowLabel = rowLabel;
-    auto sl    = std::make_unique<IESlider>();
+    auto row = std::make_unique<IERow>();
+    row->SetLabel(rowLabel);
+
+    auto sl = std::make_unique<IESlider>();
     sl->SetRange(minV, maxV);
     sl->SetShowValue(true);
-    IESlider* ptr = sl.get();
-    e.slider   = std::move(sl);
-    m_entries.push_back(std::move(e));
+    IESlider* ptr = row->SetWidget(std::move(sl));
+
+    AddChild(std::move(row));
     return ptr;
 }
 
 IELabel* IESection::AddLabel(const std::string& text)
 {
-    Entry e;
-    e.kind  = EntryKind::Label;
+    auto row = std::make_unique<IERow>();
+    row->SetFullWidth(true);
+
     auto lb = std::make_unique<IELabel>();
     lb->SetText(text.c_str());
-    lb->SetColor(kColText);
-    IELabel* ptr = lb.get();
-    e.label  = std::move(lb);
-    m_entries.push_back(std::move(e));
+    constexpr SDL_Color kTextCol = { 210, 210, 210, 255 };
+    lb->SetColor(kTextCol);
+    IELabel* ptr = row->SetWidget(std::move(lb));
+
+    AddChild(std::move(row));
     return ptr;
 }
 
 IEDropdown* IESection::AddDropdown(const std::string& rowLabel, std::vector<std::string> items)
 {
-    Entry e;
-    e.kind     = EntryKind::Dropdown;
-    e.rowLabel = rowLabel;
-    auto dd    = std::make_unique<IEDropdown>();
+    auto row = std::make_unique<IERow>();
+    row->SetLabel(rowLabel);
+
+    auto dd = std::make_unique<IEDropdown>();
     dd->SetItems(std::move(items));
-    IEDropdown* ptr = dd.get();
-    e.dropdown = std::move(dd);
-    m_entries.push_back(std::move(e));
+    IEDropdown* ptr = row->SetWidget(std::move(dd));
+
+    AddChild(std::move(row));
     return ptr;
-}
-
-// ─────────────────────────────────────────
-// 컨텍스트 전파
-// ─────────────────────────────────────────
-
-void IESection::PropagateToEntry(Entry& e)
-{
-    switch (e.kind)
-    {
-    case EntryKind::TextBox:
-        if (e.textBox)
-        {
-            e.textBox->SetFont(m_font);
-            e.textBox->SetOwnerWindow(m_ownerWindow);
-            e.textBox->SetRenderer(m_renderer);
-        }
-        break;
-    case EntryKind::Slider:
-        if (e.slider)
-        {
-            e.slider->SetFont(m_font);
-            e.slider->SetOwnerWindow(m_ownerWindow);
-            e.slider->SetRenderer(m_renderer);
-        }
-        break;
-    case EntryKind::Label:
-        if (e.label)
-        {
-            e.label->SetFont(m_font);
-            e.label->SetOwnerWindow(m_ownerWindow);
-            e.label->SetRenderer(m_renderer);
-        }
-        break;
-    case EntryKind::Section:
-        if (e.section)
-            e.section->SetFont(m_font),
-            e.section->SetOwnerWindow(m_ownerWindow),
-            e.section->SetRenderer(m_renderer);
-        break;
-    case EntryKind::Dropdown:
-        if (e.dropdown)
-        {
-            e.dropdown->SetFont(m_font);
-            e.dropdown->SetOwnerWindow(m_ownerWindow);
-            e.dropdown->SetRenderer(m_renderer);
-        }
-        break;
-    }
-}
-
-void IESection::SetFont(IEFont* f)
-{
-    m_font = f;
-    for (auto& e : m_entries) PropagateToEntry(e);
-}
-
-void IESection::SetOwnerWindow(IEWindow* w)
-{
-    m_ownerWindow = w;
-    for (auto& e : m_entries) PropagateToEntry(e);
-}
-
-void IESection::SetRenderer(IERenderer* r)
-{
-    m_renderer = r;
-    for (auto& e : m_entries) PropagateToEntry(e);
 }
 
 // ─────────────────────────────────────────
@@ -154,62 +87,23 @@ int32_t IESection::Layout(int32_t x, int32_t y, int32_t w)
         return m_totalH;
     }
 
-    int32_t cy = y + kHeaderH + kPadY;
-    int32_t cx = x + kIndentX;
-    int32_t cw = w - kIndentX - kMarginR;
+    int32_t cy     = y + kHeaderH + kPadY;
+    int32_t cx     = x + kIndentX;
+    int32_t cw     = w - kIndentX - kMarginR;
+    int32_t rowIdx = 0;
 
-    for (auto& e : m_entries)
+    for (auto& child : m_children)
     {
-        switch (e.kind)
+        if (child->IsRow())
         {
-        case EntryKind::TextBox:
-        {
-            e.labelRect  = { cx, cy + 4, kLabelW, kRowH - 4 };
-            e.widgetRect = { cx + kLabelW, cy + 2, cw - kLabelW, kRowH - 4 };
-            if (e.textBox)
-                e.textBox->SetRect(e.widgetRect.x, e.widgetRect.y,
-                                   e.widgetRect.w, e.widgetRect.h);
-            cy += kRowH + kPadY;
-            break;
+            child->SetRowParity(rowIdx % 2 == 0);
+            cy += child->Layout(cx, cy, cw) + kPadY;
+            ++rowIdx;
         }
-        case EntryKind::Slider:
+        else
         {
-            e.labelRect  = { cx, cy + 4, kLabelW, kRowH - 4 };
-            e.widgetRect = { cx + kLabelW, cy + 2, cw - kLabelW, kRowH - 4 };
-            if (e.slider)
-                e.slider->SetRect(e.widgetRect.x, e.widgetRect.y,
-                                  e.widgetRect.w, e.widgetRect.h);
-            cy += kRowH + kPadY;
-            break;
-        }
-        case EntryKind::Label:
-        {
-            e.labelRect  = {};
-            e.widgetRect = { cx, cy + 4, cw, kRowH - 4 };
-            if (e.label)
-                e.label->SetRect(e.widgetRect.x, e.widgetRect.y, 0, 0);
-            cy += kRowH + kPadY;
-            break;
-        }
-        case EntryKind::Section:
-        {
-            if (e.section)
-            {
-                int32_t childH = e.section->Layout(x, cy, w);
-                cy += childH + kPadY;
-            }
-            break;
-        }
-        case EntryKind::Dropdown:
-        {
-            e.labelRect  = { cx, cy + 4, kLabelW, kRowH - 4 };
-            e.widgetRect = { cx + kLabelW, cy + 2, cw - kLabelW, kRowH - 4 };
-            if (e.dropdown)
-                e.dropdown->SetRect(e.widgetRect.x, e.widgetRect.y,
-                                    e.widgetRect.w, e.widgetRect.h);
-            cy += kRowH + kPadY;
-            break;
-        }
+            // 중첩 섹션 — 전체 너비, rowIdx 미증가
+            cy += child->Layout(x, cy, w) + kPadY;
         }
     }
 
@@ -223,26 +117,25 @@ int32_t IESection::Layout(int32_t x, int32_t y, int32_t w)
 
 bool IESection::CheckHeaderClick()
 {
-    if (!m_collapsible || m_ownerWindow == nullptr)
+    if (!m_collapsible || GetOwnerWindow() == nullptr)
         return false;
 
     float gxF = 0.0f, gyF = 0.0f;
     SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gxF, &gyF);
-    bool lmb = (btn & SDL_BUTTON_LMASK) != 0;
+    bool lmb     = (btn & SDL_BUTTON_LMASK) != 0;
     bool clicked = lmb && !m_prevLMB;
-    m_prevLMB = lmb;
+    m_prevLMB    = lmb;
 
     if (!clicked)
         return false;
 
     int32_t winX = 0, winY = 0;
-    SDL_GetWindowPosition(m_ownerWindow->GetSDLWindow(), &winX, &winY);
+    SDL_GetWindowPosition(GetOwnerWindow()->GetSDLWindow(), &winX, &winY);
     int32_t mx = static_cast<int32_t>(gxF) - winX;
     int32_t my = static_cast<int32_t>(gyF) - winY;
 
-    bool inHeader = mx >= m_headerRect.x && mx < m_headerRect.x + m_headerRect.w
-                 && my >= m_headerRect.y && my < m_headerRect.y + m_headerRect.h;
-    return inHeader;
+    return mx >= m_headerRect.x && mx < m_headerRect.x + m_headerRect.w
+        && my >= m_headerRect.y && my < m_headerRect.y + m_headerRect.h;
 }
 
 void IESection::Update()
@@ -253,153 +146,56 @@ void IESection::Update()
     if (m_collapsed)
         return;
 
-    for (auto& e : m_entries)
-    {
-        switch (e.kind)
-        {
-        case EntryKind::Slider:
-            if (e.slider) e.slider->Update();
-            break;
-        case EntryKind::Label:
-            break;
-        case EntryKind::TextBox:
-            if (e.textBox) e.textBox->Update();
-            break;
-        case EntryKind::Section:
-            if (e.section) e.section->Update();
-            break;
-        case EntryKind::Dropdown:
-            if (e.dropdown) e.dropdown->Update();
-            break;
-        }
-    }
+    for (auto& c : m_children)
+        c->Update();
 }
 
 // ─────────────────────────────────────────
 // Draw
 // ─────────────────────────────────────────
 
-void IESection::Draw(IERenderer* r)
+void IESection::Draw()
 {
+    IERenderer* r = GetRenderer();
     if (r == nullptr)
         return;
 
-    // 헤더
+    // 헤더 배경
     SDL_Color hCol = m_collapsible ? kColHeader : kColHeaderH;
     r->DrawRect(hCol, m_headerRect.x, m_headerRect.y,
                 m_headerRect.w, m_headerRect.h, SDL_BLENDMODE_NONE);
 
-    if (m_font != nullptr)
+    if (GetFont() != nullptr)
     {
-        const char* chevron = m_collapsed ? ">" : "v";
         int32_t tx = m_headerRect.x + 6;
         int32_t ty = m_headerRect.y + 4;
+
         if (m_collapsible)
         {
-            r->DrawText(m_font, chevron, kColLabel, tx, ty);
+            r->DrawText(GetFont(), m_collapsed ? ">" : "v", kColLabel, tx, ty);
             tx += 14;
         }
-        r->DrawText(m_font, m_title.c_str(), kColText, tx, ty);
+        r->DrawText(GetFont(), m_title.c_str(), kColText, tx, ty);
 
-        // 헤더 레이블 — 타이틀 오른쪽, 헤더 너비의 45% 지점부터
         if (!m_headerLabel.empty())
         {
             int32_t lx = m_headerRect.x + static_cast<int32_t>(m_headerRect.w * kHeaderLabelRatio);
-            r->DrawText(m_font, m_headerLabel.c_str(), m_headerLabelColor, lx, ty);
+            r->DrawText(GetFont(), m_headerLabel.c_str(), m_headerLabelColor, lx, ty);
         }
     }
 
     if (m_collapsed)
         return;
 
-    // 행 렌더링 (1패스)
-    // Dropdown 팝업 z-order 보정은 DrawOpenDropdowns()에서 처리
-    int32_t rowIdx = 0;
-    for (auto& e : m_entries)
-    {
-        switch (e.kind)
-        {
-        case EntryKind::TextBox:
-        {
-            SDL_Color rowBg = (rowIdx % 2 == 0) ? kColRowBg : kColRowAlt;
-            r->DrawRect(rowBg, m_x + kIndentX, e.widgetRect.y - 2,
-                        m_w - kIndentX, kRowH, SDL_BLENDMODE_NONE);
-
-            if (m_font != nullptr && !e.rowLabel.empty())
-                r->DrawText(m_font, e.rowLabel.c_str(), kColLabel,
-                            e.labelRect.x, e.labelRect.y);
-
-            if (e.textBox)
-            {
-                bool focused = (IECore::GetFocusedTextBox() == e.textBox.get());
-                SDL_Color bor = focused ? kColTbFoc : kColTbBor;
-                SDL_Rect& wr  = e.widgetRect;
-                r->DrawRect(kColTbBg, wr.x, wr.y, wr.w, wr.h, SDL_BLENDMODE_NONE);
-                r->DrawLine(bor, wr.x,        wr.y,        wr.x + wr.w, wr.y);
-                r->DrawLine(bor, wr.x,        wr.y + wr.h, wr.x + wr.w, wr.y + wr.h);
-                r->DrawLine(bor, wr.x,        wr.y,        wr.x,        wr.y + wr.h);
-                r->DrawLine(bor, wr.x + wr.w, wr.y,        wr.x + wr.w, wr.y + wr.h);
-                e.textBox->Draw();
-            }
-            ++rowIdx;
-            break;
-        }
-        case EntryKind::Slider:
-        {
-            SDL_Color rowBg = (rowIdx % 2 == 0) ? kColRowBg : kColRowAlt;
-            r->DrawRect(rowBg, m_x + kIndentX, e.widgetRect.y - 2,
-                        m_w - kIndentX, kRowH, SDL_BLENDMODE_NONE);
-
-            if (m_font != nullptr && !e.rowLabel.empty())
-                r->DrawText(m_font, e.rowLabel.c_str(), kColLabel,
-                            e.labelRect.x, e.labelRect.y);
-
-            if (e.slider) e.slider->Draw();
-            ++rowIdx;
-            break;
-        }
-        case EntryKind::Label:
-        {
-            SDL_Color rowBg = (rowIdx % 2 == 0) ? kColRowBg : kColRowAlt;
-            r->DrawRect(rowBg, m_x + kIndentX, e.widgetRect.y - 2,
-                        m_w - kIndentX, kRowH, SDL_BLENDMODE_NONE);
-            if (e.label) e.label->Draw();
-            ++rowIdx;
-            break;
-        }
-        case EntryKind::Section:
-        {
-            if (e.section) e.section->Draw(r);
-            break;
-        }
-        case EntryKind::Dropdown:
-        {
-            SDL_Color rowBg = (rowIdx % 2 == 0) ? kColRowBg : kColRowAlt;
-            r->DrawRect(rowBg, m_x + kIndentX, e.widgetRect.y - 2,
-                        m_w - kIndentX, kRowH, SDL_BLENDMODE_NONE);
-
-            if (m_font != nullptr && !e.rowLabel.empty())
-                r->DrawText(m_font, e.rowLabel.c_str(), kColLabel,
-                            e.labelRect.x, e.labelRect.y);
-
-            if (e.dropdown) e.dropdown->Draw();
-            ++rowIdx;
-            break;
-        }
-        }
-    }
+    for (auto& c : m_children)
+        c->Draw();
 }
 
-void IESection::DrawOpenDropdowns(IERenderer* r)
+void IESection::DrawOverlay()
 {
-    if (r == nullptr || m_collapsed)
+    if (m_collapsed)
         return;
 
-    for (auto& e : m_entries)
-    {
-        if (e.kind == EntryKind::Dropdown && e.dropdown && e.dropdown->IsOpen())
-            e.dropdown->Draw();
-        if (e.kind == EntryKind::Section && e.section)
-            e.section->DrawOpenDropdowns(r);
-    }
+    for (auto& c : m_children)
+        c->DrawOverlay();
 }

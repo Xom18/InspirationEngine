@@ -1,5 +1,13 @@
 #include "../InspirationEngine.h"
 
+// ── z-order 오버레이 ─────────────────────────────────────────
+
+void IEDropdown::DrawOverlay()
+{
+    if (m_isOpen)
+        Draw();
+}
+
 // ── 설정 전파 ────────────────────────────────────────────────
 
 void IEDropdown::SetRect(int32_t x, int32_t y, int32_t w, int32_t h)

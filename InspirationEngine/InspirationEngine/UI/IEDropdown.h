@@ -49,6 +49,12 @@ public:
     /// </summary>
     void SetCallback(std::function<void(int32_t)> cb) { m_callback = std::move(cb); }
 
+    /// <summary>
+    /// 열린 팝업 목록을 최상위에 재렌더 (z-order 보정용).
+    /// IESection::DrawOverlay 체인에서 자동 호출됨.
+    /// </summary>
+    void DrawOverlay() override;
+
 private:
     void UpdateListRect();
     void DrawArrow(IERenderer* r, int32_t cx, int32_t cy) const;

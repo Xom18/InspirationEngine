@@ -290,11 +290,11 @@ void IEInspectorPanel::Draw(IERenderer* r)
     m_scroll.BeginDraw();
 
     for (auto& sec : m_sections)
-        sec->Draw(r);
+        sec->Draw();
 
-    // 열린 Dropdown 팝업 — 모든 섹션 콘텐츠 위에 재렌더
+    // 열린 Dropdown 팝업 — DrawOverlay 체인으로 최상위 재렌더
     for (auto& sec : m_sections)
-        sec->DrawOpenDropdowns(r);
+        sec->DrawOverlay();
 
     m_scroll.EndDraw();
 
