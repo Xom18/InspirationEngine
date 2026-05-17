@@ -2,20 +2,20 @@
 
 // ── 설정 전파 ────────────────────────────────────────────────
 
-void IEListView::SetRect(int32_t x, int32_t y, int32_t w, int32_t h)
+void IEUIListView::SetRect(int32_t x, int32_t y, int32_t w, int32_t h)
 {
     IEUIBase::SetRect(x, y, w, h);
     m_scroll.SetRect(x, y, w, h);
     UpdateScrollHeight();
 }
 
-void IEListView::SetOwnerWindow(IEWindow* w)
+void IEUIListView::SetOwnerWindow(IEWindow* w)
 {
     IEUIBase::SetOwnerWindow(w);
     m_scroll.SetOwnerWindow(w);
 }
 
-void IEListView::SetRenderer(IERenderer* r)
+void IEUIListView::SetRenderer(IERenderer* r)
 {
     IEUIBase::SetRenderer(r);
     m_scroll.SetRenderer(r);
@@ -23,12 +23,12 @@ void IEListView::SetRenderer(IERenderer* r)
 
 // ── 항목 관리 ────────────────────────────────────────────────
 
-void IEListView::UpdateScrollHeight()
+void IEUIListView::UpdateScrollHeight()
 {
     m_scroll.SetContentHeight(static_cast<int32_t>(m_items.size()) * kRowH);
 }
 
-void IEListView::SetItems(std::vector<std::string> items)
+void IEUIListView::SetItems(std::vector<std::string> items)
 {
     m_items         = std::move(items);
     m_selectedIndex = -1;
@@ -37,13 +37,13 @@ void IEListView::SetItems(std::vector<std::string> items)
     UpdateScrollHeight();
 }
 
-void IEListView::AddItem(const std::string& item)
+void IEUIListView::AddItem(const std::string& item)
 {
     m_items.push_back(item);
     UpdateScrollHeight();
 }
 
-void IEListView::ClearItems()
+void IEUIListView::ClearItems()
 {
     m_items.clear();
     m_selectedIndex = -1;
@@ -52,7 +52,7 @@ void IEListView::ClearItems()
     UpdateScrollHeight();
 }
 
-void IEListView::RefreshItems(std::vector<std::string> items)
+void IEUIListView::RefreshItems(std::vector<std::string> items)
 {
     m_items = std::move(items);
     int32_t count = static_cast<int32_t>(m_items.size());
@@ -63,13 +63,13 @@ void IEListView::RefreshItems(std::vector<std::string> items)
     UpdateScrollHeight();
 }
 
-void IEListView::SetSelectedIndex(int32_t index)
+void IEUIListView::SetSelectedIndex(int32_t index)
 {
     int32_t count = static_cast<int32_t>(m_items.size());
     m_selectedIndex = (index >= 0 && index < count) ? index : -1;
 }
 
-const std::string* IEListView::GetSelectedItem() const
+const std::string* IEUIListView::GetSelectedItem() const
 {
     if (m_selectedIndex < 0 || m_selectedIndex >= static_cast<int32_t>(m_items.size()))
         return nullptr;
@@ -78,7 +78,7 @@ const std::string* IEListView::GetSelectedItem() const
 
 // ── Update ───────────────────────────────────────────────────
 
-void IEListView::Update()
+void IEUIListView::Update()
 {
     m_scroll.Update();
 
@@ -129,7 +129,7 @@ void IEListView::Update()
 
 // ── Draw ─────────────────────────────────────────────────────
 
-void IEListView::Draw()
+void IEUIListView::Draw()
 {
     IERenderer* r = GetRenderer();
     if (r == nullptr)

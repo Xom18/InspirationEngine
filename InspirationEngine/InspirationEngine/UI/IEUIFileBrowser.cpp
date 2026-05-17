@@ -5,7 +5,7 @@
 
 namespace fs = std::filesystem;
 
-IEFileBrowser::IEFileBrowser()
+IEUIFileBrowser::IEUIFileBrowser()
 {
     m_treeView.SetCallback([this](IETreeNode* node) {
         auto it = m_nodePaths.find(node);
@@ -17,47 +17,47 @@ IEFileBrowser::IEFileBrowser()
     });
 }
 
-void IEFileBrowser::SetRenderer(IERenderer* r)
+void IEUIFileBrowser::SetRenderer(IERenderer* r)
 {
     IEUIBase::SetRenderer(r);
     m_treeView.SetRenderer(r);
 }
 
-void IEFileBrowser::SetRect(int32_t x, int32_t y, int32_t w, int32_t h)
+void IEUIFileBrowser::SetRect(int32_t x, int32_t y, int32_t w, int32_t h)
 {
     IEUIBase::SetRect(x, y, w, h);
     m_treeView.SetRect(x, y, w, h);
 }
 
-void IEFileBrowser::SetFont(IEFont* font)
+void IEUIFileBrowser::SetFont(IEFont* font)
 {
     IEUIBase::SetFont(font);
     m_treeView.SetFont(font);
 }
 
-void IEFileBrowser::SetOwnerWindow(IEWindow* window)
+void IEUIFileBrowser::SetOwnerWindow(IEWindow* window)
 {
     IEUIBase::SetOwnerWindow(window);
     m_treeView.SetOwnerWindow(window);
 }
 
-void IEFileBrowser::SetRootPath(const char* path)
+void IEUIFileBrowser::SetRootPath(const char* path)
 {
     m_rootPath = path ? path : "";
     Refresh();
 }
 
-void IEFileBrowser::SetFilter(const char* ext)
+void IEUIFileBrowser::SetFilter(const char* ext)
 {
     m_filter = ext ? ext : "";
 }
 
-void IEFileBrowser::SetCallback(std::function<void(const std::string&)> callback)
+void IEUIFileBrowser::SetCallback(std::function<void(const std::string&)> callback)
 {
     m_callback = std::move(callback);
 }
 
-void IEFileBrowser::Refresh()
+void IEUIFileBrowser::Refresh()
 {
     m_treeView.Clear();
     m_nodePaths.clear();
@@ -77,7 +77,7 @@ void IEFileBrowser::Refresh()
     BuildTree(rootNode, m_rootPath);
 }
 
-void IEFileBrowser::BuildTree(IETreeNode* parent, const std::string& dirPath)
+void IEUIFileBrowser::BuildTree(IETreeNode* parent, const std::string& dirPath)
 {
     std::vector<fs::directory_entry> entries;
     try
@@ -130,12 +130,12 @@ void IEFileBrowser::BuildTree(IETreeNode* parent, const std::string& dirPath)
     }
 }
 
-void IEFileBrowser::Update()
+void IEUIFileBrowser::Update()
 {
     m_treeView.Update();
 }
 
-void IEFileBrowser::Draw()
+void IEUIFileBrowser::Draw()
 {
     m_treeView.Draw();
 }

@@ -152,7 +152,7 @@ bool IEAtlasEditorWindow::HitTest(const SDL_Rect& r, int32_t x, int32_t y) const
     return x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
 }
 
-static void DrawTextBoxBg(IERenderer* r, IETextBox* tb, bool focused, SDL_Color colBor)
+static void DrawTextBoxBg(IERenderer* r, IEUITextBox* tb, bool focused, SDL_Color colBor)
 {
     SDL_Rect rect = {};
     tb->GetRect(rect);
@@ -322,7 +322,7 @@ void IEAtlasEditorWindow::Update(float /*deltaTime*/)
         OnClick(mx, my);
 }
 
-void IEAtlasEditorWindow::SetFocus(IETextBox* tb)
+void IEAtlasEditorWindow::SetFocus(IEUITextBox* tb)
 {
     m_focusedBox = tb;
     IECore::SetFocusedTextBox(tb);

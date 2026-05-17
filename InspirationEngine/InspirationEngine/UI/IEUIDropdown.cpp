@@ -2,7 +2,7 @@
 
 // ── z-order 오버레이 ─────────────────────────────────────────
 
-void IEDropdown::DrawOverlay()
+void IEUIDropdown::DrawOverlay()
 {
     if (m_isOpen)
         Draw();
@@ -10,13 +10,13 @@ void IEDropdown::DrawOverlay()
 
 // ── 설정 전파 ────────────────────────────────────────────────
 
-void IEDropdown::SetRect(int32_t x, int32_t y, int32_t w, int32_t h)
+void IEUIDropdown::SetRect(int32_t x, int32_t y, int32_t w, int32_t h)
 {
     IEUIBase::SetRect(x, y, w, h);
     UpdateListRect();
 }
 
-void IEDropdown::UpdateListRect()
+void IEUIDropdown::UpdateListRect()
 {
     SDL_Rect rect    = GetRect();
     int32_t  count   = static_cast<int32_t>(m_items.size());
@@ -26,7 +26,7 @@ void IEDropdown::UpdateListRect()
 
 // ── 항목 관리 ────────────────────────────────────────────────
 
-void IEDropdown::SetItems(std::vector<std::string> items)
+void IEUIDropdown::SetItems(std::vector<std::string> items)
 {
     m_items         = std::move(items);
     m_selectedIndex = -1;
@@ -36,13 +36,13 @@ void IEDropdown::SetItems(std::vector<std::string> items)
     UpdateListRect();
 }
 
-void IEDropdown::AddItem(const std::string& item)
+void IEUIDropdown::AddItem(const std::string& item)
 {
     m_items.push_back(item);
     UpdateListRect();
 }
 
-void IEDropdown::ClearItems()
+void IEUIDropdown::ClearItems()
 {
     m_items.clear();
     m_selectedIndex = -1;
@@ -52,13 +52,13 @@ void IEDropdown::ClearItems()
     UpdateListRect();
 }
 
-void IEDropdown::SetSelectedIndex(int32_t index)
+void IEUIDropdown::SetSelectedIndex(int32_t index)
 {
     int32_t count   = static_cast<int32_t>(m_items.size());
     m_selectedIndex = (index >= 0 && index < count) ? index : -1;
 }
 
-const std::string* IEDropdown::GetSelectedItem() const
+const std::string* IEUIDropdown::GetSelectedItem() const
 {
     if (m_selectedIndex < 0 || m_selectedIndex >= static_cast<int32_t>(m_items.size()))
         return nullptr;
@@ -67,7 +67,7 @@ const std::string* IEDropdown::GetSelectedItem() const
 
 // ── Update ───────────────────────────────────────────────────
 
-void IEDropdown::Update()
+void IEUIDropdown::Update()
 {
     IEWindow* ownerWindow = GetOwnerWindow();
     if (ownerWindow == nullptr || IECore::GetMouseOnWindow() != ownerWindow)
@@ -145,7 +145,7 @@ void IEDropdown::Update()
 
 // ── Draw ─────────────────────────────────────────────────────
 
-void IEDropdown::DrawArrow(IERenderer* r, int32_t cx, int32_t cy) const
+void IEUIDropdown::DrawArrow(IERenderer* r, int32_t cx, int32_t cy) const
 {
     // 간단한 삼각형 화살표 (선 3개)
     if (m_isOpen)
@@ -164,7 +164,7 @@ void IEDropdown::DrawArrow(IERenderer* r, int32_t cx, int32_t cy) const
     }
 }
 
-void IEDropdown::Draw()
+void IEUIDropdown::Draw()
 {
     IERenderer* r = GetRenderer();
     if (r == nullptr)

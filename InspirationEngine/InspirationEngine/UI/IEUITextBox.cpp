@@ -1,6 +1,6 @@
 #include "InspirationEngine.h"
 
-void IETextBox::TransToTexture()
+void IEUITextBox::TransToTexture()
 {
 	if (GetRenderer() == nullptr)
 		return;
@@ -322,7 +322,7 @@ void IETextBox::TransToTexture()
 //  공통 (양쪽 경로 동일)
 // ──────────────────────────────────────────────
 
-void IETextBox::Draw()
+void IEUITextBox::Draw()
 {
 	if (GetRenderer() == nullptr)
 		return;
@@ -334,11 +334,11 @@ void IETextBox::Draw()
 		GetRenderer()->DrawTexture(pTTexture->m_texture, m_rect.x + pTTexture->m_rect.x, m_rect.y + pTTexture->m_rect.y);
 }
 
-void IETextBox::Update()
+void IEUITextBox::Update()
 {
 }
 
-bool IETextBox::OperateStyleCode(const std::string* strText, int32_t* outResult)
+bool IEUITextBox::OperateStyleCode(const std::string* strText, int32_t* outResult)
 {
 	size_t cursor = strText->find_first_not_of("<s:");
 
@@ -362,7 +362,7 @@ bool IETextBox::OperateStyleCode(const std::string* strText, int32_t* outResult)
 	return true;
 }
 
-bool IETextBox::OperateColorCode(const std::string* strText, SDL_Color* outResult)
+bool IEUITextBox::OperateColorCode(const std::string* strText, SDL_Color* outResult)
 {
 	size_t endPoint = strText->find_last_of(">");
 	if (endPoint == std::string::npos)

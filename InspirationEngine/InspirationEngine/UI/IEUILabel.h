@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-class IELabel : public IEUIBase
+class IEUILabel : public IEUIBase
 {
 public:
     virtual void Draw() override;

@@ -5,7 +5,7 @@
 
 class IETreeNode;
 
-class IETreeView : public IEUIBase
+class IEUITreeView : public IEUIBase
 {
 public:
     virtual void Draw() override;
@@ -83,7 +83,7 @@ private:
     static constexpr int32_t kArrowW  = 14;
     static constexpr int32_t kPadX    = 4;
 
-    IEScrollView m_scroll;
+    IEUIScrollView m_scroll;
 
     std::vector<std::unique_ptr<IETreeNode>> m_roots;
     IETreeNode*                              m_selectedNode = nullptr;

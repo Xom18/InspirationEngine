@@ -4,10 +4,10 @@
 #include <memory>
 #include "IEUIBase.h"
 
-class IETextBox;
-class IELabel;
-class IESlider;
-class IEDropdown;
+class IEUITextBox;
+class IEUILabel;
+class IEUISlider;
+class IEUIDropdown;
 
 /// <summary>
 /// 컴포짓 패턴 기반 재귀 가능 UI 섹션 컨테이너.
@@ -17,7 +17,7 @@ class IEDropdown;
 /// 내부적으로 IERow를 생성해 레이블 + 위젯을 감싼 뒤 m_children에 저장.
 /// Layout(x, y, w) 후 Draw / Update 사용.
 /// </summary>
-class IESection : public IEUIBase
+class IEUISection : public IEUIBase
 {
 public:
     static constexpr int32_t kHeaderH  = 22;
@@ -39,19 +39,19 @@ public:
     // ── 자식 추가 ─────────────────────────────────────────────────────
 
     /// <summary>자식 섹션 추가. 반환 포인터는 이 섹션이 소유.</summary>
-    IESection*  AddSection(const std::string& title);
+    IEUISection*  AddSection(const std::string& title);
 
     /// <summary>텍스트박스 행 추가. rowLabel = 왼쪽 고정 레이블 텍스트.</summary>
-    IETextBox*  AddTextBox(const std::string& rowLabel = "");
+    IEUITextBox*  AddTextBox(const std::string& rowLabel = "");
 
     /// <summary>슬라이더 행 추가.</summary>
-    IESlider*   AddSlider(const std::string& rowLabel, float minV, float maxV);
+    IEUISlider*   AddSlider(const std::string& rowLabel, float minV, float maxV);
 
     /// <summary>전체 너비 레이블 행 추가 (표시 전용).</summary>
-    IELabel*    AddLabel(const std::string& text = "");
+    IEUILabel*    AddLabel(const std::string& text = "");
 
     /// <summary>드롭다운 행 추가. items = 선택 항목 목록.</summary>
-    IEDropdown* AddDropdown(const std::string& rowLabel, std::vector<std::string> items);
+    IEUIDropdown* AddDropdown(const std::string& rowLabel, std::vector<std::string> items);
 
     // ── 레이아웃 / 렌더 / 입력 ───────────────────────────────────────
 

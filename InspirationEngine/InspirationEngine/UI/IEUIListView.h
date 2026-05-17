@@ -6,7 +6,7 @@
 /// <summary>
 /// 스크롤 가능한 단일 선택 목록 위젯.
 /// </summary>
-class IEListView : public IEUIBase
+class IEUIListView : public IEUIBase
 {
 public:
     virtual void Draw()   override;
@@ -67,5 +67,5 @@ private:
     bool                         m_prevLMB       = false;
     std::function<void(int32_t)> m_callback;
 
-    IEScrollView m_scroll;
+    IEUIScrollView m_scroll;
 };

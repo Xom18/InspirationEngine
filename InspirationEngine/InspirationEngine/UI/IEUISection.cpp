@@ -1,72 +1,72 @@
 #include "../InspirationEngine.h"
-#include "IESection.h"
-#include "IERow.h"
+#include "IEUISection.h"
+#include "IEUIRow.h"
 
 // ─────────────────────────────────────────
 // 자식 추가
 // ─────────────────────────────────────────
 
-IESection* IESection::AddSection(const std::string& title)
+IEUISection* IEUISection::AddSection(const std::string& title)
 {
-    auto sec = std::make_unique<IESection>();
+    auto sec = std::make_unique<IEUISection>();
     sec->SetTitle(title);
-    IESection* ptr = sec.get();
+    IEUISection* ptr = sec.get();
     AddChild(std::move(sec));
     return ptr;
 }
 
-IETextBox* IESection::AddTextBox(const std::string& rowLabel)
+IEUITextBox* IEUISection::AddTextBox(const std::string& rowLabel)
 {
-    auto row = std::make_unique<IERow>();
+    auto row = std::make_unique<IEUIRow>();
     row->SetLabel(rowLabel);
 
-    auto tb = std::make_unique<IETextBox>();
+    auto tb = std::make_unique<IEUITextBox>();
     tb->SetStyle(dTEXT_BOX_STYLE_EDITABLE);
     constexpr SDL_Color kTextCol = { 210, 210, 210, 255 };
     tb->SetDefaultColor(kTextCol);
-    IETextBox* ptr = row->SetWidget(std::move(tb));
+    IEUITextBox* ptr = row->SetWidget(std::move(tb));
 
     AddChild(std::move(row));
     return ptr;
 }
 
-IESlider* IESection::AddSlider(const std::string& rowLabel, float minV, float maxV)
+IEUISlider* IEUISection::AddSlider(const std::string& rowLabel, float minV, float maxV)
 {
-    auto row = std::make_unique<IERow>();
+    auto row = std::make_unique<IEUIRow>();
     row->SetLabel(rowLabel);
 
-    auto sl = std::make_unique<IESlider>();
+    auto sl = std::make_unique<IEUISlider>();
     sl->SetRange(minV, maxV);
     sl->SetShowValue(true);
-    IESlider* ptr = row->SetWidget(std::move(sl));
+    IEUISlider* ptr = row->SetWidget(std::move(sl));
 
     AddChild(std::move(row));
     return ptr;
 }
 
-IELabel* IESection::AddLabel(const std::string& text)
+IEUILabel* IEUISection::AddLabel(const std::string& text)
 {
-    auto row = std::make_unique<IERow>();
+    auto row = std::make_unique<IEUIRow>();
     row->SetFullWidth(true);
 
-    auto lb = std::make_unique<IELabel>();
+    auto lb = std::make_unique<IEUILabel>();
     lb->SetText(text.c_str());
     constexpr SDL_Color kTextCol = { 210, 210, 210, 255 };
     lb->SetColor(kTextCol);
-    IELabel* ptr = row->SetWidget(std::move(lb));
+    IEUILabel* ptr = row->SetWidget(std::move(lb));
 
     AddChild(std::move(row));
     return ptr;
 }
 
-IEDropdown* IESection::AddDropdown(const std::string& rowLabel, std::vector<std::string> items)
+IEUIDropdown* IEUISection::AddDropdown(const std::string& rowLabel, std::vector<std::string> items)
 {
-    auto row = std::make_unique<IERow>();
+    auto row = std::make_unique<IEUIRow>();
     row->SetLabel(rowLabel);
 
-    auto dd = std::make_unique<IEDropdown>();
+    auto dd = std::make_unique<IEUIDropdown>();
     dd->SetItems(std::move(items));
-    IEDropdown* ptr = row->SetWidget(std::move(dd));
+    IEUIDropdown* ptr = row->SetWidget(std::move(dd));
 
     AddChild(std::move(row));
     return ptr;
@@ -76,7 +76,7 @@ IEDropdown* IESection::AddDropdown(const std::string& rowLabel, std::vector<std:
 // Layout
 // ─────────────────────────────────────────
 
-int32_t IESection::Layout(int32_t x, int32_t y, int32_t w)
+int32_t IEUISection::Layout(int32_t x, int32_t y, int32_t w)
 {
     m_x = x; m_y = y; m_w = w;
     m_headerRect = { x, y, w, kHeaderH };
@@ -115,7 +115,7 @@ int32_t IESection::Layout(int32_t x, int32_t y, int32_t w)
 // Update
 // ─────────────────────────────────────────
 
-bool IESection::CheckHeaderClick()
+bool IEUISection::CheckHeaderClick()
 {
     if (!m_collapsible || GetOwnerWindow() == nullptr)
         return false;
@@ -138,7 +138,7 @@ bool IESection::CheckHeaderClick()
         && my >= m_headerRect.y && my < m_headerRect.y + m_headerRect.h;
 }
 
-void IESection::Update()
+void IEUISection::Update()
 {
     if (CheckHeaderClick())
         m_collapsed = !m_collapsed;
@@ -154,7 +154,7 @@ void IESection::Update()
 // Draw
 // ─────────────────────────────────────────
 
-void IESection::Draw()
+void IEUISection::Draw()
 {
     IERenderer* r = GetRenderer();
     if (r == nullptr)
@@ -191,7 +191,7 @@ void IESection::Draw()
         c->Draw();
 }
 
-void IESection::DrawOverlay()
+void IEUISection::DrawOverlay()
 {
     if (m_collapsed)
         return;

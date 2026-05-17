@@ -23,7 +23,7 @@ uint64_t		IECore::m_deltaTimeMs = 0;						//스프라이트 관리하는곳
 IEWindow* IECore::m_mainWindow = nullptr;			//메인 윈도우
 IEWindow* IECore::m_mouseOnWindow = nullptr;		//마우스가 올라가 있는 윈도우
 IEWindow* IECore::m_focusedWindow = nullptr;		//선택 되있는 윈도우
-IETextBox* IECore::m_focusedTextBox = nullptr;		//선택 되있는 윈도우
+IEUITextBox* IECore::m_focusedTextBox = nullptr;		//선택 되있는 윈도우
 
 //private
 EnginePhase		IECore::m_operatePhase = EnginePhase::NaN;

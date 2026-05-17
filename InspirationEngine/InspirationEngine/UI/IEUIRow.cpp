@@ -1,7 +1,7 @@
 #include "../InspirationEngine.h"
-#include "IERow.h"
+#include "IEUIRow.h"
 
-int32_t IERow::Layout(int32_t x, int32_t y, int32_t w)
+int32_t IEUIRow::Layout(int32_t x, int32_t y, int32_t w)
 {
     SetRect(x, y, w, kRowH);
 
@@ -16,7 +16,7 @@ int32_t IERow::Layout(int32_t x, int32_t y, int32_t w)
     return kRowH;
 }
 
-void IERow::Draw()
+void IEUIRow::Draw()
 {
     IERenderer* r = GetRenderer();
     if (r == nullptr)
@@ -33,13 +33,13 @@ void IERow::Draw()
         c->Draw();
 }
 
-void IERow::DrawOverlay()
+void IEUIRow::DrawOverlay()
 {
     for (auto& c : m_children)
         c->DrawOverlay();
 }
 
-void IERow::Update()
+void IEUIRow::Update()
 {
     for (auto& c : m_children)
         c->Update();

@@ -111,11 +111,11 @@ private:
     IEAtlasEditorWindow* m_atlasEditor = nullptr;
     IEFont*              m_font        = nullptr;
 
-    IEButton m_btnAtlas;
-    IEButton m_btnSave;
-    IEButton m_btnLoad;
-    IEButton m_btnAddStatic;
-    IEButton m_btnAddEntity;
+    IEUIButton m_btnAtlas;
+    IEUIButton m_btnSave;
+    IEUIButton m_btnLoad;
+    IEUIButton m_btnAddStatic;
+    IEUIButton m_btnAddEntity;
 
     IECommandHistory m_history;
 

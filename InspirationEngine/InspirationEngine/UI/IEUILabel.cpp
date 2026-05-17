@@ -1,6 +1,6 @@
 #include "../InspirationEngine.h"
 
-void IELabel::Draw()
+void IEUILabel::Draw()
 {
     IERenderer* r = GetRenderer();
     IEFont* font = GetFont();

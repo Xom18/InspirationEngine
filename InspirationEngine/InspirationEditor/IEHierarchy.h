@@ -75,5 +75,5 @@ public:
 
 private:
     IEScene*   m_scene = nullptr;
-    IEListView m_list;
+    IEUIListView m_list;
 };

@@ -67,7 +67,7 @@ private:
     void ApplyPanel();
     void OnClick(int32_t mx, int32_t my);
     void FillPanelFromSelected();
-    void SetFocus(IETextBox* tb);
+    void SetFocus(IEUITextBox* tb);
     bool HitTest(const SDL_Rect& r, int32_t x, int32_t y) const;
 
     IEFont* m_font = nullptr;
@@ -88,29 +88,29 @@ private:
     int32_t              m_selectedTile = -1;
 
     // File browser panel
-    IEFileBrowser m_fileBrowser;
-    IETextBox     m_tbBrowserPath;
-    IEButton      m_btnSetPath;
+    IEUIFileBrowser m_fileBrowser;
+    IEUITextBox     m_tbBrowserPath;
+    IEUIButton      m_btnSetPath;
 
     // Atlas header
-    IETextBox m_tbPath;
-    IETextBox m_tbTileW;
-    IETextBox m_tbTileH;
+    IEUITextBox m_tbPath;
+    IEUITextBox m_tbTileW;
+    IEUITextBox m_tbTileH;
 
     // Atlas tile property panel
-    IETextBox m_tbName;
-    IETextBox m_tbX;
-    IETextBox m_tbY;
-    IETextBox m_tbTW;
-    IETextBox m_tbTH;
-    IETextBox m_tbPivotX;
-    IETextBox m_tbPivotY;
+    IEUITextBox m_tbName;
+    IEUITextBox m_tbX;
+    IEUITextBox m_tbY;
+    IEUITextBox m_tbTW;
+    IEUITextBox m_tbTH;
+    IEUITextBox m_tbPivotX;
+    IEUITextBox m_tbPivotY;
 
-    IETextBox* m_focusedBox = nullptr;
+    IEUITextBox* m_focusedBox = nullptr;
 
-    IEButton m_btnLoad;
-    IEButton m_btnApply;
-    IEButton m_btnSave;
+    IEUIButton m_btnLoad;
+    IEUIButton m_btnApply;
+    IEUIButton m_btnSave;
 
     bool        m_prevLMB  = false;
     std::string m_statusMsg;

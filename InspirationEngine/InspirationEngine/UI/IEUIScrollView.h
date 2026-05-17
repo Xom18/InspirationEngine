@@ -1,6 +1,6 @@
 #pragma once
 
-class IEScrollView : public IEUIBase
+class IEUIScrollView : public IEUIBase
 {
 public:
     virtual void Draw() override;

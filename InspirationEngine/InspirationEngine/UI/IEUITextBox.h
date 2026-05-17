@@ -16,7 +16,7 @@
 
 class IETextTexture
 {
-	friend class IETextBox;
+	friend class IEUITextBox;
 
 public:
 	IETextTexture() = default;
@@ -43,16 +43,16 @@ private:
 	SDL_Rect     m_rect      = {};
 };
 
-class IETextBox : public IEUIBase
+class IEUITextBox : public IEUIBase
 {
 public:
-	IETextBox()
+	IEUITextBox()
 	{
 		memset(&m_color, 0xff, sizeof(m_color));
 		memset(&m_rect, 0, sizeof(m_rect));
 	}
 
-	~IETextBox()
+	~IEUITextBox()
 	{
 		ResetTexture();
 	}

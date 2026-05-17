@@ -2,7 +2,7 @@
 #include <functional>
 #include <string>
 
-class IEButton : public IEUIBase
+class IEUIButton : public IEUIBase
 {
 public:
     virtual void Draw() override;

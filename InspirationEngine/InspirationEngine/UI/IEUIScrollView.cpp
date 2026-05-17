@@ -1,6 +1,6 @@
 #include "../InspirationEngine.h"
 
-void IEScrollView::ClampScroll()
+void IEUIScrollView::ClampScroll()
 {
     SDL_Rect rect = GetRect();
     int32_t maxScroll = m_contentH - rect.h;
@@ -12,7 +12,7 @@ void IEScrollView::ClampScroll()
         m_scrollY = maxScroll;
 }
 
-void IEScrollView::Update()
+void IEUIScrollView::Update()
 {
     IEWindow* ownerWindow = GetOwnerWindow();
     if (ownerWindow == nullptr || IECore::GetMouseOnWindow() != ownerWindow)
@@ -41,7 +41,7 @@ void IEScrollView::Update()
     }
 }
 
-void IEScrollView::Draw()
+void IEUIScrollView::Draw()
 {
     IERenderer* r = GetRenderer();
     SDL_Rect rect = GetRect();
@@ -62,7 +62,7 @@ void IEScrollView::Draw()
     r->DrawRect({ 110, 110, 120, 220 }, trackX, thumbY, kScrollbarW, thumbH, SDL_BLENDMODE_BLEND);
 }
 
-void IEScrollView::BeginDraw()
+void IEUIScrollView::BeginDraw()
 {
     IERenderer* r = GetRenderer();
     if (r == nullptr)
@@ -73,7 +73,7 @@ void IEScrollView::BeginDraw()
     SDL_SetRenderClipRect(r->GetSDLRenderer(), &clip);
 }
 
-void IEScrollView::EndDraw()
+void IEUIScrollView::EndDraw()
 {
     IERenderer* r = GetRenderer();
     if (r == nullptr)

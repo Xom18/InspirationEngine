@@ -33,7 +33,7 @@ void IEInspectorPanel::RebuildSections()
 
     // Basic — 항상, non-collapsible
     {
-        auto sec = std::make_unique<IESection>();
+        auto sec = std::make_unique<IEUISection>();
         sec->SetTitle("Basic");
         sec->SetCollapsible(false);
         m_tbName = sec->AddTextBox(IELocalize::Get("ui.name"));
@@ -44,7 +44,7 @@ void IEInspectorPanel::RebuildSections()
     auto* t = m_target->GetComponent<IETransformComponent>();
     if (t != nullptr)
     {
-        auto sec = std::make_unique<IESection>();
+        auto sec = std::make_unique<IEUISection>();
         sec->SetTitle("Transform");
         sec->SetHeaderLabel("IETransformComponent");
 
@@ -73,7 +73,7 @@ void IEInspectorPanel::RebuildSections()
     auto* tile = m_target->GetComponent<IETileComponent>();
     if (tile != nullptr)
     {
-        auto sec = std::make_unique<IESection>();
+        auto sec = std::make_unique<IEUISection>();
         sec->SetTitle("Tile");
         sec->SetHeaderLabel("IETileComponent");
 
@@ -87,7 +87,7 @@ void IEInspectorPanel::RebuildSections()
     auto* cc = m_target->GetComponent<IECameraComponent>();
     if (cc != nullptr)
     {
-        auto sec = std::make_unique<IESection>();
+        auto sec = std::make_unique<IEUISection>();
         sec->SetTitle("Camera");
         sec->SetHeaderLabel("IECameraComponent");
 
@@ -157,7 +157,7 @@ void IEInspectorPanel::SyncFromTarget()
     if (m_target == nullptr)
         return;
 
-    IETextBox* focused = IECore::GetFocusedTextBox();
+    IEUITextBox* focused = IECore::GetFocusedTextBox();
 
     if (m_tbName != nullptr && focused != m_tbName)
         m_tbName->SetText(m_target->GetName().c_str());
@@ -197,7 +197,7 @@ void IEInspectorPanel::ApplyFocusedInput()
     if (m_target == nullptr)
         return;
 
-    IETextBox* focused = IECore::GetFocusedTextBox();
+    IEUITextBox* focused = IECore::GetFocusedTextBox();
 
     if (m_tbName != nullptr && focused == m_tbName)
         m_target->SetName(m_tbName->GetText());

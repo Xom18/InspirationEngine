@@ -35,10 +35,10 @@ public:
 
 	static IEWindow*  GetMouseOnWindow()  { return m_mouseOnWindow; }
 	static IEWindow*  GetFocusedWindow()  { return m_focusedWindow; }
-	static IETextBox* GetFocusedTextBox() { return m_focusedTextBox; }
+	static IEUITextBox* GetFocusedTextBox() { return m_focusedTextBox; }
 	static void SetMouseOnWindow(IEWindow* window)  { m_mouseOnWindow = window; }
 	static void SetFocusedWindow(IEWindow* window)  { m_focusedWindow = window; }
-	static void SetFocusedTextBox(IETextBox* textBox)
+	static void SetFocusedTextBox(IEUITextBox* textBox)
 	{
 		m_focusedTextBox = textBox;
 		if (textBox != nullptr)
@@ -340,7 +340,7 @@ private:
 	static IEWindow*        m_mainWindow;
 	static IEWindow*        m_mouseOnWindow;
 	static IEWindow*        m_focusedWindow;
-	static IETextBox*       m_focusedTextBox;
+	static IEUITextBox*     m_focusedTextBox;
 
 	static EnginePhase      m_operatePhase;
 	static std::mutex       m_eventMutex;

@@ -6,7 +6,7 @@
 /// 레이블 + 단일 위젯 래퍼 행. IESection의 자식으로 사용.
 /// 왼쪽 kLabelW 픽셀에 레이블 텍스트, 나머지 우측에 위젯(m_children[0]) 렌더.
 /// </summary>
-class IERow : public IEUIBase
+class IEUIRow : public IEUIBase
 {
 public:
     void SetLabel(const std::string& label) { m_label = label; }

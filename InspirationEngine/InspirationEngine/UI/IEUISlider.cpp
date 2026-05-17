@@ -2,19 +2,19 @@
 #include <algorithm>
 #include <cstdio>
 
-void IESlider::SetRange(float minVal, float maxVal)
+void IEUISlider::SetRange(float minVal, float maxVal)
 {
     m_minVal = minVal;
     m_maxVal = maxVal;
     SetValue(m_value);
 }
 
-void IESlider::SetValue(float v)
+void IEUISlider::SetValue(float v)
 {
     m_value = std::clamp(v, m_minVal, m_maxVal);
 }
 
-float IESlider::ThumbCenterX() const
+float IEUISlider::ThumbCenterX() const
 {
     SDL_Rect rect = GetRect();
     float t = (m_maxVal > m_minVal)
@@ -23,7 +23,7 @@ float IESlider::ThumbCenterX() const
     return static_cast<float>(rect.x) + t * static_cast<float>(rect.w);
 }
 
-float IESlider::ValueFromX(int32_t x) const
+float IEUISlider::ValueFromX(int32_t x) const
 {
     SDL_Rect rect = GetRect();
     float t = static_cast<float>(x - rect.x) / static_cast<float>(rect.w);
@@ -31,7 +31,7 @@ float IESlider::ValueFromX(int32_t x) const
     return m_minVal + t * (m_maxVal - m_minVal);
 }
 
-void IESlider::Update()
+void IEUISlider::Update()
 {
     IEWindow* ownerWindow = GetOwnerWindow();
     if (ownerWindow == nullptr || IECore::GetMouseOnWindow() != ownerWindow)
@@ -82,7 +82,7 @@ void IESlider::Update()
     }
 }
 
-void IESlider::Draw()
+void IEUISlider::Draw()
 {
     IERenderer* r = GetRenderer();
     if (r == nullptr)

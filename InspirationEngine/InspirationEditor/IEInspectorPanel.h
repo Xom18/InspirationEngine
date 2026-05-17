@@ -44,23 +44,23 @@ private:
 
     void PropagateContextToSections();
 
-    IEScrollView                            m_scroll;
-    std::vector<std::unique_ptr<IESection>> m_sections;
-    IEGameObject*                           m_target = nullptr;
+    IEUIScrollView                            m_scroll;
+    std::vector<std::unique_ptr<IEUISection>> m_sections;
+    IEGameObject*                             m_target = nullptr;
     int32_t m_x = 0, m_y = 0, m_w = 1, m_h = 1;
 
     // 위젯 raw 포인터 캐시 (소유권은 m_sections 내부)
-    IETextBox*  m_tbName    = nullptr;
-    IESlider*   m_slX       = nullptr;
-    IESlider*   m_slY       = nullptr;
-    IESlider*   m_slZ       = nullptr;
-    IESlider*   m_slRot     = nullptr;
-    IESlider*   m_slSx      = nullptr;
-    IESlider*   m_slSy      = nullptr;
-    IETextBox*  m_tbAtlas   = nullptr;
-    IETextBox*  m_tbTile    = nullptr;
-    IEDropdown* m_ddCamType = nullptr;
-    IESlider*   m_slCamZoom = nullptr;
+    IEUITextBox*  m_tbName    = nullptr;
+    IEUISlider*   m_slX       = nullptr;
+    IEUISlider*   m_slY       = nullptr;
+    IEUISlider*   m_slZ       = nullptr;
+    IEUISlider*   m_slRot     = nullptr;
+    IEUISlider*   m_slSx      = nullptr;
+    IEUISlider*   m_slSy      = nullptr;
+    IEUITextBox*  m_tbAtlas   = nullptr;
+    IEUITextBox*  m_tbTile    = nullptr;
+    IEUIDropdown* m_ddCamType = nullptr;
+    IEUISlider*   m_slCamZoom = nullptr;
 
     static constexpr SDL_Color kColBg    = {  35,  35,  40, 255 };
     static constexpr SDL_Color kColNoSel = { 110, 110, 110, 255 };

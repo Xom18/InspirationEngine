@@ -7,7 +7,7 @@
 /// 접힌/펼친 상태를 토글하는 드롭다운 선택 위젯.
 /// 펼쳐진 목록은 위젯 아래쪽으로 렌더됨 — 다른 위젯보다 마지막에 그려야 함.
 /// </summary>
-class IEDropdown : public IEUIBase
+class IEUIDropdown : public IEUIBase
 {
 public:
     virtual void Draw()   override;

@@ -64,6 +64,6 @@ public:
 private:
     void OnSelect(const std::string& path);
 
-    IEFileBrowser        m_fileBrowser;
+    IEUIFileBrowser        m_fileBrowser;
     IEAtlasEditorWindow* m_atlasEditor = nullptr;
 };

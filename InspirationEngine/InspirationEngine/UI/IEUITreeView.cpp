@@ -1,19 +1,19 @@
 #include "../InspirationEngine.h"
 
-IETreeNode* IETreeView::AddRootNode(const char* label)
+IETreeNode* IEUITreeView::AddRootNode(const char* label)
 {
     m_roots.push_back(std::make_unique<IETreeNode>(label));
     return m_roots.back().get();
 }
 
-void IETreeView::Clear()
+void IEUITreeView::Clear()
 {
     m_roots.clear();
     m_selectedNode = nullptr;
     m_scroll.ResetScroll();
 }
 
-void IETreeView::BuildFlatListRecursive(IETreeNode* node, int32_t depth, int32_t& y, std::vector<FlatEntry>& flat) const
+void IEUITreeView::BuildFlatListRecursive(IETreeNode* node, int32_t depth, int32_t& y, std::vector<FlatEntry>& flat) const
 {
     flat.push_back({ node, depth, y });
     y += kRowH;
@@ -22,14 +22,14 @@ void IETreeView::BuildFlatListRecursive(IETreeNode* node, int32_t depth, int32_t
             BuildFlatListRecursive(child.get(), depth + 1, y, flat);
 }
 
-void IETreeView::BuildFlatList(std::vector<FlatEntry>& flat) const
+void IEUITreeView::BuildFlatList(std::vector<FlatEntry>& flat) const
 {
     int32_t y = 0;
     for (const auto& root : m_roots)
         BuildFlatListRecursive(root.get(), 0, y, flat);
 }
 
-void IETreeView::DrawArrow(IERenderer* r, int32_t x, int32_t y, bool expanded) const
+void IEUITreeView::DrawArrow(IERenderer* r, int32_t x, int32_t y, bool expanded) const
 {
     SDL_Color col = { 180, 180, 180, 255 };
     int32_t cx = x + kArrowW / 2;
@@ -50,7 +50,7 @@ void IETreeView::DrawArrow(IERenderer* r, int32_t x, int32_t y, bool expanded) c
     }
 }
 
-void IETreeView::Update()
+void IEUITreeView::Update()
 {
     m_scroll.Update();
 
@@ -118,7 +118,7 @@ void IETreeView::Update()
     }
 }
 
-void IETreeView::Draw()
+void IEUITreeView::Draw()
 {
     IERenderer* r = GetRenderer();
     IEFont* font = GetFont();

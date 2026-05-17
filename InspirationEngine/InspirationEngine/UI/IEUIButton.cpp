@@ -1,6 +1,6 @@
 #include "../InspirationEngine.h"
 
-void IEButton::Draw()
+void IEUIButton::Draw()
 {
     IERenderer* r = GetRenderer();
     if (r == nullptr)
@@ -22,7 +22,7 @@ void IEButton::Draw()
     r->DrawText(font, m_label.c_str(), m_colorText, rect.x + 6, textY);
 }
 
-void IEButton::Update()
+void IEUIButton::Update()
 {
     IEWindow* ownerWindow = GetOwnerWindow();
     if (ownerWindow == nullptr || IECore::GetMouseOnWindow() != ownerWindow)

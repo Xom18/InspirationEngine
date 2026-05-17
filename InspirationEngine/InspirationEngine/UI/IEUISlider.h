@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
 
-class IESlider : public IEUIBase
+class IEUISlider : public IEUIBase
 {
 public:
     virtual void Draw() override;

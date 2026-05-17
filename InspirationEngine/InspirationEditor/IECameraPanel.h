@@ -70,7 +70,7 @@ private:
     IEGameObject* m_cameraObj = nullptr;
     IEPanelLayout m_layout;
 
-    IESlider m_sliderZoom;
-    IESlider m_sliderX;
-    IESlider m_sliderY;
+    IEUISlider m_sliderZoom;
+    IEUISlider m_sliderX;
+    IEUISlider m_sliderY;
 };

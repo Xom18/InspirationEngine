@@ -3,13 +3,13 @@
 #include <string>
 #include <unordered_map>
 
-class IEFileBrowser : public IEUIBase
+class IEUIFileBrowser : public IEUIBase
 {
 public:
     /// <summary>
     /// 파일 트리뷰 초기화
     /// </summary>
-    IEFileBrowser();
+    IEUIFileBrowser();
 
     /// <summary>
     /// 파일 트리를 렌더링
@@ -73,7 +73,7 @@ public:
 private:
     void BuildTree(IETreeNode* parent, const std::string& dirPath);
 
-    IETreeView  m_treeView;
+    IEUITreeView  m_treeView;
     std::string m_rootPath;
     std::string m_filter;
     std::string m_selectedPath;
