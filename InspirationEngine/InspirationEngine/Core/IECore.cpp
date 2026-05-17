@@ -23,7 +23,7 @@ uint64_t		IECore::m_deltaTimeMs = 0;						//스프라이트 관리하는곳
 IEWindow* IECore::m_mainWindow = nullptr;			//메인 윈도우
 IEWindow* IECore::m_mouseOnWindow = nullptr;		//마우스가 올라가 있는 윈도우
 IEWindow* IECore::m_focusedWindow = nullptr;		//선택 되있는 윈도우
-IETextBox* IECore::m_focusedTextBox = nullptr;		//선택 되있는 윈도우
+IEUITextBox* IECore::m_focusedTextBox = nullptr;		//선택 되있는 윈도우
 
 //private
 EnginePhase		IECore::m_operatePhase = EnginePhase::NaN;
@@ -48,6 +48,87 @@ SDL_Rect IECore::m_textEditPosition;					// 텍스트 편집 사용중일때 커
 std::string IECore::m_pendingIMEComposition;
 bool IECore::m_imeCompositionDirty = false;
 
+std::mutex                                         IECore::m_pendingWindowsMutex;
+std::vector<std::pair<std::string, IEWindow*>>     IECore::m_pendingWindowsToAdd;
+std::vector<std::string>                           IECore::m_pendingWindowsToRemove;
+
+std::mutex                                         IECore::m_mainTasksMutex;
+std::vector<std::function<void()>>                 IECore::m_mainTasks;
+
+bool          IECore::s_floatDragging   = false;
+int32_t       IECore::s_floatDragGX     = 0;
+int32_t       IECore::s_floatDragGY     = 0;
+IEDockedPanel* IECore::s_dropTargetPanel = nullptr;
+int32_t       IECore::s_dropTargetSide  = 0;
+
+
+void IECore::PostMainThreadTask(std::function<void()> task)
+{
+	std::lock_guard<std::mutex> lock(m_mainTasksMutex);
+	m_mainTasks.push_back(std::move(task));
+}
+
+void IECore::RunMainThreadTasks()
+{
+	std::vector<std::function<void()>> tasks;
+	{
+		std::lock_guard<std::mutex> lock(m_mainTasksMutex);
+		tasks.swap(m_mainTasks);
+	}
+	for (auto& t : tasks)
+		t();
+}
+
+void IECore::ProcessPendingWindows()
+{
+	std::vector<std::pair<std::string, IEWindow*>> toAdd;
+	std::vector<std::string> toRemove;
+	{
+		std::lock_guard<std::mutex> lock(m_pendingWindowsMutex);
+		toAdd.swap(m_pendingWindowsToAdd);
+		toRemove.swap(m_pendingWindowsToRemove);
+	}
+
+	for (auto& [id, win] : toAdd)
+	{
+		if (m_windows.find(id) != m_windows.end())
+			continue;
+		m_windows[id] = std::unique_ptr<IEWindow>(win);
+		AddWindowIndex(win);
+		if (m_isRunning)
+			win->BeginDrawThread();
+	}
+
+	for (const auto& id : toRemove)
+	{
+		auto ite = m_windows.find(id);
+		if (ite == m_windows.end())
+			continue;
+
+		SDL_Window* sdlWin = ite->second->GetSDLWindow();
+		if (sdlWin != nullptr)
+			m_windowsByID.erase(SDL_GetWindowID(sdlWin));
+
+		ite->second->StopDrawThread();
+
+		if (ite->second.get() == m_mainWindow)
+			m_mainWindow = nullptr;
+
+		m_windows.erase(ite);
+	}
+}
+
+void IECore::RequestAddWindow(const char* id, IEWindow* window)
+{
+	std::lock_guard<std::mutex> lock(m_pendingWindowsMutex);
+	m_pendingWindowsToAdd.emplace_back(id, window);
+}
+
+void IECore::RequestRemoveWindow(const char* id)
+{
+	std::lock_guard<std::mutex> lock(m_pendingWindowsMutex);
+	m_pendingWindowsToRemove.emplace_back(id);
+}
 
 void IECore::MainThread()
 {
@@ -58,6 +139,7 @@ void IECore::MainThread()
 
 	while (m_isRunning)
 	{
+		ProcessPendingWindows();
 		auto now     = std::chrono::steady_clock::now();
 		auto elapsed = now - lastTime;
 		m_deltaTime   = std::chrono::duration<float>(elapsed).count();
@@ -93,6 +175,8 @@ void IECore::MainThread()
 
 void IECore::OperateEvent()
 {
+	m_Input.ResetWheelY();
+
 	//큐에서 이벤트 가져옴 + pending IME composition 수거
 	std::deque<SDL_Event> eventQueue;
 	std::string pendingIME;
@@ -142,11 +226,34 @@ void IECore::OperateEvent()
 			m_Input.SetKeyState(Event.key.scancode, Event.key.down);
 		}
 		break;
+		case SDL_EVENT_MOUSE_WHEEL:
+		{
+			m_Input.AddMouseWheelY(Event.wheel.y);
+		}
+		break;
+		case SDL_EVENT_WINDOW_MOUSE_ENTER:
+		{
+			IEWindow* window = GetWindowByID(Event.window.windowID);
+			if (window != nullptr)
+				m_mouseOnWindow = window;
+		}
+		break;
+		case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+		{
+			IEWindow* window = GetWindowByID(Event.window.windowID);
+			if (window != nullptr && m_mouseOnWindow == window)
+				m_mouseOnWindow = nullptr;
+		}
+		break;
 		case SDL_EVENT_WINDOW_RESIZED:
 		{
 			IEWindow* window = GetWindowByID(Event.window.windowID);
 			if (window != nullptr)
+			{
 				window->ResizeRenderer();
+				window->OnResize(Event.window.data1, Event.window.data2);
+			}
+			SetFocusedTextBox(nullptr);
 		}
 		break;
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
@@ -189,16 +296,39 @@ void IECore::OperateEvent()
 		int32_t mouseYInt = static_cast<int32_t>(mouseY);
 		m_Input.UpdateMousePos(mouseXInt, mouseYInt);
 
-		//마우스가 올라와있는 윈도우
-		SDL_Window* sdlWindow = SDL_GetMouseFocus();
-		if (sdlWindow != nullptr)
+		// m_mouseOnWindow 결정:
+		// 1순위 — SDL_GetMouseFocus() (메인 스레드 소유 HWND 기준, z-order 반영)
+		// 2순위 — 글로벌 좌표 경계 비교 (새 창이 커서 아래 생성돼 MOUSE_ENTER 미발생 시 폴백)
+		SDL_Window* focusSdlWin = SDL_GetMouseFocus();
+		if (focusSdlWin != nullptr)
 		{
-			Uint32 windowID = SDL_GetWindowID(sdlWindow);
-			m_mouseOnWindow = GetWindowByID(windowID);
+			m_mouseOnWindow = GetWindowByID(SDL_GetWindowID(focusSdlWin));
 		}
 		else
 		{
+			float gxF = 0.0f, gyF = 0.0f;
+			SDL_GetGlobalMouseState(&gxF, &gyF);
+			int32_t gx = static_cast<int32_t>(gxF);
+			int32_t gy = static_cast<int32_t>(gyF);
+
 			m_mouseOnWindow = nullptr;
+			for (auto& [_, win] : m_windows)
+			{
+				SDL_WindowFlags wf = SDL_GetWindowFlags(win->GetSDLWindow());
+				if (wf & (SDL_WINDOW_HIDDEN | SDL_WINDOW_MINIMIZED))
+					continue;
+
+				int32_t wx = 0, wy = 0;
+				SDL_GetWindowPosition(win->GetSDLWindow(), &wx, &wy);
+				int32_t ww = 0, wh = 0;
+				SDL_GetWindowSize(win->GetSDLWindow(), &ww, &wh);
+
+				if (gx >= wx && gx < wx + ww && gy >= wy && gy < wy + wh)
+				{
+					m_mouseOnWindow = win.get();
+					break;
+				}
+			}
 		}
 	}
 }
@@ -261,7 +391,8 @@ bool IECore::EndEngine()
 	for (auto& [_, window] : m_windows)//각 창 삭제
 		window->Close();
 
-	SDL_Quit();
+	//종료시 크래시 발생 원인으로 추정
+	//SDL_Quit();
 	return true;
 }
 
@@ -295,7 +426,15 @@ bool IECore::OperateTextEdit(SDL_Event* event)
 			//엔터
 			if (event->key.key == SDLK_RETURN
 				|| event->key.key == SDLK_KP_ENTER)
-				m_focusedTextBox->InsertCursorPos("\n");
+			{
+				if (m_focusedTextBox->IsMultiline())
+					m_focusedTextBox->InsertCursorPos("\n");
+				else
+				{
+					m_focusedTextBox->SetCursorPos(std::string::npos);
+					SetFocusedTextBox(nullptr);
+				}
+			}
 		}
 	}
 	break;

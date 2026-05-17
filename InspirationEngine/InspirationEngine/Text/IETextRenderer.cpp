@@ -73,22 +73,33 @@ SDL_Texture* IETextRenderer::renderToTexture(
 	int32_t penX = 0;
 	for (const auto& g : glyphs)
 	{
-		if (FT_Load_Glyph(face, g.glyphIndex, FT_LOAD_DEFAULT) != 0) { penX += g.xAdvance >> 6; continue; }
-		if (bBold) FT_GlyphSlot_Embolden(face->glyph);
-		if (FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL) != 0) { penX += g.xAdvance >> 6; continue; }
+		if (FT_Load_Glyph(face, g.glyphIndex, FT_LOAD_DEFAULT) != 0)
+		{
+			penX += g.xAdvance >> 6;
+			continue;
+		}
+		if (bBold)
+			FT_GlyphSlot_Embolden(face->glyph);
+		if (FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL) != 0)
+		{
+			penX += g.xAdvance >> 6;
+			continue;
+		}
 
 		FT_Bitmap& bmp = face->glyph->bitmap;
 		int32_t drawX = penX + (g.xOffset >> 6) + face->glyph->bitmap_left;
 		int32_t drawY = ascent - face->glyph->bitmap_top + (g.yOffset >> 6);
 
-		for (unsigned row = 0; row < bmp.rows; ++row)
+		for (uint32_t row = 0; row < bmp.rows; ++row)
 		{
 			int32_t dstY = drawY + static_cast<int32_t>(row);
-			if (dstY < 0 || dstY >= h) continue;
-			for (unsigned col = 0; col < bmp.width; ++col)
+			if (dstY < 0 || dstY >= h)
+				continue;
+			for (uint32_t col = 0; col < bmp.width; ++col)
 			{
 				int32_t dstX = drawX + static_cast<int32_t>(col);
-				if (dstX < 0 || dstX >= w) continue;
+				if (dstX < 0 || dstX >= w)
+					continue;
 
 				uint8_t alpha = bmp.buffer[row * bmp.pitch + col];
 				if (alpha == 0) continue;

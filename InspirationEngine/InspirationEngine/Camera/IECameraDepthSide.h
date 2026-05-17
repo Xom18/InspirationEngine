@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "IECamera.h"
 
@@ -20,40 +20,82 @@
 /// </summary>
 class IECameraDepthSide : public IECamera
 {
-	float m_depthFactor  = 0.5f;
-	float m_heightFactor = 1.0f;
-
 public:
+	/// <summary>
+	/// 기본 뎁스 사이드뷰 카메라 초기화
+	/// </summary>
 	IECameraDepthSide() = default;
+
+	/// <summary>
+	/// 깊이·높이 인수를 지정해 카메라 초기화
+	/// </summary>
+	/// <param name="depthFactor">y축 → 화면 Y 깊이 변환 계수</param>
+	/// <param name="heightFactor">z축 → 화면 Y 높이 변환 계수</param>
 	IECameraDepthSide(float depthFactor, float heightFactor = 1.0f)
 		: m_depthFactor(depthFactor), m_heightFactor(heightFactor) {}
 
-	IEVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const override
+	/// <summary>
+	/// 월드 좌표를 스크린 좌표로 변환
+	/// </summary>
+	/// <param name="wx">월드 X</param>
+	/// <param name="wy">월드 Y (깊이 — 클수록 멀어짐)</param>
+	/// <param name="wz">월드 Z (높이)</param>
+	virtual IEVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const override
 	{
 		IEVector2 result;
-		result.m_x = std::lround((wx - m_x) * m_zoom + m_viewportWidth  * 0.5f);
-		result.m_y = std::lround((-(wy - m_y) * m_depthFactor - (wz - m_z) * m_heightFactor) * m_zoom + m_viewportHeight * 0.5f);
+		result.SetX(static_cast<int32_t>(std::lround((wx - GetX()) * GetZoom() + GetViewportWidth()  * 0.5f)));
+		result.SetY(static_cast<int32_t>(std::lround((-(wy - GetY()) * m_depthFactor - (wz - GetZ()) * m_heightFactor) * GetZoom() + GetViewportHeight() * 0.5f)));
 		return result;
 	}
 
-	IEVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
+	/// <summary>
+	/// 스크린 좌표를 월드 좌표로 역변환 (z = 0 가정)
+	/// </summary>
+	/// <param name="sx">스크린 X</param>
+	/// <param name="sy">스크린 Y</param>
+	virtual IEVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
 	{
 		IEVector2 result;
-		result.m_x = static_cast<int32_t>((sx - m_viewportWidth  * 0.5f) / m_zoom + m_x);
+		result.SetX(static_cast<int32_t>((sx - GetViewportWidth()  * 0.5f) / GetZoom() + GetX()));
 		if (m_depthFactor != 0.0f)
-			result.m_y = static_cast<int32_t>(-(sy - m_viewportHeight * 0.5f) / (m_depthFactor * m_zoom) + m_y);
+			result.SetY(static_cast<int32_t>(-(sy - GetViewportHeight() * 0.5f) / (m_depthFactor * GetZoom()) + GetY()));
 		else
-			result.m_y = 0;
+			result.SetY(0);
 		return result;
 	}
 
-	float GetSortKey(float x, float y, float z) const override
+	/// <summary>
+	/// 드로우 정렬 키 반환 — -y (y 클수록 먼저 그림)
+	/// </summary>
+	/// <param name="y">월드 Y (깊이)</param>
+	virtual float GetSortKey(float /*x*/, float y, float /*z*/) const override
 	{
 		return -y;
 	}
 
+	/// <summary>
+	/// y축 깊이 변환 계수 설정
+	/// </summary>
+	/// <param name="f">변환 계수</param>
 	void  SetDepthFactor(float f)  { m_depthFactor  = f; }
+
+	/// <summary>
+	/// z축 높이 변환 계수 설정
+	/// </summary>
+	/// <param name="f">변환 계수</param>
 	void  SetHeightFactor(float f) { m_heightFactor = f; }
+
+	/// <summary>
+	/// y축 깊이 변환 계수 반환
+	/// </summary>
 	float GetDepthFactor()  const  { return m_depthFactor; }
+
+	/// <summary>
+	/// z축 높이 변환 계수 반환
+	/// </summary>
 	float GetHeightFactor() const  { return m_heightFactor; }
+
+private:
+	float m_depthFactor  = 0.5f;
+	float m_heightFactor = 1.0f;
 };

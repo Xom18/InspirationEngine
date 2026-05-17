@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "../Core/MacroDefine.h"
 
@@ -9,14 +9,6 @@
 /// </summary>
 class IECamera
 {
-protected:
-	float   m_x = 0.0f;
-	float   m_y = 0.0f;
-	float   m_z = 0.0f;
-	float   m_zoom           = 1.0f;
-	int32_t m_viewportWidth  = 0;
-	int32_t m_viewportHeight = 0;
-
 public:
 	virtual ~IECamera() = default;
 
@@ -34,7 +26,7 @@ public:
 	/// 드로우 정렬 키 — 낮을수록 먼저(뒤에) 그려짐.
 	/// 기본: y (TopView / SideView 기준)
 	/// </summary>
-	virtual float GetSortKey(float x, float y, float z) const
+	virtual float GetSortKey(float /*x*/, float y, float /*z*/) const
 	{
 		return y;
 	}
@@ -53,10 +45,18 @@ public:
 	void  SetZoom(float zoom)                            { m_zoom = zoom; }
 	void  SetViewport(int32_t w, int32_t h)              { m_viewportWidth = w; m_viewportHeight = h; }
 
-	float   GetX()             const { return m_x; }
-	float   GetY()             const { return m_y; }
-	float   GetZ()             const { return m_z; }
-	float   GetZoom()          const { return m_zoom; }
-	int32_t GetViewportWidth() const { return m_viewportWidth; }
-	int32_t GetViewportHeight()const { return m_viewportHeight; }
+	float   GetX()              const { return m_x; }
+	float   GetY()              const { return m_y; }
+	float   GetZ()              const { return m_z; }
+	float   GetZoom()           const { return m_zoom; }
+	int32_t GetViewportWidth()  const { return m_viewportWidth; }
+	int32_t GetViewportHeight() const { return m_viewportHeight; }
+
+private:
+	float   m_x              = 0.0f;
+	float   m_y              = 0.0f;
+	float   m_z              = 0.0f;
+	float   m_zoom           = 1.0f;
+	int32_t m_viewportWidth  = 0;
+	int32_t m_viewportHeight = 0;
 };

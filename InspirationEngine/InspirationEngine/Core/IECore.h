@@ -1,5 +1,7 @@
 #pragma once
 
+class IEDockedPanel;
+
 enum class EnginePhase : int32_t
 {
 	NaN = 0,
@@ -33,10 +35,10 @@ public:
 
 	static IEWindow*  GetMouseOnWindow()  { return m_mouseOnWindow; }
 	static IEWindow*  GetFocusedWindow()  { return m_focusedWindow; }
-	static IETextBox* GetFocusedTextBox() { return m_focusedTextBox; }
+	static IEUITextBox* GetFocusedTextBox() { return m_focusedTextBox; }
 	static void SetMouseOnWindow(IEWindow* window)  { m_mouseOnWindow = window; }
 	static void SetFocusedWindow(IEWindow* window)  { m_focusedWindow = window; }
-	static void SetFocusedTextBox(IETextBox* textBox)
+	static void SetFocusedTextBox(IEUITextBox* textBox)
 	{
 		m_focusedTextBox = textBox;
 		if (textBox != nullptr)
@@ -166,6 +168,21 @@ public:
 	}
 
 	/// <summary>
+	/// 엔진 루프 안전 지점(다음 틱 시작)에서 창을 등록하고 드로우 스레드를 시작.
+	/// 엔진 구동 중 동적 창 생성 시 사용.
+	/// </summary>
+	/// <param name="id">창 식별 ID</param>
+	/// <param name="window">등록할 창 (소유권 이전)</param>
+	static void RequestAddWindow(const char* id, IEWindow* window);
+
+	/// <summary>
+	/// 엔진 루프 안전 지점(다음 틱 시작)에서 창을 드로우 스레드 종료 후 제거.
+	/// 엔진 구동 중 동적 창 제거 시 사용.
+	/// </summary>
+	/// <param name="id">제거할 창 ID</param>
+	static void RequestRemoveWindow(const char* id);
+
+	/// <summary>
 	/// 이벤트 처리 큐에 넣기
 	/// </summary>
 	/// <param name="event">추가할 SDL 이벤트</param>
@@ -269,16 +286,47 @@ public:
 	static void PollPlatformIME(SDL_Window* focusWin);
 
 	/// <summary>
+	/// 메인 스레드에서 실행할 태스크를 큐에 추가.
+	/// SDL 창 생성 등 HWND 스레드 어피니티가 필요한 작업에 사용.
+	/// </summary>
+	/// <param name="task">실행할 함수 객체</param>
+	static void PostMainThreadTask(std::function<void()> task);
+
+	/// <summary>
+	/// 큐에 쌓인 메인 스레드 태스크를 모두 실행. 메인 스레드에서 호출.
+	/// </summary>
+	static void RunMainThreadTasks();
+
+	/// <summary>
 	/// 텍스트 편집 이벤트 처리 — 처리했으면 true 반환
 	/// </summary>
 	/// <param name="event">처리할 SDL 이벤트</param>
 	static bool OperateTextEdit(SDL_Event* event);
+
+	/// <summary>플로팅 창 드래그 상태 설정 (IEFloatingPanel 이 호출)</summary>
+	static void SetFloatDragging(bool on, int32_t gx, int32_t gy)
+	{
+		s_floatDragging = on; s_floatDragGX = gx; s_floatDragGY = gy;
+	}
+	static bool    IsFloatDragging()  { return s_floatDragging; }
+	static int32_t GetFloatDragGX()   { return s_floatDragGX; }
+	static int32_t GetFloatDragGY()   { return s_floatDragGY; }
+
+	/// <summary>드롭 타겟 설정 — side: 0=Center 1=Left 2=Right 3=Top 4=Bottom</summary>
+	static void SetDropTarget(IEDockedPanel* target, int32_t side)
+	{
+		s_dropTargetPanel = target; s_dropTargetSide = side;
+	}
+	static void           ClearDropTarget()      { s_dropTargetPanel = nullptr; s_dropTargetSide = 0; }
+	static IEDockedPanel* GetDropTargetPanel()   { return s_dropTargetPanel; }
+	static int32_t        GetDropTargetSide()    { return s_dropTargetSide; }
 
 private:
 	static void MainThread();
 	static void OperateEvent();
 	static void Update(float deltaTime);
 	static void Draw();
+	static void ProcessPendingWindows();
 
 private:
 	static IEInput          m_Input;
@@ -292,7 +340,7 @@ private:
 	static IEWindow*        m_mainWindow;
 	static IEWindow*        m_mouseOnWindow;
 	static IEWindow*        m_focusedWindow;
-	static IETextBox*       m_focusedTextBox;
+	static IEUITextBox*     m_focusedTextBox;
 
 	static EnginePhase      m_operatePhase;
 	static std::mutex       m_eventMutex;
@@ -314,4 +362,18 @@ private:
 
 	static std::string      m_pendingIMEComposition;
 	static bool             m_imeCompositionDirty;
+
+	static std::mutex                                           m_pendingWindowsMutex;
+	static std::vector<std::pair<std::string, IEWindow*>>       m_pendingWindowsToAdd;
+	static std::vector<std::string>                             m_pendingWindowsToRemove;
+
+	static std::mutex                                           m_mainTasksMutex;
+	static std::vector<std::function<void()>>                   m_mainTasks;
+
+	// 플로팅 드래그 / 드롭 타겟 상태 (엔진 스레드 전용, mutex 불필요)
+	static bool          s_floatDragging;
+	static int32_t       s_floatDragGX;
+	static int32_t       s_floatDragGY;
+	static IEDockedPanel* s_dropTargetPanel;
+	static int32_t       s_dropTargetSide;
 };

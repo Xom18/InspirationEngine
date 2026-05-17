@@ -9,5 +9,5 @@ public:
 	void InitWindow();
 
 private:
-	IETextBox m_DebugText;
+	IEUITextBox m_DebugText;
 };

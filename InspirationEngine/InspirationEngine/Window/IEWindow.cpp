@@ -52,16 +52,24 @@ void IEWindow::ResizeRenderer()
 		r.m_window   = this;
 		r.m_w        = m_width;
 		r.m_h        = m_height;
+		r.m_generation++;
 	}
+}
+
+void IEWindow::StopDrawThread()
+{
+	if (m_drawThread == nullptr)
+		return;
+	m_shouldStop = true;
+	IECore::GetDrawWaiter()->notify_all();
+	m_drawThread->join();
+	m_drawThread.reset();
+	m_shouldStop = false;
 }
 
 void IEWindow::Reset()
 {
-	if (m_drawThread != nullptr)
-	{
-		m_drawThread->join();
-		m_drawThread.reset();
-	}
+	StopDrawThread();
 
 	// 렌더러 먼저 파괴 (슬롯이 모두 같은 포인터이므로 첫 번째만)
 	if (!m_renderers.empty() && m_renderers[0].m_renderer != nullptr)
@@ -129,24 +137,24 @@ void IEWindow::DrawThread()
 
 		//그릴 때 까지 대기
 		waiter->wait(lkWaiter, [&] {
-			return m_isDrawed == false || !IECore::IsRunning();
+			return m_shouldStop.load() || !m_isDrawed.load(std::memory_order_acquire) || !IECore::IsRunning();
 			});
 
-		//엔진이 멈췄다
-		if (!IECore::IsRunning())
+		//스레드 정지 요청 or 엔진 종료
+		if (!IECore::IsRunning() || m_shouldStop.load())
 			return;
 
 		//창이 숨겨져있다
 		if (IsWindowHide())
 		{
+			m_isDrawed.store(true, std::memory_order_release);
 			IECore::IncreaseDrawCompleteCount();
-			m_isDrawed = true;
 			continue;
 		}
 
 		Draw();
 		Render();
-		m_isDrawed = true;
+		m_isDrawed.store(true, std::memory_order_release);
 		IECore::IncreaseDrawCompleteCount();
 	}
 }

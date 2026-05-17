@@ -1,4 +1,4 @@
-﻿#include "InspirationEngine.h"
+#include "InspirationEngine.h"
 
 void IEDebugInfo::DrawOverlay(IERenderer* renderer, IEScene* scene, IEFont* font)
 {
@@ -43,13 +43,13 @@ void IEDebugInfo::DrawGrid(IERenderer* renderer, IECamera* camera)
 	{
 		auto p0 = camera->WorldToScreen(static_cast<float>(wx), static_cast<float>(startY));
 		auto p1 = camera->WorldToScreen(static_cast<float>(wx), static_cast<float>(endY));
-		renderer->DrawLine(gridColor, p0.m_x, p0.m_y, p1.m_x, p1.m_y);
+		renderer->DrawLine(gridColor, p0.GetX(), p0.GetY(), p1.GetX(), p1.GetY());
 	}
 	for (int32_t wy = startY; wy <= endY; wy += STEP)
 	{
 		auto p0 = camera->WorldToScreen(static_cast<float>(startX), static_cast<float>(wy));
 		auto p1 = camera->WorldToScreen(static_cast<float>(endX), static_cast<float>(wy));
-		renderer->DrawLine(gridColor, p0.m_x, p0.m_y, p1.m_x, p1.m_y);
+		renderer->DrawLine(gridColor, p0.GetX(), p0.GetY(), p1.GetX(), p1.GetY());
 	}
 }
 
@@ -72,8 +72,8 @@ void IEDebugInfo::DrawObjectMarkers(IERenderer* renderer, IEScene* scene, IECame
 		if (camera != nullptr)
 		{
 			auto pos = camera->WorldToScreen(t->GetX(), t->GetY(), t->GetZ());
-			sx = pos.m_x;
-			sy = pos.m_y;
+			sx = pos.GetX();
+			sy = pos.GetY();
 		}
 		else
 		{

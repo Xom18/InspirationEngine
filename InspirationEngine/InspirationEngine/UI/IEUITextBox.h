@@ -16,7 +16,7 @@
 
 class IETextTexture
 {
-	friend class IETextBox;
+	friend class IEUITextBox;
 
 public:
 	IETextTexture() = default;
@@ -43,16 +43,16 @@ private:
 	SDL_Rect     m_rect      = {};
 };
 
-class IETextBox : public IEMenu
+class IEUITextBox : public IEUIBase
 {
 public:
-	IETextBox()
+	IEUITextBox()
 	{
 		memset(&m_color, 0xff, sizeof(m_color));
 		memset(&m_rect, 0, sizeof(m_rect));
 	}
 
-	~IETextBox()
+	~IEUITextBox()
 	{
 		ResetTexture();
 	}
@@ -80,10 +80,12 @@ public:
 	/// 폰트 설정
 	/// </summary>
 	/// <param name="font">사용할 폰트</param>
-	void SetFont(IEFont* font)
+	virtual void SetFont(IEFont* font) override
 	{
+		IEUIBase::SetFont(font);
 		m_font = font;
-		m_fontHeight = m_font->GetHeight();
+		if (m_font != nullptr)
+			m_fontHeight = m_font->GetHeight();
 	}
 
 	/// <summary>
@@ -160,8 +162,10 @@ public:
 	/// <param name="cursorPos">커서 위치 (UTF-8 문자 인덱스)</param>
 	void SetCursorCharPos(size_t cursorPos)
 	{
-		m_cursorPos = IEStrUTF8::getMemoryPoint(m_text, cursorPos);
+		m_cursorPos = IEStrUTF8::GetMemoryPoint(m_text, cursorPos);
 	}
+
+	bool IsMultiline() const { return (m_textBoxStyle & dTEXT_BOX_STYLE_MULTILINE) != 0; }
 
 	/// <summary>
 	/// 커서 다음으로 이동
@@ -171,6 +175,7 @@ public:
 		if (m_cursorPos == std::string::npos)
 		{
 			m_cursorPos = 0;
+			m_textChanged = true;
 			return;
 		}
 		if (m_cursorPos >= m_text.length())
@@ -181,7 +186,10 @@ public:
 
 		auto it = std::upper_bound(m_graphemeBounds.begin(), m_graphemeBounds.end(), m_cursorPos);
 		if (it != m_graphemeBounds.end())
+		{
 			m_cursorPos = *it;
+			m_textChanged = true;
+		}
 	}
 
 	/// <summary>
@@ -192,6 +200,7 @@ public:
 		if (m_cursorPos == std::string::npos)
 		{
 			m_cursorPos = 0;
+			m_textChanged = true;
 			return;
 		}
 		if (m_cursorPos == 0)
@@ -205,6 +214,7 @@ public:
 		{
 			--it;
 			m_cursorPos = *it;
+			m_textChanged = true;
 		}
 	}
 
@@ -216,8 +226,9 @@ public:
 	{
 		if (m_cursorPos == std::string::npos)
 			return;
+		m_overwriteMode = false;
 		size_t before = m_text.length();
-		IEStrUTF8::removeToFront(m_text, m_cursorPos, count);
+		IEStrUTF8::RemoveToFront(m_text, m_cursorPos, count);
 		size_t after = m_text.length();
 
 		m_cursorPos -= before - after;
@@ -231,7 +242,8 @@ public:
 	/// <param name="count">삭제할 문자 수</param>
 	void RemoveByDelete(size_t count = 1)
 	{
-		IEStrUTF8::removeToBack(m_text, m_cursorPos, count);
+		m_overwriteMode = false;
+		IEStrUTF8::RemoveToBack(m_text, m_cursorPos, count);
 		m_textChanged = true;
 		m_graphemeBounds.clear();
 	}
@@ -258,7 +270,7 @@ public:
 	/// </summary>
 	/// <param name="text">삽입할 텍스트 (UTF-8)</param>
 	/// <param name="insertPoint">삽입 위치 (바이트 오프셋)</param>
-	void Insert(const char* text, int32_t insertPoint)
+	void Insert(const char* /*text*/, int32_t /*insertPoint*/)
 	{
 	}
 
@@ -270,6 +282,13 @@ public:
 	{
 		if (m_cursorPos == std::string::npos)
 			return;
+		if (m_overwriteMode)
+		{
+			m_text.clear();
+			m_cursorPos    = 0;
+			m_overwriteMode = false;
+			m_graphemeBounds.clear();
+		}
 		m_text.insert(m_cursorPos, text);
 		m_cursorPos += std::strlen(text);
 		m_textChanged = true;
@@ -285,6 +304,7 @@ public:
 	{
 		m_rect.x = x;
 		m_rect.y = y;
+		IEUIBase::SetRect(x, y, m_rect.w, m_rect.h);
 	}
 
 	/// <summary>
@@ -294,8 +314,9 @@ public:
 	/// <param name="y">화면 Y</param>
 	/// <param name="w">너비 (0이면 제한 없음)</param>
 	/// <param name="h">높이 (0이면 제한 없음)</param>
-	void SetRect(int32_t x, int32_t y, int32_t w = 0, int32_t h = 0)
+	virtual void SetRect(int32_t x, int32_t y, int32_t w = 0, int32_t h = 0) override
 	{
+		IEUIBase::SetRect(x, y, w, h);
 		m_rect.x = x;
 		m_rect.y = y;
 		m_rect.w = w;
@@ -420,8 +441,12 @@ private:
 	int32_t                                   m_textAlign     = 0;
 	SDL_Rect                                  m_rect;
 	bool                                      m_textChanged   = false;
+	bool                                      m_prevLMB       = false;
+	bool                                      m_overwriteMode = false;
 	size_t                                    m_drawHash      = 0;
 	size_t                                    m_imeInputLength = 0;
 	SDL_Point                                 m_cursorScreenPos;
 	std::vector<size_t>                       m_graphemeBounds;
+	IERenderer*                               m_lastUsedIERenderer = nullptr;
+	uint32_t                                  m_lastRendererGen    = 0;
 };
