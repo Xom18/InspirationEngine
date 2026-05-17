@@ -83,15 +83,16 @@ void IEUIListView::Update()
     m_scroll.Update();
 
     IEWindow* ownerWindow = GetOwnerWindow();
-    if (ownerWindow == nullptr || IECore::GetMouseOnWindow() != ownerWindow)
-    {
-        m_prevLMB      = false;
-        m_hoveredIndex = -1;
-        return;
-    }
 
     float gx = 0.0f, gy = 0.0f;
     SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
+
+    if (ownerWindow == nullptr || IECore::GetMouseOnWindow() != ownerWindow)
+    {
+        m_prevLMB      = (btn & SDL_BUTTON_LMASK) != 0;
+        m_hoveredIndex = -1;
+        return;
+    }
 
     int32_t winX = 0, winY = 0;
     SDL_GetWindowPosition(ownerWindow->GetSDLWindow(), &winX, &winY);

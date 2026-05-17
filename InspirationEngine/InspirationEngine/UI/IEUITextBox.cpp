@@ -13,6 +13,7 @@ void IEUITextBox::TransToTexture()
 
 	m_textChanged = false;
 	size_t hash = std::hash<std::string>{}(m_text);
+	hash ^= std::hash<size_t>{}(m_cursorPos) + 0x9e3779b9ull + (hash << 6) + (hash >> 2);
 	if (m_drawHash == hash)
 		return;
 
@@ -327,13 +328,18 @@ void IEUITextBox::Draw()
 	if (GetRenderer() == nullptr)
 		return;
 
-	SDL_Renderer* sdlRenderer = GetRenderer()->GetSDLRenderer();
-	if (sdlRenderer != m_lastUsedRenderer)
+	IERenderer* ieRenderer = GetRenderer();
+	uint32_t    curGen     = ieRenderer->GetGeneration();
+	if (ieRenderer != m_lastUsedIERenderer || curGen != m_lastRendererGen)
 	{
-		ResetTexture();
-		m_drawHash         = 0;
-		m_textChanged      = true;
-		m_lastUsedRenderer = sdlRenderer;
+		// SDL이 렌더러 파괴 시 연결된 텍스처도 모두 해제 — dangling 포인터 방지
+		for (auto& t : m_textures)
+			t->m_texture = nullptr;
+		m_textures.clear();
+		m_drawHash           = 0;
+		m_textChanged        = true;
+		m_lastUsedIERenderer = ieRenderer;
+		m_lastRendererGen    = curGen;
 	}
 
 	if (m_textChanged)
@@ -341,10 +347,81 @@ void IEUITextBox::Draw()
 
 	for (const auto& pTTexture : m_textures)
 		GetRenderer()->DrawTexture(pTTexture->m_texture, m_rect.x + pTTexture->m_rect.x, m_rect.y + pTTexture->m_rect.y);
+
+	if (IECore::GetFocusedTextBox() != this)
+		return;
+
+	IERenderer* r = GetRenderer();
+	if (r == nullptr)
+		return;
+
+	constexpr SDL_Color kFocusBorderCol = { 80, 130, 210, 200 };
+	r->DrawLine(kFocusBorderCol, m_rect.x,             m_rect.y,             m_rect.x + m_rect.w, m_rect.y);
+	r->DrawLine(kFocusBorderCol, m_rect.x,             m_rect.y + m_rect.h,  m_rect.x + m_rect.w, m_rect.y + m_rect.h);
+	r->DrawLine(kFocusBorderCol, m_rect.x,             m_rect.y,             m_rect.x,             m_rect.y + m_rect.h);
+	r->DrawLine(kFocusBorderCol, m_rect.x + m_rect.w,  m_rect.y,             m_rect.x + m_rect.w,  m_rect.y + m_rect.h);
+
+	if (m_cursorPos != std::string::npos)
+	{
+		int32_t curX;
+		if (m_textures.empty())
+			curX = m_rect.x + 2;
+		else if (m_cursorPos >= m_text.size())
+			curX = m_rect.x + m_textures.back()->m_rect.x + m_textures.back()->m_rect.w;
+		else
+			curX = m_cursorScreenPos.x;
+
+		constexpr SDL_Color kCursorCol = { 220, 220, 220, 255 };
+		r->DrawLine(kCursorCol, curX, m_rect.y + 2, curX, m_rect.y + m_rect.h - 3);
+	}
 }
 
 void IEUITextBox::Update()
 {
+	if (!(m_textBoxStyle & dTEXT_BOX_STYLE_EDITABLE))
+		return;
+
+	IEWindow* ownerWindow = GetOwnerWindow();
+	if (ownerWindow == nullptr)
+		return;
+
+	float gx = 0.0f, gy = 0.0f;
+	SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
+	bool lmb = (btn & SDL_BUTTON_LMASK) != 0;
+
+	if (IECore::GetMouseOnWindow() != ownerWindow)
+	{
+		m_prevLMB = lmb;
+		return;
+	}
+
+	int32_t winX = 0, winY = 0;
+	SDL_GetWindowPosition(ownerWindow->GetSDLWindow(), &winX, &winY);
+	int32_t mx = static_cast<int32_t>(gx) - winX;
+	int32_t my = static_cast<int32_t>(gy) - winY;
+
+	bool clicked = lmb && !m_prevLMB;
+	m_prevLMB = lmb;
+
+	if (!clicked)
+		return;
+
+	bool onRect = (mx >= m_rect.x && mx < m_rect.x + m_rect.w &&
+	               my >= m_rect.y && my < m_rect.y + m_rect.h);
+
+	if (onRect)
+	{
+		IECore::SetFocusedTextBox(this);
+		m_cursorPos     = m_text.length();
+		m_overwriteMode = true;
+		m_textChanged   = true;
+	}
+	else if (IECore::GetFocusedTextBox() == this)
+	{
+		IECore::SetFocusedTextBox(nullptr);
+		m_cursorPos   = std::string::npos;
+		m_textChanged = true;
+	}
 }
 
 bool IEUITextBox::OperateStyleCode(const std::string* strText, int32_t* outResult)

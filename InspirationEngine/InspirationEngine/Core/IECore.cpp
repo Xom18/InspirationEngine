@@ -253,6 +253,7 @@ void IECore::OperateEvent()
 				window->ResizeRenderer();
 				window->OnResize(Event.window.data1, Event.window.data2);
 			}
+			SetFocusedTextBox(nullptr);
 		}
 		break;
 		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
@@ -425,7 +426,15 @@ bool IECore::OperateTextEdit(SDL_Event* event)
 			//엔터
 			if (event->key.key == SDLK_RETURN
 				|| event->key.key == SDLK_KP_ENTER)
-				m_focusedTextBox->InsertCursorPos("\n");
+			{
+				if (m_focusedTextBox->IsMultiline())
+					m_focusedTextBox->InsertCursorPos("\n");
+				else
+				{
+					m_focusedTextBox->SetCursorPos(std::string::npos);
+					SetFocusedTextBox(nullptr);
+				}
+			}
 		}
 	}
 	break;

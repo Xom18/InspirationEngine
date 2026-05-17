@@ -37,17 +37,17 @@ void IEViewportPanel::UpdateInput()
     IEWindow* ownerWindow = GetOwnerWindow();
     if (ownerWindow == nullptr)
         return;
+    float gx = 0.0f, gy = 0.0f;
+    SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
+
     if (IECore::GetMouseOnWindow() != ownerWindow)
     {
-        m_vpPrevLMB  = false;
-        m_vpPrevRMB  = false;
-        m_vpDragging = false;
+        m_vpPrevLMB   = (btn & SDL_BUTTON_LMASK) != 0;
+        m_vpPrevRMB   = (btn & SDL_BUTTON_RMASK) != 0;
+        m_vpDragging  = false;
         m_objDragging = false;
         return;
     }
-
-    float gx = 0.0f, gy = 0.0f;
-    SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
 
     int32_t winX = 0, winY = 0;
     SDL_GetWindowPosition(ownerWindow->GetSDLWindow(), &winX, &winY);

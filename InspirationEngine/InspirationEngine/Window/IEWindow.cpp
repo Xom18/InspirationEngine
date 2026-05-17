@@ -52,6 +52,7 @@ void IEWindow::ResizeRenderer()
 		r.m_window   = this;
 		r.m_w        = m_width;
 		r.m_h        = m_height;
+		r.m_generation++;
 	}
 }
 

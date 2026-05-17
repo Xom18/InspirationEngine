@@ -129,7 +129,14 @@ bool IEUISection::CheckHeaderClick()
 
     float gxF = 0.0f, gyF = 0.0f;
     SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gxF, &gyF);
-    bool lmb     = (btn & SDL_BUTTON_LMASK) != 0;
+    bool lmb = (btn & SDL_BUTTON_LMASK) != 0;
+
+    if (IECore::GetMouseOnWindow() != GetOwnerWindow())
+    {
+        m_prevLMB = lmb;
+        return false;
+    }
+
     bool clicked = lmb && !m_prevLMB;
     m_prevLMB    = lmb;
 

@@ -25,16 +25,17 @@ void IEUIButton::Draw()
 void IEUIButton::Update()
 {
     IEWindow* ownerWindow = GetOwnerWindow();
+
+    float gx = 0.0f, gy = 0.0f;
+    SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
+
     if (ownerWindow == nullptr || IECore::GetMouseOnWindow() != ownerWindow)
     {
         m_hovered = false;
         m_pressed = false;
-        m_prevLMB = false;
+        m_prevLMB = (btn & SDL_BUTTON_LMASK) != 0;
         return;
     }
-
-    float gx = 0.0f, gy = 0.0f;
-    SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
 
     int32_t winX = 0, winY = 0;
     SDL_GetWindowPosition(ownerWindow->GetSDLWindow(), &winX, &winY);

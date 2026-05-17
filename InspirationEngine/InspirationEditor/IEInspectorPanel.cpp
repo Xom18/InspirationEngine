@@ -20,6 +20,8 @@ void IEInspectorPanel::SetTarget(IEGameObject* obj)
 
 void IEInspectorPanel::RebuildSections()
 {
+    IECore::SetFocusedTextBox(nullptr);
+
     m_tbName    = nullptr;
     m_tbX       = nullptr;  m_tbY    = nullptr;  m_tbZ   = nullptr;
     m_tbRot     = nullptr;  m_tbSx   = nullptr;  m_tbSy  = nullptr;
@@ -286,11 +288,12 @@ void IEInspectorPanel::Update(float /*dt*/)
 {
     m_scroll.Update();
     RelayoutSections();
-    ApplyFocusedInput();
-    SyncFromTarget();
 
     for (auto& sec : m_sections)
         sec->Update();
+
+    ApplyFocusedInput();
+    SyncFromTarget();
 }
 
 // ─────────────────────────────────────────

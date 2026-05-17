@@ -79,6 +79,11 @@ public:
 	}
 
 	/// <summary>
+	/// 렌더러 재생성 카운터 반환 (ResizeRenderer 호출마다 증가)
+	/// </summary>
+	uint32_t GetGeneration() const { return m_generation; }
+
+	/// <summary>
 	/// 렌더러 너비 반환 (px)
 	/// </summary>
 	int32_t GetW() const { return m_w; }
@@ -148,8 +153,9 @@ public:
 	bool SaveScreenshot(const char* path);
 
 private:
-	IEWindow*     m_window   = nullptr;
-	SDL_Renderer* m_renderer = nullptr;
-	int32_t       m_w        = 0;
-	int32_t       m_h        = 0;
+	IEWindow*     m_window     = nullptr;
+	SDL_Renderer* m_renderer   = nullptr;
+	int32_t       m_w          = 0;
+	int32_t       m_h          = 0;
+	uint32_t      m_generation = 0;
 };

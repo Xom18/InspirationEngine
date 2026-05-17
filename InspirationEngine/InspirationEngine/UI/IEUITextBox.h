@@ -165,6 +165,8 @@ public:
 		m_cursorPos = IEStrUTF8::GetMemoryPoint(m_text, cursorPos);
 	}
 
+	bool IsMultiline() const { return (m_textBoxStyle & dTEXT_BOX_STYLE_MULTILINE) != 0; }
+
 	/// <summary>
 	/// 커서 다음으로 이동
 	/// </summary>
@@ -173,6 +175,7 @@ public:
 		if (m_cursorPos == std::string::npos)
 		{
 			m_cursorPos = 0;
+			m_textChanged = true;
 			return;
 		}
 		if (m_cursorPos >= m_text.length())
@@ -183,7 +186,10 @@ public:
 
 		auto it = std::upper_bound(m_graphemeBounds.begin(), m_graphemeBounds.end(), m_cursorPos);
 		if (it != m_graphemeBounds.end())
+		{
 			m_cursorPos = *it;
+			m_textChanged = true;
+		}
 	}
 
 	/// <summary>
@@ -194,6 +200,7 @@ public:
 		if (m_cursorPos == std::string::npos)
 		{
 			m_cursorPos = 0;
+			m_textChanged = true;
 			return;
 		}
 		if (m_cursorPos == 0)
@@ -207,6 +214,7 @@ public:
 		{
 			--it;
 			m_cursorPos = *it;
+			m_textChanged = true;
 		}
 	}
 
@@ -218,6 +226,7 @@ public:
 	{
 		if (m_cursorPos == std::string::npos)
 			return;
+		m_overwriteMode = false;
 		size_t before = m_text.length();
 		IEStrUTF8::RemoveToFront(m_text, m_cursorPos, count);
 		size_t after = m_text.length();
@@ -233,6 +242,7 @@ public:
 	/// <param name="count">삭제할 문자 수</param>
 	void RemoveByDelete(size_t count = 1)
 	{
+		m_overwriteMode = false;
 		IEStrUTF8::RemoveToBack(m_text, m_cursorPos, count);
 		m_textChanged = true;
 		m_graphemeBounds.clear();
@@ -272,6 +282,13 @@ public:
 	{
 		if (m_cursorPos == std::string::npos)
 			return;
+		if (m_overwriteMode)
+		{
+			m_text.clear();
+			m_cursorPos    = 0;
+			m_overwriteMode = false;
+			m_graphemeBounds.clear();
+		}
 		m_text.insert(m_cursorPos, text);
 		m_cursorPos += std::strlen(text);
 		m_textChanged = true;
@@ -424,9 +441,12 @@ private:
 	int32_t                                   m_textAlign     = 0;
 	SDL_Rect                                  m_rect;
 	bool                                      m_textChanged   = false;
+	bool                                      m_prevLMB       = false;
+	bool                                      m_overwriteMode = false;
 	size_t                                    m_drawHash      = 0;
 	size_t                                    m_imeInputLength = 0;
 	SDL_Point                                 m_cursorScreenPos;
 	std::vector<size_t>                       m_graphemeBounds;
-	SDL_Renderer*                             m_lastUsedRenderer = nullptr;
+	IERenderer*                               m_lastUsedIERenderer = nullptr;
+	uint32_t                                  m_lastRendererGen    = 0;
 };

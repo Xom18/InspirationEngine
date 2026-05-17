@@ -299,14 +299,14 @@ void IEAtlasEditorWindow::Update(float /*deltaTime*/)
     m_btnSave.Update();
     m_fileBrowser.Update();
 
-    if (IECore::GetMouseOnWindow() != this)
-    {
-        m_prevLMB = false;
-        return;
-    }
-
     float gx = 0.0f, gy = 0.0f;
     SDL_MouseButtonFlags btn = SDL_GetGlobalMouseState(&gx, &gy);
+
+    if (IECore::GetMouseOnWindow() != this)
+    {
+        m_prevLMB = (btn & SDL_BUTTON_LMASK) != 0;
+        return;
+    }
 
     int32_t winX = 0, winY = 0;
     SDL_GetWindowPosition(GetSDLWindow(), &winX, &winY);
