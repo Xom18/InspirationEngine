@@ -31,6 +31,7 @@
     <ClInclude Include="UI\IEListView.h" />
     <ClInclude Include="UI\IEDropdown.h" />
     <ClInclude Include="UI\IEPanelLayout.h" />
+    <ClInclude Include="UI\IESection.h" />
     <ClInclude Include="UI\IEFileBrowser.h" />
     <ClInclude Include="UI\IEPanel.h" />
     <ClInclude Include="UI\IEDockedPanel.h" />
@@ -80,6 +81,7 @@
     <ClCompile Include="UI\IEListView.cpp" />
     <ClCompile Include="UI\IEDropdown.cpp" />
     <ClCompile Include="UI\IEPanelLayout.cpp" />
+    <ClCompile Include="UI\IESection.cpp" />
     <ClCompile Include="UI\IEFileBrowser.cpp" />
     <ClCompile Include="UI\IEDockedPanel.cpp" />
     <ClCompile Include="UI\IEFloatingPanel.cpp" />

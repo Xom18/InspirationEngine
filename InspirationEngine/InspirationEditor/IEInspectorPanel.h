@@ -1,16 +1,17 @@
 #pragma once
 #include "IEEditorPanel.h"
+#include <vector>
+#include <memory>
 
 class IEGameObject;
 
 /// <summary>
-/// 선택된 오브젝트의 이름·Transform·Tile 컴포넌트를 편집하는 Inspector 패널
+/// 선택된 오브젝트의 컴포넌트를 IESection 기반 섹션으로 편집하는 Inspector 패널.
+/// SetTarget() 시 컴포넌트 구성에 따라 섹션을 동적으로 재구성.
 /// </summary>
 class IEInspectorPanel : public IEEditorPanel
 {
 public:
-    IEInspectorPanel();
-
     /// <summary>패널 콘텐츠 렌더링</summary>
     virtual void        Draw(IERenderer* r)                                          override;
 
@@ -23,48 +24,44 @@ public:
     /// <summary>패널 콘텐츠 영역 설정</summary>
     virtual void        SetContentRect(int32_t x, int32_t y, int32_t w, int32_t h) override;
 
-    /// <summary>폰트 설정 — 내부 위젯에 전파</summary>
+    /// <summary>폰트 설정 — 내부 섹션에 전파</summary>
     virtual void        SetFont(IEFont* f)                                           override;
 
-    /// <summary>소유 창 설정 — 내부 위젯에 전파</summary>
+    /// <summary>소유 창 설정 — 내부 섹션에 전파</summary>
     virtual void        SetOwnerWindow(IEWindow* w)                                  override;
 
-    /// <summary>렌더러 설정 — 내부 위젯에 전파</summary>
+    /// <summary>렌더러 설정 — 내부 섹션에 전파</summary>
     virtual void        SetRenderer(IERenderer* r)                                   override;
 
-    /// <summary>편집 대상 오브젝트 설정</summary>
+    /// <summary>편집 대상 오브젝트 설정 — 컴포넌트에 따라 섹션 재구성</summary>
     void SetTarget(IEGameObject* obj);
 
 private:
-    void SetFocus(IETextBox* tb);
-    bool HitTest(const SDL_Rect& r, int32_t mx, int32_t my) const;
-    void SyncFloat(IETextBox& tb, float value);
-    void SyncStr(IETextBox& tb, const std::string& value);
+    void RebuildSections();
+    void RelayoutSections();
+    void SyncFromTarget();
+    void ApplyFocusedInput();
+
+    void PropagateContextToSections();
+
+    IEScrollView                            m_scroll;
+    std::vector<std::unique_ptr<IESection>> m_sections;
+    IEGameObject*                           m_target = nullptr;
+    int32_t m_x = 0, m_y = 0, m_w = 1, m_h = 1;
+
+    // 위젯 raw 포인터 캐시 (소유권은 m_sections 내부)
+    IETextBox*  m_tbName    = nullptr;
+    IESlider*   m_slX       = nullptr;
+    IESlider*   m_slY       = nullptr;
+    IESlider*   m_slZ       = nullptr;
+    IESlider*   m_slRot     = nullptr;
+    IESlider*   m_slSx      = nullptr;
+    IESlider*   m_slSy      = nullptr;
+    IETextBox*  m_tbAtlas   = nullptr;
+    IETextBox*  m_tbTile    = nullptr;
+    IEDropdown* m_ddCamType = nullptr;
+    IESlider*   m_slCamZoom = nullptr;
 
     static constexpr SDL_Color kColBg    = {  35,  35,  40, 255 };
     static constexpr SDL_Color kColNoSel = { 110, 110, 110, 255 };
-    static constexpr SDL_Color kColTbBg  = {  30,  30,  35, 255 };
-    static constexpr SDL_Color kColTbBor = {  70,  70,  80, 255 };
-    static constexpr SDL_Color kColTbFoc = {  70, 130, 180, 255 };
-
-    IEGameObject* m_target     = nullptr;
-    IETextBox*    m_focusedBox = nullptr;
-    bool          m_prevLMB    = false;
-
-    IEPanelLayout m_layout;
-
-    // Name
-    IETextBox m_tbName;
-
-    // Transform
-    IETextBox m_tbX;
-    IETextBox m_tbY;
-    IETextBox m_tbZ;
-    IETextBox m_tbRot;
-    IETextBox m_tbScaleX;
-    IETextBox m_tbScaleY;
-
-    // Tile component
-    IETextBox m_tbAtlas;
-    IETextBox m_tbTile;
 };

@@ -10,10 +10,11 @@ class IERenderer;
 class IETextBox;
 class IELabel;
 class IESlider;
+class IEDropdown;
 
 /// <summary>
 /// 재귀 가능한 UI 섹션 컨테이너.
-/// AddSection / AddTextBox / AddSlider / AddLabel 로 자식 추가.
+/// AddSection / AddTextBox / AddSlider / AddLabel / AddDropdown 로 자식 추가.
 /// Layout(x, y, w) 후 Draw / Update 사용.
 /// 게임 UI 및 에디터 공용.
 /// </summary>
@@ -34,6 +35,10 @@ public:
     void SetCollapsed(bool c)   { m_collapsed   = c; }
     bool IsCollapsed() const    { return m_collapsed; }
 
+    /// <summary>타이틀바 오른쪽(45% 지점)에 표시할 보조 레이블.</summary>
+    void SetHeaderLabel(const std::string& text)  { m_headerLabel = text; }
+    void SetHeaderLabelColor(SDL_Color col)        { m_headerLabelColor = col; }
+
     // ── 자식 추가 (소유권은 이 섹션) ─────────────────────────────────
 
     /// <summary>자식 섹션 추가. 반환 포인터는 이 섹션이 소유.</summary>
@@ -47,6 +52,9 @@ public:
 
     /// <summary>전체 너비 레이블 행 추가 (표시 전용).</summary>
     IELabel*    AddLabel(const std::string& text = "");
+
+    /// <summary>드롭다운 행 추가. items = 선택 항목 목록.</summary>
+    IEDropdown* AddDropdown(const std::string& rowLabel, std::vector<std::string> items);
 
     // ── 레이아웃 ──────────────────────────────────────────────────────
 
@@ -64,6 +72,12 @@ public:
     void Draw(IERenderer* r);
     void Update();
 
+    /// <summary>
+    /// 열린 Dropdown 팝업을 재귀적으로 맨 위에 렌더링.
+    /// 최상위 호출자(Panel::Draw)에서 모든 Draw() 호출 후 실행해야 함.
+    /// </summary>
+    void DrawOpenDropdowns(IERenderer* r);
+
     // ── 컨텍스트 전파 ────────────────────────────────────────────────
 
     void SetFont(IEFont* f);
@@ -71,17 +85,18 @@ public:
     void SetRenderer(IERenderer* r);
 
 private:
-    enum class EntryKind { TextBox, Slider, Label, Section };
+    enum class EntryKind { TextBox, Slider, Label, Section, Dropdown };
 
     struct Entry
     {
         EntryKind              kind;
         std::string            rowLabel;
 
-        std::unique_ptr<IETextBox>  textBox;
-        std::unique_ptr<IESlider>   slider;
-        std::unique_ptr<IELabel>    label;
-        std::unique_ptr<IESection>  section;
+        std::unique_ptr<IETextBox>   textBox;
+        std::unique_ptr<IESlider>    slider;
+        std::unique_ptr<IELabel>     label;
+        std::unique_ptr<IESection>   section;
+        std::unique_ptr<IEDropdown>  dropdown;
 
         SDL_Rect  widgetRect{};  // Layout() 가 채움
         SDL_Rect  labelRect{};   // Layout() 가 채움
@@ -91,6 +106,10 @@ private:
     bool CheckHeaderClick();
 
     std::string        m_title;
+    std::string        m_headerLabel;
+    SDL_Color          m_headerLabelColor = { 140, 140, 150, 255 };  // kColLabel과 동일 초기값
+    static constexpr float kHeaderLabelRatio = 0.45f;
+
     bool               m_collapsible = true;
     bool               m_collapsed   = false;
     std::vector<Entry> m_entries;
@@ -108,7 +127,7 @@ private:
 
     // ── 색상 상수 ────────────────────────────────────────────────────
     static constexpr SDL_Color kColHeader  = {  60,  60,  70, 255 };
-    static constexpr SDL_Color kColHeaderH = {  75,  75,  88, 255 }; // hover
+    static constexpr SDL_Color kColHeaderH = {  75,  75,  88, 255 };
     static constexpr SDL_Color kColRowBg   = {  32,  32,  38, 255 };
     static constexpr SDL_Color kColRowAlt  = {  36,  36,  42, 255 };
     static constexpr SDL_Color kColTbBg    = {  28,  28,  34, 255 };

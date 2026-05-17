@@ -59,6 +59,19 @@ IELabel* IESection::AddLabel(const std::string& text)
     return ptr;
 }
 
+IEDropdown* IESection::AddDropdown(const std::string& rowLabel, std::vector<std::string> items)
+{
+    Entry e;
+    e.kind     = EntryKind::Dropdown;
+    e.rowLabel = rowLabel;
+    auto dd    = std::make_unique<IEDropdown>();
+    dd->SetItems(std::move(items));
+    IEDropdown* ptr = dd.get();
+    e.dropdown = std::move(dd);
+    m_entries.push_back(std::move(e));
+    return ptr;
+}
+
 // ─────────────────────────────────────────
 // 컨텍스트 전파
 // ─────────────────────────────────────────
@@ -96,6 +109,14 @@ void IESection::PropagateToEntry(Entry& e)
             e.section->SetFont(m_font),
             e.section->SetOwnerWindow(m_ownerWindow),
             e.section->SetRenderer(m_renderer);
+        break;
+    case EntryKind::Dropdown:
+        if (e.dropdown)
+        {
+            e.dropdown->SetFont(m_font);
+            e.dropdown->SetOwnerWindow(m_ownerWindow);
+            e.dropdown->SetRenderer(m_renderer);
+        }
         break;
     }
 }
@@ -179,6 +200,16 @@ int32_t IESection::Layout(int32_t x, int32_t y, int32_t w)
             }
             break;
         }
+        case EntryKind::Dropdown:
+        {
+            e.labelRect  = { cx, cy + 4, kLabelW, kRowH - 4 };
+            e.widgetRect = { cx + kLabelW, cy + 2, cw - kLabelW, kRowH - 4 };
+            if (e.dropdown)
+                e.dropdown->SetRect(e.widgetRect.x, e.widgetRect.y,
+                                    e.widgetRect.w, e.widgetRect.h);
+            cy += kRowH + kPadY;
+            break;
+        }
         }
     }
 
@@ -232,11 +263,13 @@ void IESection::Update()
         case EntryKind::Label:
             break;
         case EntryKind::TextBox:
-            // TextBox 키보드 입력은 IECore::GetFocusedTextBox() 가 관리
             if (e.textBox) e.textBox->Update();
             break;
         case EntryKind::Section:
             if (e.section) e.section->Update();
+            break;
+        case EntryKind::Dropdown:
+            if (e.dropdown) e.dropdown->Update();
             break;
         }
     }
@@ -267,12 +300,20 @@ void IESection::Draw(IERenderer* r)
             tx += 14;
         }
         r->DrawText(m_font, m_title.c_str(), kColText, tx, ty);
+
+        // 헤더 레이블 — 타이틀 오른쪽, 헤더 너비의 45% 지점부터
+        if (!m_headerLabel.empty())
+        {
+            int32_t lx = m_headerRect.x + static_cast<int32_t>(m_headerRect.w * kHeaderLabelRatio);
+            r->DrawText(m_font, m_headerLabel.c_str(), m_headerLabelColor, lx, ty);
+        }
     }
 
     if (m_collapsed)
         return;
 
-    // 행 렌더링
+    // 행 렌더링 (1패스)
+    // Dropdown 팝업 z-order 보정은 DrawOpenDropdowns()에서 처리
     int32_t rowIdx = 0;
     for (auto& e : m_entries)
     {
@@ -280,17 +321,14 @@ void IESection::Draw(IERenderer* r)
         {
         case EntryKind::TextBox:
         {
-            // 행 배경
             SDL_Color rowBg = (rowIdx % 2 == 0) ? kColRowBg : kColRowAlt;
             r->DrawRect(rowBg, m_x + kIndentX, e.widgetRect.y - 2,
                         m_w - kIndentX, kRowH, SDL_BLENDMODE_NONE);
 
-            // 레이블
             if (m_font != nullptr && !e.rowLabel.empty())
                 r->DrawText(m_font, e.rowLabel.c_str(), kColLabel,
                             e.labelRect.x, e.labelRect.y);
 
-            // 텍스트박스 배경 + 포커스 테두리
             if (e.textBox)
             {
                 bool focused = (IECore::GetFocusedTextBox() == e.textBox.get());
@@ -334,6 +372,34 @@ void IESection::Draw(IERenderer* r)
             if (e.section) e.section->Draw(r);
             break;
         }
+        case EntryKind::Dropdown:
+        {
+            SDL_Color rowBg = (rowIdx % 2 == 0) ? kColRowBg : kColRowAlt;
+            r->DrawRect(rowBg, m_x + kIndentX, e.widgetRect.y - 2,
+                        m_w - kIndentX, kRowH, SDL_BLENDMODE_NONE);
+
+            if (m_font != nullptr && !e.rowLabel.empty())
+                r->DrawText(m_font, e.rowLabel.c_str(), kColLabel,
+                            e.labelRect.x, e.labelRect.y);
+
+            if (e.dropdown) e.dropdown->Draw();
+            ++rowIdx;
+            break;
         }
+        }
+    }
+}
+
+void IESection::DrawOpenDropdowns(IERenderer* r)
+{
+    if (r == nullptr || m_collapsed)
+        return;
+
+    for (auto& e : m_entries)
+    {
+        if (e.kind == EntryKind::Dropdown && e.dropdown && e.dropdown->IsOpen())
+            e.dropdown->Draw();
+        if (e.kind == EntryKind::Section && e.section)
+            e.section->DrawOpenDropdowns(r);
     }
 }
