@@ -43,7 +43,7 @@ public:
 	/// 프레임 업데이트
 	/// </summary>
 	/// <param name="deltaTime">경과 시간 (초)</param>
-	virtual void Update(float deltaTime) {}
+	virtual void Update(float /*deltaTime*/) {}
 
 	/// <summary>
 	/// 렌더러에 오브젝트 그리기 — 씬이 카메라 투영 후 스크린 좌표 전달
@@ -86,8 +86,25 @@ public:
 	/// </summary>
 	bool IsActive() const { return m_active; }
 
+	/// <summary>
+	/// 직렬화용 타입 이름 반환
+	/// </summary>
+	virtual const char* GetTypeName() const { return "GameObject"; }
+
+	/// <summary>
+	/// 오브젝트 이름 반환
+	/// </summary>
+	const std::string& GetName() const { return m_name; }
+
+	/// <summary>
+	/// 오브젝트 이름 설정
+	/// </summary>
+	/// <param name="name">설정할 이름</param>
+	void SetName(const std::string& name) { m_name = name; }
+
 private:
 	std::vector<std::unique_ptr<IEComponent>> m_components;
-	IESprite* m_sprite = nullptr;
-	bool      m_active = true;
+	IESprite*   m_sprite = nullptr;
+	bool        m_active = true;
+	std::string m_name;
 };

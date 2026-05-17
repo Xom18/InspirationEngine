@@ -209,16 +209,29 @@ if (m_isCheck) // return과 같이 if 다음에 한줄일 경우 줄바꿈 / 괄
 if (m_isCheck) return; // 줄바꿈까지 생략 금지
 ```
 
+### virtual
+- 가상 함수 선언 시 **`virtual`** 키워드 명시 필수 (기저 클래스와 파생 클래스 모두)
+- 사유: `override` 만으로는 해당 함수가 가상임을 선언부에서 즉시 알 수 없음
+
+```cpp
+// Good
+virtual void Draw() override;
+virtual void Update() override;
+
+// Bad
+void Draw() override;   // virtual 생략 — 가상임이 불명확
+```
+
 ### override
 - 가상 함수 재정의 시 **`override`** 키워드 필수
 
 ```cpp
 // Good
-void Draw() override;
-void Update() override;
+virtual void Draw() override;
+virtual void Update() override;
 
 // Bad
-void Draw();  // override 없음
+virtual void Draw();  // override 없음 — 기저 클래스 시그니처 변경 시 묵시적 숨김 발생
 ```
 
 ### 헤더 가드

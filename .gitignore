@@ -50,7 +50,8 @@ InspirationEngine/Release/*
 CodeAnalysisResultManifest.txt
 *.enc
 */build/*
-*/binary/*
+**/binary/
+**/Binary/
 
 #resources
 */data/*
@@ -58,4 +59,8 @@ CodeAnalysisResultManifest.txt
 
 #font
 *.ttf
+
+# other
 .vs
+.claude/
+*/.claude/*

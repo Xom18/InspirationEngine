@@ -74,6 +74,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL3.lib;SDL3_image.lib;SDL3_mixer.lib;freetype.lib;harfbuzz.lib;InspirationEngine_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\ThirdParty\SDL\lib\x64;..\ThirdParty\freetype\lib\x64;..\ThirdParty\harfbuzz\lib\x64;$(SolutionDir)Binary\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/ignore:4098 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /Y /I "..\ThirdParty\SDL\dll\x64\*.dll" "$(OutDir)" &amp;&amp; xcopy /Y /I "..\ThirdParty\harfbuzz\dll\x64\*.dll" "$(OutDir)"</Command>

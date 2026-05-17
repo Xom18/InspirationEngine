@@ -17,7 +17,7 @@ public:
 	/// 프레임 업데이트
 	/// </summary>
 	/// <param name="deltaTime">경과 시간 (초)</param>
-	virtual void Update(float deltaTime) {}
+	virtual void Update(float /*deltaTime*/) {}
 
 	/// <summary>
 	/// 그리기
@@ -28,6 +28,13 @@ public:
 	/// X버튼을 눌렀을 때
 	/// </summary>
 	virtual void CallXButton() {}
+
+	/// <summary>
+	/// 창 크기가 변경됐을 때 (ResizeRenderer 호출 직후)
+	/// </summary>
+	/// <param name="w">새 너비</param>
+	/// <param name="h">새 높이</param>
+	virtual void OnResize(int32_t /*w*/, int32_t /*h*/) {}
 
 	/// <summary>
 	/// 창 생성
@@ -115,6 +122,11 @@ public:
 	void BeginDrawThread();
 
 	/// <summary>
+	/// 드로우 스레드에 종료 신호를 보내고 조인. 엔진 구동 중 동적 창 제거 시 사용.
+	/// </summary>
+	void StopDrawThread();
+
+	/// <summary>
 	/// 드로우 스레드 종료 대기
 	/// </summary>
 	void JoinDrawThread()
@@ -133,11 +145,11 @@ public:
 	}
 
 	/// <summary>
-	/// 그린 상태 초기화
+	/// 그린 상태 초기화 — 드로우 스레드 기동 신호
 	/// </summary>
 	void ResetDrawed()
 	{
-		m_isDrawed = false;
+		m_isDrawed.store(false, std::memory_order_release);
 	}
 
 	/// <summary>
@@ -169,6 +181,8 @@ private:
 	int32_t                      m_width              = 0;
 	int32_t                      m_height             = 0;
 	std::unique_ptr<std::thread> m_drawThread;
+	std::atomic<bool>            m_shouldStop{false};
 	bool                         m_drawThreadIsRunning = false;
-	bool                         m_isDrawed            = false;
+	// true로 초기화: 드로우 스레드가 ResetDrawed() 호출 전에 즉시 실행되지 않도록
+	std::atomic<bool>            m_isDrawed{true};
 };

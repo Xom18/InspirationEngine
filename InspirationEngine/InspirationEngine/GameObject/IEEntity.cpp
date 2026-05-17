@@ -12,7 +12,7 @@ void IEEntity::Update(float deltaTime)
 	t->SetZ(t->GetZ() + v->GetVz() * deltaTime);
 }
 
-void IEEntity::Draw(IERenderer* renderer, int32_t screenX, int32_t screenY, float zoom)
+void IEEntity::Draw(IERenderer* renderer, int32_t screenX, int32_t screenY, float /*zoom*/)
 {
 	if (!IsActive() || GetSprite() == nullptr || renderer == nullptr)
 		return;

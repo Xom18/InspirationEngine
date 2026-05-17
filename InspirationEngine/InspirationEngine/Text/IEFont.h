@@ -3,19 +3,32 @@
 #include FT_FREETYPE_H
 #include FT_SYNTHESIS_H
 #include <hb.h>
+#include <mutex>
 
-#define IE_FONT_STYLE_NORMAL        0x00
-#define IE_FONT_STYLE_BOLD          0x01
-#define IE_FONT_STYLE_ITALIC        0x02
-#define IE_FONT_STYLE_UNDERLINE     0x04
-#define IE_FONT_STYLE_STRIKETHROUGH 0x08
+constexpr int32_t IE_FONT_STYLE_NORMAL        = 0x00;
+constexpr int32_t IE_FONT_STYLE_BOLD          = 0x01;
+constexpr int32_t IE_FONT_STYLE_ITALIC        = 0x02;
+constexpr int32_t IE_FONT_STYLE_UNDERLINE     = 0x04;
+constexpr int32_t IE_FONT_STYLE_STRIKETHROUGH = 0x08;
 
+/// <summary>
+/// FreeType 페이스와 HarfBuzz 폰트를 묶는 데이터 구조.
+/// FT_Face / hb_font_t 는 스레드 비안전 — 렌더링 전 m_mutex 잠금 필수.
+/// </summary>
 struct IEFontFace
 {
-	FT_Face    m_ftFace = nullptr;
-	hb_font_t* m_hbFont = nullptr;
-	bool       m_bold   = false;
+	FT_Face      m_ftFace = nullptr;
+	hb_font_t*   m_hbFont = nullptr;
+	bool         m_bold   = false;
+	std::mutex   m_mutex;  // FT_/hb_shape 호출 직렬화
 
+	IEFontFace()                             = default;
+	IEFontFace(const IEFontFace&)            = delete;
+	IEFontFace& operator=(const IEFontFace&) = delete;
+
+	/// <summary>
+	/// HarfBuzz 폰트와 FreeType 페이스 자원 해제
+	/// </summary>
 	~IEFontFace()
 	{
 		if (m_hbFont != nullptr)
@@ -112,7 +125,14 @@ private:
 class IEFontManager
 {
 public:
+	/// <summary>
+	/// FreeType 라이브러리 초기화
+	/// </summary>
 	IEFontManager()  { FT_Init_FreeType(&m_ftLib); }
+
+	/// <summary>
+	/// 등록된 폰트 해제 및 FreeType 라이브러리 종료
+	/// </summary>
 	~IEFontManager()
 	{
 		m_fonts.clear();

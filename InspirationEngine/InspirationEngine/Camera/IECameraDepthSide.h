@@ -21,11 +21,26 @@
 class IECameraDepthSide : public IECamera
 {
 public:
+	/// <summary>
+	/// 기본 뎁스 사이드뷰 카메라 초기화
+	/// </summary>
 	IECameraDepthSide() = default;
+
+	/// <summary>
+	/// 깊이·높이 인수를 지정해 카메라 초기화
+	/// </summary>
+	/// <param name="depthFactor">y축 → 화면 Y 깊이 변환 계수</param>
+	/// <param name="heightFactor">z축 → 화면 Y 높이 변환 계수</param>
 	IECameraDepthSide(float depthFactor, float heightFactor = 1.0f)
 		: m_depthFactor(depthFactor), m_heightFactor(heightFactor) {}
 
-	IEVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const override
+	/// <summary>
+	/// 월드 좌표를 스크린 좌표로 변환
+	/// </summary>
+	/// <param name="wx">월드 X</param>
+	/// <param name="wy">월드 Y (깊이 — 클수록 멀어짐)</param>
+	/// <param name="wz">월드 Z (높이)</param>
+	virtual IEVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const override
 	{
 		IEVector2 result;
 		result.SetX(static_cast<int32_t>(std::lround((wx - GetX()) * GetZoom() + GetViewportWidth()  * 0.5f)));
@@ -33,7 +48,12 @@ public:
 		return result;
 	}
 
-	IEVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
+	/// <summary>
+	/// 스크린 좌표를 월드 좌표로 역변환 (z = 0 가정)
+	/// </summary>
+	/// <param name="sx">스크린 X</param>
+	/// <param name="sy">스크린 Y</param>
+	virtual IEVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
 	{
 		IEVector2 result;
 		result.SetX(static_cast<int32_t>((sx - GetViewportWidth()  * 0.5f) / GetZoom() + GetX()));
@@ -44,14 +64,35 @@ public:
 		return result;
 	}
 
-	float GetSortKey(float x, float y, float z) const override
+	/// <summary>
+	/// 드로우 정렬 키 반환 — -y (y 클수록 먼저 그림)
+	/// </summary>
+	/// <param name="y">월드 Y (깊이)</param>
+	virtual float GetSortKey(float /*x*/, float y, float /*z*/) const override
 	{
 		return -y;
 	}
 
+	/// <summary>
+	/// y축 깊이 변환 계수 설정
+	/// </summary>
+	/// <param name="f">변환 계수</param>
 	void  SetDepthFactor(float f)  { m_depthFactor  = f; }
+
+	/// <summary>
+	/// z축 높이 변환 계수 설정
+	/// </summary>
+	/// <param name="f">변환 계수</param>
 	void  SetHeightFactor(float f) { m_heightFactor = f; }
+
+	/// <summary>
+	/// y축 깊이 변환 계수 반환
+	/// </summary>
 	float GetDepthFactor()  const  { return m_depthFactor; }
+
+	/// <summary>
+	/// z축 높이 변환 계수 반환
+	/// </summary>
 	float GetHeightFactor() const  { return m_heightFactor; }
 
 private:

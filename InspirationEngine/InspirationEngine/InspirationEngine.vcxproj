@@ -20,12 +20,29 @@
     <ClInclude Include="Input\IEInput.h" />
     <ClInclude Include="Input\MouseCusor.h" />
     <ClInclude Include="UI\Interface.h" />
-    <ClInclude Include="UI\IEMenu.h" />
-    <ClInclude Include="UI\IETextBox.h" />
+    <ClInclude Include="UI\IEUIBase.h" />
+    <ClInclude Include="UI\IEUILabel.h" />
+    <ClInclude Include="UI\IEUITextBox.h" />
+    <ClInclude Include="UI\IEUIButton.h" />
+    <ClInclude Include="UI\IEUIScrollView.h" />
+    <ClInclude Include="UI\IETreeNode.h" />
+    <ClInclude Include="UI\IEUITreeView.h" />
+    <ClInclude Include="UI\IEUISlider.h" />
+    <ClInclude Include="UI\IEUIListView.h" />
+    <ClInclude Include="UI\IEUIDropdown.h" />
+    <ClInclude Include="UI\IEPanelLayout.h" />
+    <ClInclude Include="UI\IEUISection.h" />
+    <ClInclude Include="UI\IEUIRow.h" />
+    <ClInclude Include="UI\IEUIHRow.h" />
+    <ClInclude Include="UI\IEUIFileBrowser.h" />
+    <ClInclude Include="UI\IEPanel.h" />
+    <ClInclude Include="UI\IEDockedPanel.h" />
+    <ClInclude Include="UI\IEFloatingPanel.h" />
     <ClInclude Include="Text\IEFont.h" />
     <ClInclude Include="Text\IETextRenderer.h" />
     <ClInclude Include="Util\IEStrUTF8.h" />
     <ClInclude Include="Util\IEFile.h" />
+    <ClInclude Include="Util\IELocalize.h" />
     <ClInclude Include="Sprite\IESpriteManager.h" />
     <ClInclude Include="Sprite\IEAtlasManager.h" />
     <ClInclude Include="GameObject\IEComponent.h" />
@@ -38,11 +55,17 @@
     <ClInclude Include="Camera\IECameraSideView.h" />
     <ClInclude Include="Camera\IECameraOverheadOblique.h" />
     <ClInclude Include="Camera\IECameraDepthSide.h" />
+    <ClInclude Include="Camera\IECameraComponent.h" />
+    <ClInclude Include="Camera\IECameraObject.h" />
     <ClInclude Include="Scene\IEScene.h" />
     <ClInclude Include="Scene\IESceneManager.h" />
+    <ClInclude Include="Scene\IESceneSerializer.h" />
+    <ClInclude Include="Scene\IEProjectConfig.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\ThirdParty\utf8proc\utf8proc.c" />
+    <ClCompile Include="..\ThirdParty\utf8proc\utf8proc.c">
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+    </ClCompile>
     <ClCompile Include="Core\IECore.cpp" />
     <ClCompile Include="Core\IEDebugInfo.cpp" />
     <ClCompile Include="Window\IEWindow.cpp" />
@@ -50,17 +73,36 @@
     <ClCompile Include="Input\IEInput.cpp" />
     <ClCompile Include="Input\MouseCusor.cpp" />
     <ClCompile Include="UI\Interface.cpp" />
-    <ClCompile Include="UI\Menu.cpp" />
-    <ClCompile Include="UI\IETextBox.cpp" />
+    <ClCompile Include="UI\IEUIBase.cpp" />
+    <ClCompile Include="UI\IEUILabel.cpp" />
+    <ClCompile Include="UI\IEUITextBox.cpp" />
+    <ClCompile Include="UI\IEUIButton.cpp" />
+    <ClCompile Include="UI\IEUIScrollView.cpp" />
+    <ClCompile Include="UI\IEUITreeView.cpp" />
+    <ClCompile Include="UI\IEUISlider.cpp" />
+    <ClCompile Include="UI\IEUIListView.cpp" />
+    <ClCompile Include="UI\IEUIDropdown.cpp" />
+    <ClCompile Include="UI\IEPanelLayout.cpp" />
+    <ClCompile Include="UI\IEUISection.cpp" />
+    <ClCompile Include="UI\IEUIRow.cpp" />
+    <ClCompile Include="UI\IEUIHRow.cpp" />
+    <ClCompile Include="UI\IEUIFileBrowser.cpp" />
+    <ClCompile Include="UI\IEDockedPanel.cpp" />
+    <ClCompile Include="UI\IEFloatingPanel.cpp" />
     <ClCompile Include="Text\IEFont.cpp" />
     <ClCompile Include="Text\IETextRenderer.cpp" />
     <ClCompile Include="Util\IEStrUTF8.cpp" />
     <ClCompile Include="Util\IEFile.cpp" />
+    <ClCompile Include="Util\IELocalize.cpp" />
     <ClCompile Include="Sprite\IESpriteManager.cpp" />
     <ClCompile Include="Sprite\IEAtlasManager.cpp" />
     <ClCompile Include="GameObject\IEStaticObject.cpp" />
     <ClCompile Include="GameObject\IEEntity.cpp" />
+    <ClCompile Include="Camera\IECameraComponent.cpp" />
+    <ClCompile Include="Camera\IECameraObject.cpp" />
     <ClCompile Include="Scene\IEScene.cpp" />
+    <ClCompile Include="Scene\IESceneSerializer.cpp" />
+    <ClCompile Include="Scene\IEProjectConfig.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9D10CAC6-29F4-4F09-8DF2-BF7B37530E37}</ProjectGuid>
@@ -102,7 +144,10 @@
   <PropertyGroup Label="UserMacros" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>.;..\ThirdParty\SDL\include;..\ThirdParty\freetype\include;..\ThirdParty\harfbuzz\include;..\ThirdParty\nlohmann\include;..\ThirdParty\utf8proc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -124,7 +169,10 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatAngleIncludeAsExternal>true</TreatAngleIncludeAsExternal>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>

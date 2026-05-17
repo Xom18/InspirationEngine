@@ -15,9 +15,17 @@
 class IECameraTopView : public IECamera
 {
 public:
+	/// <summary>
+	/// 기본 탑뷰 카메라 초기화
+	/// </summary>
 	IECameraTopView() = default;
 
-	IEVector2 WorldToScreen(float wx, float wy, float wz = 0.0f) const override
+	/// <summary>
+	/// 월드 좌표를 스크린 좌표로 변환 (z 무시)
+	/// </summary>
+	/// <param name="wx">월드 X</param>
+	/// <param name="wy">월드 Y</param>
+	virtual IEVector2 WorldToScreen(float wx, float wy, float /*wz*/ = 0.0f) const override
 	{
 		IEVector2 result;
 		result.SetX(static_cast<int32_t>(std::lround((wx - GetX()) * GetZoom() + GetViewportWidth()  * 0.5f)));
@@ -25,7 +33,12 @@ public:
 		return result;
 	}
 
-	IEVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
+	/// <summary>
+	/// 스크린 좌표를 월드 좌표로 역변환
+	/// </summary>
+	/// <param name="sx">스크린 X</param>
+	/// <param name="sy">스크린 Y</param>
+	virtual IEVector2 ScreenToWorld(int32_t sx, int32_t sy) const override
 	{
 		IEVector2 result;
 		result.SetX(static_cast<int32_t>(std::lround((sx - GetViewportWidth()  * 0.5f) / GetZoom() + GetX())));
