@@ -33,6 +33,7 @@
     <ClInclude Include="UI\IEPanelLayout.h" />
     <ClInclude Include="UI\IEUISection.h" />
     <ClInclude Include="UI\IEUIRow.h" />
+    <ClInclude Include="UI\IEUIHRow.h" />
     <ClInclude Include="UI\IEUIFileBrowser.h" />
     <ClInclude Include="UI\IEPanel.h" />
     <ClInclude Include="UI\IEDockedPanel.h" />
@@ -84,6 +85,7 @@
     <ClCompile Include="UI\IEPanelLayout.cpp" />
     <ClCompile Include="UI\IEUISection.cpp" />
     <ClCompile Include="UI\IEUIRow.cpp" />
+    <ClCompile Include="UI\IEUIHRow.cpp" />
     <ClCompile Include="UI\IEUIFileBrowser.cpp" />
     <ClCompile Include="UI\IEDockedPanel.cpp" />
     <ClCompile Include="UI\IEFloatingPanel.cpp" />

@@ -7,7 +7,7 @@
 
 void IEInspectorPanel::SetTarget(IEGameObject* obj)
 {
-    if (m_target == obj)
+    if (m_target == obj && obj != nullptr)
         return;
 
     m_target = obj;
@@ -21,8 +21,8 @@ void IEInspectorPanel::SetTarget(IEGameObject* obj)
 void IEInspectorPanel::RebuildSections()
 {
     m_tbName    = nullptr;
-    m_slX       = nullptr;  m_slY    = nullptr;  m_slZ      = nullptr;
-    m_slRot     = nullptr;  m_slSx   = nullptr;  m_slSy     = nullptr;
+    m_tbX       = nullptr;  m_tbY    = nullptr;  m_tbZ   = nullptr;
+    m_tbRot     = nullptr;  m_tbSx   = nullptr;  m_tbSy  = nullptr;
     m_tbAtlas   = nullptr;  m_tbTile = nullptr;
     m_ddCamType = nullptr;  m_slCamZoom = nullptr;
 
@@ -48,23 +48,24 @@ void IEInspectorPanel::RebuildSections()
         sec->SetTitle("Transform");
         sec->SetHeaderLabel("IETransformComponent");
 
-        m_slX = sec->AddSlider(IELocalize::Get("ui.x"), -2000.0f, 2000.0f);
-        m_slX->SetCallback([t](float v) { t->SetX(v); });
+        constexpr SDL_Color kTextCol = { 210, 210, 210, 255 };
+        auto setupTb = [&](IEUITextBox* tb)
+        {
+            tb->SetStyle(dTEXT_BOX_STYLE_EDITABLE);
+            tb->SetDefaultColor(kTextCol);
+        };
 
-        m_slY = sec->AddSlider(IELocalize::Get("ui.y"), -2000.0f, 2000.0f);
-        m_slY->SetCallback([t](float v) { t->SetY(v); });
+        // Row 1: X  Y  Z
+        auto* row1 = sec->AddHRow();
+        m_tbX = row1->AddItem("X", std::make_unique<IEUITextBox>()); setupTb(m_tbX);
+        m_tbY = row1->AddItem("Y", std::make_unique<IEUITextBox>()); setupTb(m_tbY);
+        m_tbZ = row1->AddItem("Z", std::make_unique<IEUITextBox>()); setupTb(m_tbZ);
 
-        m_slZ = sec->AddSlider(IELocalize::Get("ui.z"), -500.0f, 500.0f);
-        m_slZ->SetCallback([t](float v) { t->SetZ(v); });
-
-        m_slRot = sec->AddSlider(IELocalize::Get("ui.rot"), -180.0f, 180.0f);
-        m_slRot->SetCallback([t](float v) { t->SetRotation(v); });
-
-        m_slSx = sec->AddSlider(IELocalize::Get("ui.scale_x"), 0.01f, 5.0f);
-        m_slSx->SetCallback([t](float v) { t->SetScaleX(v); });
-
-        m_slSy = sec->AddSlider(IELocalize::Get("ui.scale_y"), 0.01f, 5.0f);
-        m_slSy->SetCallback([t](float v) { t->SetScaleY(v); });
+        // Row 2: Rot  Sx  Sy
+        auto* row2 = sec->AddHRow();
+        m_tbRot = row2->AddItem("Rot", std::make_unique<IEUITextBox>()); setupTb(m_tbRot);
+        m_tbSx  = row2->AddItem("Sx",  std::make_unique<IEUITextBox>()); setupTb(m_tbSx);
+        m_tbSy  = row2->AddItem("Sy",  std::make_unique<IEUITextBox>()); setupTb(m_tbSy);
 
         m_sections.push_back(std::move(sec));
     }
@@ -165,12 +166,19 @@ void IEInspectorPanel::SyncFromTarget()
     auto* t = m_target->GetComponent<IETransformComponent>();
     if (t != nullptr)
     {
-        if (m_slX)   m_slX->SetValue(t->GetX());
-        if (m_slY)   m_slY->SetValue(t->GetY());
-        if (m_slZ)   m_slZ->SetValue(t->GetZ());
-        if (m_slRot) m_slRot->SetValue(t->GetRotation());
-        if (m_slSx)  m_slSx->SetValue(t->GetScaleX());
-        if (m_slSy)  m_slSy->SetValue(t->GetScaleY());
+        auto fmtF = [](float v) -> std::string
+        {
+            char buf[32];
+            snprintf(buf, sizeof(buf), "%.2f", v);
+            return buf;
+        };
+
+        if (m_tbX   && focused != m_tbX)   m_tbX->SetText(fmtF(t->GetX()).c_str());
+        if (m_tbY   && focused != m_tbY)   m_tbY->SetText(fmtF(t->GetY()).c_str());
+        if (m_tbZ   && focused != m_tbZ)   m_tbZ->SetText(fmtF(t->GetZ()).c_str());
+        if (m_tbRot && focused != m_tbRot) m_tbRot->SetText(fmtF(t->GetRotation()).c_str());
+        if (m_tbSx  && focused != m_tbSx)  m_tbSx->SetText(fmtF(t->GetScaleX()).c_str());
+        if (m_tbSy  && focused != m_tbSy)  m_tbSy->SetText(fmtF(t->GetScaleY()).c_str());
     }
 
     auto* tile = m_target->GetComponent<IETileComponent>();
@@ -201,6 +209,24 @@ void IEInspectorPanel::ApplyFocusedInput()
 
     if (m_tbName != nullptr && focused == m_tbName)
         m_target->SetName(m_tbName->GetText());
+
+    auto* t = m_target->GetComponent<IETransformComponent>();
+    if (t != nullptr)
+    {
+        auto parseF = [](const char* text, float fallback) -> float
+        {
+            char* end = nullptr;
+            float v = std::strtof(text, &end);
+            return (end != text) ? v : fallback;
+        };
+
+        if (m_tbX   && focused == m_tbX)   t->SetX(parseF(m_tbX->GetText(),     t->GetX()));
+        if (m_tbY   && focused == m_tbY)   t->SetY(parseF(m_tbY->GetText(),     t->GetY()));
+        if (m_tbZ   && focused == m_tbZ)   t->SetZ(parseF(m_tbZ->GetText(),     t->GetZ()));
+        if (m_tbRot && focused == m_tbRot) t->SetRotation(parseF(m_tbRot->GetText(), t->GetRotation()));
+        if (m_tbSx  && focused == m_tbSx)  t->SetScaleX(parseF(m_tbSx->GetText(),  t->GetScaleX()));
+        if (m_tbSy  && focused == m_tbSy)  t->SetScaleY(parseF(m_tbSy->GetText(),  t->GetScaleY()));
+    }
 
     auto* tile = m_target->GetComponent<IETileComponent>();
 

@@ -327,6 +327,15 @@ void IEUITextBox::Draw()
 	if (GetRenderer() == nullptr)
 		return;
 
+	SDL_Renderer* sdlRenderer = GetRenderer()->GetSDLRenderer();
+	if (sdlRenderer != m_lastUsedRenderer)
+	{
+		ResetTexture();
+		m_drawHash         = 0;
+		m_textChanged      = true;
+		m_lastUsedRenderer = sdlRenderer;
+	}
+
 	if (m_textChanged)
 		TransToTexture();
 

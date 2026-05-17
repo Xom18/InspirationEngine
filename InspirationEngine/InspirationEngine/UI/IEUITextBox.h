@@ -84,7 +84,8 @@ public:
 	{
 		IEUIBase::SetFont(font);
 		m_font = font;
-		m_fontHeight = m_font->GetHeight();
+		if (m_font != nullptr)
+			m_fontHeight = m_font->GetHeight();
 	}
 
 	/// <summary>
@@ -427,4 +428,5 @@ private:
 	size_t                                    m_imeInputLength = 0;
 	SDL_Point                                 m_cursorScreenPos;
 	std::vector<size_t>                       m_graphemeBounds;
+	SDL_Renderer*                             m_lastUsedRenderer = nullptr;
 };

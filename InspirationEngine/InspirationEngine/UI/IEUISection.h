@@ -8,6 +8,7 @@ class IEUITextBox;
 class IEUILabel;
 class IEUISlider;
 class IEUIDropdown;
+class IEUIHRow;
 
 /// <summary>
 /// 컴포짓 패턴 기반 재귀 가능 UI 섹션 컨테이너.
@@ -52,6 +53,9 @@ public:
 
     /// <summary>드롭다운 행 추가. items = 선택 항목 목록.</summary>
     IEUIDropdown* AddDropdown(const std::string& rowLabel, std::vector<std::string> items);
+
+    /// <summary>가로 다중 위젯 행 추가. 반환된 포인터에 AddItem() 으로 위젯 추가.</summary>
+    IEUIHRow* AddHRow();
 
     // ── 레이아웃 / 렌더 / 입력 ───────────────────────────────────────
 

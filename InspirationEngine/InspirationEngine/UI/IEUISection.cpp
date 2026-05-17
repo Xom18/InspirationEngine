@@ -1,6 +1,7 @@
 #include "../InspirationEngine.h"
 #include "IEUISection.h"
 #include "IEUIRow.h"
+#include "IEUIHRow.h"
 
 // ─────────────────────────────────────────
 // 자식 추가
@@ -57,6 +58,12 @@ IEUILabel* IEUISection::AddLabel(const std::string& text)
 
     AddChild(std::move(row));
     return ptr;
+}
+
+IEUIHRow* IEUISection::AddHRow()
+{
+    auto row = std::make_unique<IEUIHRow>();
+    return AddChild(std::move(row));
 }
 
 IEUIDropdown* IEUISection::AddDropdown(const std::string& rowLabel, std::vector<std::string> items)

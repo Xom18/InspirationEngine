@@ -34,6 +34,7 @@
 #include "UI/IEUIDropdown.h"			//UI-드롭다운
 #include "UI/IEPanelLayout.h"		//UI-패널레이아웃
 #include "UI/IEUISection.h"			//UI-섹션 컨테이너
+#include "UI/IEUIHRow.h"			//UI-가로 다중 위젯 행
 #include "UI/IEUIFileBrowser.h"		//UI-파일브라우저
 #include "Input/MouseCusor.h"	//마우스 커서
 #include "Window/IERenderer.h"	//렌더러

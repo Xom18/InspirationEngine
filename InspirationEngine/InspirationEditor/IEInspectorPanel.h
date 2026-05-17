@@ -51,12 +51,12 @@ private:
 
     // 위젯 raw 포인터 캐시 (소유권은 m_sections 내부)
     IEUITextBox*  m_tbName    = nullptr;
-    IEUISlider*   m_slX       = nullptr;
-    IEUISlider*   m_slY       = nullptr;
-    IEUISlider*   m_slZ       = nullptr;
-    IEUISlider*   m_slRot     = nullptr;
-    IEUISlider*   m_slSx      = nullptr;
-    IEUISlider*   m_slSy      = nullptr;
+    IEUITextBox*  m_tbX       = nullptr;
+    IEUITextBox*  m_tbY       = nullptr;
+    IEUITextBox*  m_tbZ       = nullptr;
+    IEUITextBox*  m_tbRot     = nullptr;
+    IEUITextBox*  m_tbSx      = nullptr;
+    IEUITextBox*  m_tbSy      = nullptr;
     IEUITextBox*  m_tbAtlas   = nullptr;
     IEUITextBox*  m_tbTile    = nullptr;
     IEUIDropdown* m_ddCamType = nullptr;
